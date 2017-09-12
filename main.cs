@@ -315,7 +315,7 @@ public class ScoreInput : Form
 	
 	public ScoreInput()
 	{
-		Size = new Size(300, 200);
+		Size = new Size(300, 89);
 		
 		submit.Text = "Keep";
 		undo.Text = "Back";
@@ -359,6 +359,7 @@ public class ScoreInput : Form
 		undo.Top = submit.Top;
 		undo.Width = GetWidth() - submit.Width;
 		undo.Left = submit.Width;
+		undo.Height = submit.Height;
 		save.Top = submit.Top;
 		save.Width = submit.Width;
 		save.Height = submit.Height;
@@ -368,7 +369,15 @@ public class ScoreInput : Form
 	{
 		Controls.Clear();
 		
-		Controls.Add(inputBox);
+		if (b != save)
+		{
+			Controls.Add(inputBox);
+			inputBox.Enabled = true;
+		}
+		else
+		{
+			inputBox.Enabled = true;
+		}
 		Controls.Add(b);
 		Controls.Add(undo);
 		
@@ -392,6 +401,8 @@ public class ScoreInput : Form
 			{
 				undo.Enabled = true;
 			}
+			
+			inputBox.Focus();
 			
 			if (index == Score.scoresList.Count)
 			{
@@ -429,13 +440,15 @@ public class ScoreInput : Form
 			index--;
 			Score.scoresList[index].CurrentScore = 0;
 			Score.scoresList[index].Highlight();
-			inputBox.Text = "" + Score.scoresList[index].CurrentScore;
+			inputBox.Text = "";
 			
 			
 			if (index < Score.scoresList.Count)
 			{
 				submit.Enabled = true;
 			}
+			
+			inputBox.Focus();
 			
 			if (index == 0)
 			{
@@ -461,6 +474,7 @@ public class ScoreInput : Form
 		submit.Enabled = true;
 		index = 0;
 		Score.scoresList[index].Highlight();
+		inputBox.Focus();
 	}
 }
 
