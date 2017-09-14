@@ -1,6 +1,7 @@
 using System.Text;
 using System;
 using System.IO;
+using System.Collections;
 using System.Collections.Generic;
 
 public class FileReader : IEnumerable<KeyValuePair<string,string>>
@@ -9,6 +10,10 @@ public class FileReader : IEnumerable<KeyValuePair<string,string>>
 	private List<KeyValuePair<string, string>> content = new List<KeyValuePair<string, string>>();
 
 	public IEnumerator<KeyValuePair<string,string>> GetEnumerator() {
+		return content.GetEnumerator();
+	}
+
+	IEnumerator IEnumerable.GetEnumerator() {
 		return content.GetEnumerator();
 	}
 
