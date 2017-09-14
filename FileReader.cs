@@ -17,11 +17,6 @@ public class FileReader : IEnumerable<KeyValuePair<string,string>>
 		return content.GetEnumerator();
 	}
 
-	public List<KeyValuePair<string, string>> Content
-	{
-		get { return content;}
-	}
-
 	private FileReader() : base() {}
 	public FileReader(string file) : base()
 	{
