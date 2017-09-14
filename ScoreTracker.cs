@@ -7,7 +7,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 
 
-public class ScoreWindow : Form
+public class ScoreTracker : Form
 {
 	
 	[DllImport("kernel32.dll")]
@@ -18,6 +18,11 @@ public class ScoreWindow : Form
 	
 	const int SW_HIDE = 0;
 	const int SW_SHOW = 5;
+	
+	public static FileReader config;
+	public static FileReader pbEasy;
+	public static FileReader pbHard;
+	public static FileReader individualLevels;
 
 	//  Declare and initilize UI elements
 	//private LogBox chatLog = new LogBox(); //  LogBox is my own class that has a method for adding messages and built in thread safety
@@ -30,64 +35,49 @@ public class ScoreWindow : Form
 	//private TabControl rooms = new TabControl();
 
 	//  Declare colors
-	private Color text = ColorTranslator.FromHtml("#99dfff");
-	private Color windowColor = ColorTranslator.FromHtml("#052e51");
-	private Color bgColor = ColorTranslator.FromHtml("#082045");
-	private Color current = ColorTranslator.FromHtml("#FF8800");
-	private Color ahead = ColorTranslator.FromHtml("#00CC36");
-	private Color behind = ColorTranslator.FromHtml("#CC1200");
-	private Color best = ColorTranslator.FromHtml("#D8AF1F");
+	public static Color text_color;
+	public static Color background_color_highlighted;
+	public static Color background_color = ColorTranslator.FromHtml("#082045");
+	public static Color text_color_highlighted;
+	public static Color text_color_ahead;
+	public static Color text_color_behind;
+	public static Color text_color_best;
 	
-	private string[] pb_run;
-	private string[] ils;
-	private string peanut_butter;
-	private string individual_levels;
+	//private string[] pb_run;
+	//private string[] ils;
+	//private string peanut_butter;
+	//private string individual_levels;
 	
 	//private List<Score> scores = new List<Score>();
 	
-	public ScoreWindow(string peanut_butter, string individual_levels)
+	public ScoreTracker()
 	{
-		this.peanut_butter = peanut_butter;
-		this.individual_levels = individual_levels;
 		
-		Font = new Font("Tahoma", 20);
+		text_color = ColorTranslator.FromHtml(config["text_color"]);
+		background_color_highlighted = ColorTranslator.FromHtml(config["background_color_highlighted"]);
+		background_color = ColorTranslator.FromHtml(config["background_color"]);
+		text_color_highlighted = ColorTranslator.FromHtml(config["text_color_highlighted"]);
+		text_color_ahead = ColorTranslator.FromHtml(config["text_color_ahead"]);
+		text_color_behind = ColorTranslator.FromHtml(config["text_color_behind"]);
+		text_color_best = ColorTranslator.FromHtml(config["text_color_best"]);
+		//this.peanut_butter = peanut_butter;
+		//this.individual_levels = individual_levels;
+		
+		Font = new Font(config["font"], Int32.Parse(config["font_size"]), FontStyle.Bold);
 		Text = "Star Fox 64 Score Tracker";
 		sInput.Text = "Input";
 
 		Size = new Size(1296, 99);
 
 		//  Set colors
-		BackColor = bgColor;
-		topScore.ForeColor = text;
-		sobScore.ForeColor = text;
-		//BackColor = lightColor;
-		//rooms.BackColor = bgColor;
-		//ForeColor = lightColor;
-		//chatLog.BackColor = lightColor;
-		//sendButton.BackColor = Color.FromArgb(160, 255, 140);
-		//sendButton.Font = new Font("Courier", 9, FontStyle.Bold);
-		//inputBox.AutoSize = false;
-		//rooms.BackColor = darkColor;
-		//rooms.ForeColor = darkColor;
-		//inputBox.BackColor = lightColor;
-
-		//  Set up the send button
-		//sendButton.Text = "send";
-		//sendButton.Click += new EventHandler(HandleInput);
-
-		//  Add controls to the form
-		
-		
-		
+		BackColor = background_color;
+		topScore.ForeColor = text_color;
+		sobScore.ForeColor = text_color;
 		
 		
 		
 		SetControls();
 		
-
-		//  Display documentation so user knows how to use the program
-		//chatLog.AddMessage("use /connect host port nickname");
-		//chatLog.AddMessage("or /host port nickname");
 
 		//  Redraw the form if the window is resized
 		Resize += delegate { DoLayout(); };
@@ -124,30 +114,29 @@ public class ScoreWindow : Form
 	private void SetControls()
 	{
 		Controls.Clear();
-
-		pb_run = peanut_butter.Split('\n');
-		ils = individual_levels.Split('\n');
+		
+		FileReader run = pbEasy;
+		if (config["hard_route"] == "1")
+		{
+			run = pbHard;
+		}
 		try
 		{
 			int total = 0;
 			int sob = 0;
-			foreach(string s in pb_run)
+			foreach(KeyValuePair<string, string> level in run.Content)
 			{
-				string[] split = s.Split(':');
-				string n = split[0];
-				int sc = Int32.Parse(split[1]);
+				int sc = Int32.Parse(level.Value);
 				total += sc;
-				Score newScore = new Score(n, sc);
+				Score newScore = new Score(level.Key, sc);
 				Controls.Add(newScore);
 				
 			}
 			
-			for(int i = 0; i < ils.Length; i++)
+			for(int i = 0; i < individualLevels.Content.Count; i++)
 			{
-				string[] split = ils[i].Split(':');
-				string n = split[0];
-				int sc = Int32.Parse(split[1]);
-				Score.SetBest(n, sc, i);
+				int sc = Int32.Parse(individualLevels.Content[i].Value);
+				Score.SetBest(individualLevels.Content[i].Key, sc, i);
 				
 			}
 			
@@ -183,10 +172,10 @@ public class ScoreWindow : Form
 		}
 		
 		topScore.Left = sList[sList.Count - 1].Left + 135;
-		topScore.Width = 150;
+		topScore.Width = 155;
 		topScore.Height = GetHeight();
-		sobScore.Left = topScore.Left + 150;
-		sobScore.Width = 150;
+		sobScore.Left = topScore.Left + 155;
+		sobScore.Width = 155;
 		sobScore.Height = GetHeight();
 	}
 	
@@ -230,68 +219,70 @@ public class ScoreWindow : Form
 		
 		//  Start the client if -s was not found
 		
+			
+		config = new FileReader("config.txt");
+		config.AddNewItem("hard_route", "0");
+		//config.AddNewItem("layout", "horizontal");
+		config.AddNewItem("font", "Segoe UI");
+		config.AddNewItem("font_size", "18");
+		config.AddNewItem("background_color", "#0F0F0F");
+		config.AddNewItem("background_color_highlighted", "#0F0F0F");
+		config.AddNewItem("text_color", "#FFFFFF");
+		config.AddNewItem("text_color_highlighted", "#FFFFFF");
+		config.AddNewItem("text_color_ahead", "#00CC36");
+		config.AddNewItem("text_color_behind", "#CC1200");
+		config.AddNewItem("text_color_best", "#D8AF1F");
 		
-		string peanut_butter = "";
-		string individual_levels = ""; 
-		string config = "";
+		pbEasy = new FileReader("pb_easy.txt");
+		pbEasy.AddNewItem("CO", "0");
+		pbEasy.AddNewItem("ME", "0");
+		pbEasy.AddNewItem("KA", "0");
+		pbEasy.AddNewItem("SX", "0");
+		pbEasy.AddNewItem("MA", "0");
+		pbEasy.AddNewItem("a6", "0");
+		pbEasy.AddNewItem("VE", "0");
+		
+		pbHard = new FileReader("pb_hard.txt");
+		pbHard.AddNewItem("CO", "0");
+		pbHard.AddNewItem("SY", "0");
+		pbHard.AddNewItem("AQ", "0");
+		pbHard.AddNewItem("ZO", "0");
+		pbHard.AddNewItem("MA", "0");
+		pbHard.AddNewItem("a6", "0");
+		pbHard.AddNewItem("VE", "0");
+		
+		individualLevels = new FileReader("pb_individuals.txt");
+		individualLevels.AddNewItem("CO", "0");
+		individualLevels.AddNewItem("ME", "0");
+		individualLevels.AddNewItem("KA", "0");
+		individualLevels.AddNewItem("SX", "0");
+		individualLevels.AddNewItem("SY", "0");
+		individualLevels.AddNewItem("AQ", "0");
+		individualLevels.AddNewItem("ZO", "0");
+		individualLevels.AddNewItem("MA", "0");
+		individualLevels.AddNewItem("a6", "0");
+		individualLevels.AddNewItem("VE", "0");	
+			
 		try
 		{
-			config = File.ReadAllText(@"config.txt", Encoding.UTF8);
-			
+			config.Save();
+			pbEasy.Save();
+			pbHard.Save();
+			individualLevels.Save();
 		}
 		catch (Exception e)
 		{
 			Console.WriteLine("Error: " + e.Message);
-			string peanut_butter_easy = "CO:0\nME:0\nKA:0\nSX:0\nMA:0\na6:0\nVE:0";
-			string peanut_butter_hard = "CO:0\nSY:0\nAQ:0\nZO:0\nMA:0\na6:0\nVE:0";
-			individual_levels = "CO:0\nME:0\nKA:0\nSX:0\nSY:0\nAQ:0\nZO:0\nMA:0\na6:0\nVE:0";
 			
-			try
-			{
-				var sw = new StreamWriter(@"config.txt");
-				sw.Write("Hard Route: 0");
-				sw.Close();
-				
-				sw = new StreamWriter(@"pb_easy.txt");
-				sw.Write(peanut_butter_easy);
-				sw.Close();
-				
-				sw = new StreamWriter(@"pb_hard.txt");
-				sw.Write(peanut_butter_hard);
-				sw.Close();
-				
-				sw = new StreamWriter(@"pb_individuals.txt");
-				sw.Write(individual_levels);
-				sw.Close();
-			}
-			catch (Exception e2)
-			{
-				Console.WriteLine("Error: " + e2.Message);
-			}
+			//peanut_butter = "CO:0\nME:0\nKA:0\nSX:0\nMA:0\na6:0\nVE:0";
+			//individual_levels = "CO:0\nME:0\nKA:0\nSX:0\nSY:0\nAQ:0\nZO:0\nMA:0\na6:0\nVE:0";
 		}
 		
 		try
 		{
-			if (config == "Hard Route: 0")
-			{
-				peanut_butter = File.ReadAllText(@"pb_easy.txt", Encoding.UTF8);
-			}
-			else
-			{
-				peanut_butter = File.ReadAllText(@"pb_hard.txt", Encoding.UTF8);
-			}
-			individual_levels = File.ReadAllText(@"pb_individuals.txt", Encoding.UTF8);
-			
-		}
-		catch (Exception e)
-		{
-			Console.WriteLine("Error: " + e.Message);
-			peanut_butter = "CO:0\nME:0\nKA:0\nSX:0\nMA:0\na6:0\nVE:0";
-			individual_levels = "CO:0\nME:0\nKA:0\nSX:0\nSY:0\nAQ:0\nZO:0\nMA:0\na6:0\nVE:0";
-		}
-		
-		Application.Run(new ScoreWindow(peanut_butter, individual_levels));
-		
+			Application.Run(new ScoreTracker());
+		}	
+		catch (Exception) {}
 		/*
 		try
 		{

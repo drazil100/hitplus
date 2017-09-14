@@ -19,7 +19,7 @@ public class Entry
 	
 	public override string ToString()
 	{
-		return String.Format("{0}:{1}", name, score);
+		return String.Format("{0}: {1}", name, score);
 	}
 }
 
@@ -33,12 +33,13 @@ public class Score : Panel
 	private Label scoreLabel = new Label();
 	
 	
-	private Color text_default = ColorTranslator.FromHtml("#99dfff");
-	private Color bgColor = ColorTranslator.FromHtml("#052e51");
-	private Color current = ColorTranslator.FromHtml("#FF8800");
-	private Color ahead = ColorTranslator.FromHtml("#00CC36");
-	private Color behind = ColorTranslator.FromHtml("#CC1200");
-	private Color bestColor = ColorTranslator.FromHtml("#D8AF1F");
+	private Color text_default = ScoreTracker.text_color;
+	private Color bgColor = ScoreTracker.background_color;
+	private Color bgColorHighlighted = ScoreTracker.background_color_highlighted;
+	private Color current = ScoreTracker.text_color_highlighted;
+	private Color ahead = ScoreTracker.text_color_ahead;
+	private Color behind = ScoreTracker.text_color_behind;
+	private Color bestColor = ScoreTracker.text_color_best;
 
 	private int score = 0;
 	public int pbScore = 0;
@@ -46,6 +47,44 @@ public class Score : Panel
 	public string name = "";
 	private int index = 0;
 	public int arrayIndex = 0;
+	
+	private Score()
+	{
+		
+	}
+	
+	public Score(string name, int score)
+	{
+		if (scores.ContainsKey(name))
+			return;
+		scores.Add(name, this);
+		index = scoresList.Count;
+		scoresList.Add(this);
+		nameLabel.ForeColor = text_default;
+		scoreLabel.ForeColor = text_default;
+		nameLabel.BackColor = bgColor;
+		scoreLabel.BackColor = bgColor;
+		if (index == 0)
+			Highlight();
+		this.name = name;
+		this.pbScore = score;
+		scoreLabel.Text = String.Format("{0}", pbScore);
+		nameLabel.Text = String.Format("{0}:", name);
+		
+		Controls.Add(nameLabel);
+		Controls.Add(scoreLabel);
+		
+		Resize += delegate { DoLayout(); };
+		
+		DoLayout();
+		
+	}
+	
+	~Score()
+	{
+		scores.Remove(this.name);
+		scoresList.Remove(this);
+	}
 	
 	public override string ToString()
 	{
@@ -109,19 +148,16 @@ public class Score : Panel
 		
 		if (updated)
 		{
-			string temp = topData[0].ToString();
+			//string temp = topData[0].ToString();
 		
 			for(int i = 1; i < topData.Count; i++)
 			{
-				temp += "\n" + topData[i].ToString();
+				ScoreTracker.individualLevels[topData[i].name] = "" + topData[i].score;
 			}
 			
 			try
 			{
-				string file = @"pb_individuals.txt";
-				var sw = new StreamWriter(file);
-				sw.Write(temp);
-				sw.Close();
+				ScoreTracker.individualLevels.Save();
 			}
 			catch (Exception e2)
 			{
@@ -133,7 +169,7 @@ public class Score : Panel
 	public static void SaveRun()
 	{
 		
-		string temp = "";
+		//string temp = "";
 		int sob = 0;
 		int tot = GetTotal();
 		bool doSave = false;
@@ -141,107 +177,36 @@ public class Score : Panel
 		if (GetTotal() > GetOldScore())
 			doSave = true;
 		
-		try
-		{
-			temp = scoresList[0].ToString();
-			
-			for(int i = 0; i < scoresList.Count; i++)
-			{
-				if (i > 0)
-					temp += "\n" + scoresList[i].ToString();
+		FileReader file = ScoreTracker.pbEasy;
 				
-				sob += scoresList[i].best;
-				if (doSave)
-					scoresList[i].pbScore = scoresList[i].CurrentScore;
-				scoresList[i].CurrentScore = 0;
-			}
-		}
-		catch (Exception e3)
+		if (ScoreTracker.config["hard_route"] == "1")
+			file = ScoreTracker.pbHard;
+		
+		//temp = scoresList[0].ToString();
+		
+		for(int i = 0; i < scoresList.Count; i++)
 		{
-			Console.WriteLine("Error: " + e3.Message);
-			return;
+			//if (i > 0)
+				//temp += "\n" + scoresList[i].ToString();
+			
+			sob += scoresList[i].best;
+			if (doSave)
+			{
+				scoresList[i].pbScore = scoresList[i].CurrentScore;
+				file[scoresList[i].name] = "" + scoresList[i].CurrentScore;
+			}
+			scoresList[i].CurrentScore = 0;
 		}
 		
-		ScoreWindow.sobScore.Text = "SoB: " + sob;
-		string config = "";
+		
+		ScoreTracker.sobScore.Text = "SoB: " + sob;
+		//string config = "";
 		
 		if (!doSave)
 			return;
+		file.Save();
 		
-		ScoreWindow.topScore.Text = "Top: " + tot;
-		
-		try
-		{
-			config = File.ReadAllText(@"config.txt", Encoding.UTF8);
-			
-			try
-			{
-				string file = "";
-				
-				if (config == "Hard Route: 0")
-					file = @"pb_easy.txt";
-				else
-					file = @"pb_hard.txt";
-				
-				var sw = new StreamWriter(file);
-				sw.Write(temp);
-				sw.Close();
-			}
-			catch (Exception e2)
-			{
-				Console.WriteLine("Error: " + e2.Message);
-			}
-			
-		}
-		catch (Exception)
-		{
-			try
-			{
-				var sw = new StreamWriter(@"emergency_save.txt");
-				sw.Write(temp);
-				sw.Close();
-			}
-			catch (Exception e2)
-			{
-				Console.WriteLine("Error: " + e2.Message);
-			}
-		}
-	}
-	
-	private Score()
-	{
-		
-	}
-	
-	public Score(string name, int score)
-	{
-		if (scores.ContainsKey(name))
-			return;
-		scores.Add(name, this);
-		index = scoresList.Count;
-		scoresList.Add(this);
-		nameLabel.ForeColor = text_default;
-		if (index == 0)
-			Highlight();
-		scoreLabel.ForeColor = text_default;
-		this.name = name;
-		this.pbScore = score;
-		scoreLabel.Text = String.Format("{0}", pbScore);
-		nameLabel.Text = String.Format("{0}:", name);
-		
-		Controls.Add(nameLabel);
-		Controls.Add(scoreLabel);
-		
-		Resize += delegate { DoLayout(); };
-		
-		DoLayout();
-		
-	}
-	
-	~Score()
-	{
-		scores.Remove(this.name);
-		scoresList.Remove(this);
+		ScoreTracker.topScore.Text = "Top: " + tot;
 	}
 	
 	public static Score GetScore(string name)
@@ -287,20 +252,25 @@ public class Score : Panel
 	public void Highlight()
 	{
 		nameLabel.ForeColor = current;
+		scoreLabel.ForeColor = current;
+		nameLabel.BackColor = bgColorHighlighted;
+		scoreLabel.BackColor = bgColorHighlighted;
 	}
 	
 	public void Unhighlight()
 	{
 		nameLabel.ForeColor = text_default;
+		nameLabel.BackColor = bgColor;
+		scoreLabel.BackColor = bgColor;
 	}
 	
 	private void DoLayout()
 	{
 		nameLabel.Height = Height;
 		scoreLabel.Height = Height;
-		nameLabel.Width = 60;
-		scoreLabel.Left = 60;
-		scoreLabel.Width = Width - 60;
+		nameLabel.Width = 65;
+		scoreLabel.Left = 65;
+		scoreLabel.Width = Width - 65;
 	}
 	
 }

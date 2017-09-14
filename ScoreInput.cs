@@ -67,7 +67,7 @@ public class ScoreInput : Form
 		save.Height = submit.Height;
 	}
 	
-	public void SwapControls(Control b)
+	public void SwapControls(Button b)
 	{
 		Controls.Clear();
 		
@@ -80,6 +80,7 @@ public class ScoreInput : Form
 		{
 			inputBox.Enabled = true;
 		}
+		AcceptButton = b;
 		Controls.Add(b);
 		Controls.Add(undo);
 		
