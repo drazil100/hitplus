@@ -8,6 +8,7 @@ public class FileReader : IEnumerable<KeyValuePair<string,string>>
 {
 	private string fileName = "";
 	private List<KeyValuePair<string, string>> content = new List<KeyValuePair<string, string>>();
+	private int newItemCounter = 0;
 
 	public IEnumerator<KeyValuePair<string,string>> GetEnumerator() {
 		return content.GetEnumerator();
@@ -72,10 +73,24 @@ public class FileReader : IEnumerable<KeyValuePair<string,string>>
 		{
 			if (content[i].Key == key)
 			{
+				if (i != newItemCounter)
+				{
+					KeyValuePair<string, string> temp = content[newItemCounter];
+					content[newItemCounter] = content[i];
+					content[i] = temp;
+				}
+				newItemCounter++;
 				return;
 			}
 		}
 		content.Add(new KeyValuePair<string, string>(key, value));
+		if (content.Count-1 != newItemCounter)
+		{
+			KeyValuePair<string, string> temp = content[newItemCounter];
+			content[newItemCounter] = content[content.Count-1];
+			content[content.Count-1] = temp;
+		}
+		newItemCounter++;
 	}
 
 	public void Save()

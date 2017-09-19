@@ -222,7 +222,7 @@ public class ScoreTracker : Form
 
 		config = new FileReader("config.txt");
 		config.AddNewItem("hard_route", "0");
-		//config.AddNewItem("layout", "horizontal");
+		config.AddNewItem("layout", "horizontal");
 		config.AddNewItem("font", "Segoe UI");
 		config.AddNewItem("font_size", "18");
 		config.AddNewItem("background_color", "#0F0F0F");
