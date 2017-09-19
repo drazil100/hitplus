@@ -150,7 +150,7 @@ public class Score : Panel
 		{
 			//string temp = topData[0].ToString();
 		
-			for(int i = 1; i < topData.Count; i++)
+			for(int i = 0; i < topData.Count; i++)
 			{
 				ScoreTracker.individualLevels[topData[i].name] = "" + topData[i].score;
 			}

@@ -31,7 +31,7 @@ public class FileReader : IEnumerable<KeyValuePair<string,string>>
 			{
 				string[] parts = line.Split(':');
 
-				this[parts[0]] = parts[1].Trim();
+				this[parts[0].Trim()] = parts[1].Trim();
 			}
 
 		}
