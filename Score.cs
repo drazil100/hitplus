@@ -41,10 +41,11 @@ public class Score : Panel
 	private Color behind = ScoreTracker.text_color_behind;
 	private Color bestColor = ScoreTracker.text_color_best;
 
-	private int score = 0;
+	private int score = -1;
 	public int pbScore = 0;
 	public int best = 0;
 	public string name = "";
+	public string displayName = "";
 	private int index = 0;
 	public int arrayIndex = 0;
 	
@@ -58,18 +59,20 @@ public class Score : Panel
 		if (scores.ContainsKey(name))
 			return;
 		scores.Add(name, this);
+		//if (ScoreTracker.config["layout"] == "horizontal")
+			displayName = GetName(name);
 		index = scoresList.Count;
 		scoresList.Add(this);
 		nameLabel.ForeColor = text_default;
 		scoreLabel.ForeColor = text_default;
 		nameLabel.BackColor = bgColor;
 		scoreLabel.BackColor = bgColor;
-		if (index == 0)
+		if (index == 0 && ScoreTracker.config["start_highlighted"] == "1")
 			Highlight();
 		this.name = name;
 		this.pbScore = score;
 		scoreLabel.Text = String.Format("{0}", pbScore);
-		nameLabel.Text = String.Format("{0}:", name);
+		nameLabel.Text = String.Format("{0}:", displayName);
 		
 		Controls.Add(nameLabel);
 		Controls.Add(scoreLabel);
@@ -118,7 +121,7 @@ public class Score : Panel
 				scoreLabel.ForeColor = bestColor;
 			}
 			
-			if (score == 0)
+			if (score == -1)
 			{
 				scoreLabel.ForeColor = text_default;
 				scoreLabel.Text = ""+pbScore;//+"\n"+best;
@@ -195,7 +198,7 @@ public class Score : Panel
 				scoresList[i].pbScore = scoresList[i].CurrentScore;
 				file[scoresList[i].name] = "" + scoresList[i].CurrentScore;
 			}
-			scoresList[i].CurrentScore = 0;
+			scoresList[i].CurrentScore = -1;
 		}
 		
 		
@@ -262,6 +265,45 @@ public class Score : Panel
 		nameLabel.ForeColor = text_default;
 		nameLabel.BackColor = bgColor;
 		scoreLabel.BackColor = bgColor;
+	}
+	
+	public string GetName(string n)
+	{
+		switch (n)
+		{
+			case "Cornaria":
+			n = "CO";
+			break;
+			case "Meteo":
+			n = "ME";
+			break;
+			case "Katina":
+			n = "KA";
+			break;
+			case "Sector X":
+			n = "SX";
+			break;
+			case "Sector Y":
+			n = "SY";
+			break;
+			case "Aquas":
+			n = "AQ";
+			break;
+			case "Zoness":
+			n = "ZO";
+			break;
+			case "Macbeth":
+			n = "MA";
+			break;
+			case "Area 6":
+			n = "a6";
+			break;
+			case "Venom":
+			n = "VE";
+			break;
+		}
+		
+		return n;
 	}
 	
 	private void DoLayout()

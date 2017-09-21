@@ -93,7 +93,10 @@ public class ScoreInput : Form
 	{
 		try
 		{
-			Score.scoresList[index].CurrentScore = Int32.Parse(inputBox.Text);
+			int s = Int32.Parse(inputBox.Text);
+			if (s < 0 || s > 999)
+				return;
+			Score.scoresList[index].CurrentScore = s;
 			inputBox.Text = "";
 			Score.scoresList[index].Unhighlight();
 			index++;
@@ -132,7 +135,7 @@ public class ScoreInput : Form
 		{
 			if (index < Score.scoresList.Count)
 			{
-				Score.scoresList[index].CurrentScore = 0;
+				Score.scoresList[index].CurrentScore = -1;
 				Score.scoresList[index].Unhighlight();
 			}
 			else
@@ -141,7 +144,7 @@ public class ScoreInput : Form
 				save.Enabled = false;
 			}
 			index--;
-			Score.scoresList[index].CurrentScore = 0;
+			Score.scoresList[index].CurrentScore = -1;
 			Score.scoresList[index].Highlight();
 			inputBox.Text = "";
 			
@@ -176,7 +179,8 @@ public class ScoreInput : Form
 		SwapControls(submit);
 		submit.Enabled = true;
 		index = 0;
-		Score.scoresList[index].Highlight();
+		if (ScoreTracker.config["start_highlighted"] == "1")
+			Score.scoresList[index].Highlight();
 		inputBox.Focus();
 	}
 }
