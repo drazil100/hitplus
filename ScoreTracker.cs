@@ -33,6 +33,8 @@ public class ScoreTracker : Form
 	private Panel levels = new Panel();
 	public static Label topScore = new Label();
 	public static Label sobScore = new Label();
+	public static Label topScoreName = new Label();
+	public static Label sobScoreName = new Label();
 	public ScoreInput sInput = new ScoreInput();
 
 	//private Button sendButton = new Button();
@@ -41,7 +43,7 @@ public class ScoreTracker : Form
 	//  Declare colors
 	public static Color text_color;
 	public static Color background_color_highlighted;
-	public static Color background_color = ColorTranslator.FromHtml("#082045");
+	public static Color background_color;
 	public static Color text_color_highlighted;
 	public static Color text_color_ahead;
 	public static Color text_color_behind;
@@ -74,13 +76,22 @@ public class ScoreTracker : Form
 		sInput.Text = "Input";
 		sInput.FormClosing += new FormClosingEventHandler(ConfirmClose);
 		FormClosing += new FormClosingEventHandler(ConfirmClose);
-
-		Size = new Size(1296, 99);
+		
+		if (config["layout"] == "horizontal")
+		{
+			Size = new Size(1296, 99);
+		}
+		else
+		{
+			Size = new Size(316, 309);
+		}
 
 		//  Set colors
 		BackColor = background_color;
 		topScore.ForeColor = text_color_total;
 		sobScore.ForeColor = text_color_total;
+		topScoreName.ForeColor = text_color_total;
+		sobScoreName.ForeColor = text_color_total;
 
 
 
@@ -153,12 +164,24 @@ public class ScoreTracker : Form
 			{
 				sob += s.best;
 			}
-			topScore.Text = "Top: " + total;
+			topScoreName.Text = "Top: ";
+			topScore.Text = "" + total;
+			totals.Controls.Add(topScoreName);
 			totals.Controls.Add(topScore);
-			sobScore.Text = "SoB: " + sob;
+			if (config["layout"] == "horizontal")
+			{
+				sobScoreName.Text = "SoB:";
+				sobScore.Text = "" + sob;
+			}
+			else
+			{
+				sobScore.Text = "" + sob;
+				sobScoreName.Text = "Sum of Best:";
+			}
+			totals.Controls.Add(sobScoreName);
 			totals.Controls.Add(sobScore);
 			
-			if (config["sums_horizontal_alignment"] == "left")
+			if (config["sums_horizontal_alignment"] == "left" && config["layout"] == "horizontal")
 			{
 				Controls.Add(totals);
 				Controls.Add(levels);
@@ -179,18 +202,31 @@ public class ScoreTracker : Form
 
 	public void DoLayout()
 	{
-		totals.Width = 310;
-		levels.Width = GetWidth() - totals.Width;
-		DoTotalsLayout();
-		DoLevelsLayout();
-		
-		if (config["sums_horizontal_alignment"] == "left")
+		if (config["layout"] == "horizontal")
 		{
-			levels.Left = totals.Width;
+			totals.Width = 310;
+			levels.Width = GetWidth() - totals.Width;
+			DoTotalsLayoutHorizontal();
+			DoLevelsLayoutHorizontal();
+			
+			if (config["sums_horizontal_alignment"] == "left")
+			{
+				levels.Left = totals.Width;
+			}
+			else
+			{
+				totals.Left = levels.Width;
+			}
 		}
 		else
 		{
-			totals.Left = levels.Width;
+			totals.Width = GetWidth();
+			levels.Width = GetWidth();
+			totals.Height = 60;
+			levels.Height = GetHeight() - totals.Height;
+			totals.Top = levels.Height;
+			DoTotalsLayoutVertical();
+			DoLevelsLayoutVertical();
 		}
 		
 		//totals.Left = sList[sList.Count - 1].Left + 135;
@@ -199,16 +235,23 @@ public class ScoreTracker : Form
 		Refresh();
 	}
 	
-	public void DoTotalsLayout()
+	public void DoTotalsLayoutHorizontal()
 	{
-		topScore.Width = 155;
+		topScoreName.Width = 75;
+		topScore.Left = topScoreName.Width;
+		topScore.Width = 155 - topScoreName.Width;
+		topScoreName.Height = GetHeight();
 		topScore.Height = GetHeight();
-		sobScore.Left = topScore.Left + 155;
-		sobScore.Width = 155;
+		sobScoreName.Left = topScore.Left + topScore.Width;
+		sobScore.Left = sobScoreName.Left + sobScoreName.Width;
+		sobScoreName.Width = 75;
+		sobScore.Width = 155 - sobScoreName.Width;
+		sobScoreName.Height = GetHeight();
 		sobScore.Height = GetHeight();
+
 	}
 	
-	public void DoLevelsLayout()
+	public void DoLevelsLayoutHorizontal()
 	{
 		List<Score> sList = Score.scoresList;
 		foreach (Score s in sList)
@@ -222,6 +265,42 @@ public class ScoreTracker : Form
 			sList[i].Left = sList[i-1].Left + levels.Width / 7;
 		}
 	}
+	
+	public void DoTotalsLayoutVertical()
+	{
+		topScoreName.Width = 220;
+		topScore.Width = GetWidth() - topScoreName.Width;
+		topScore.Height = 30;
+		topScoreName.Height = topScore.Height;
+		topScore.Left = topScoreName.Width;
+		sobScoreName.Width = 220;
+		sobScoreName.Top = 30;
+		sobScore.Top = 30;
+		sobScore.Width = GetWidth() - sobScoreName.Width;
+		sobScore.Height = 30;
+		sobScore.Left = sobScoreName.Width;
+		sobScoreName.Height = sobScore.Height;
+		topScore.TextAlign = ContentAlignment.TopRight;
+		sobScore.TextAlign = ContentAlignment.TopRight;
+	}
+	
+	public void DoLevelsLayoutVertical()
+	{
+		List<Score> sList = Score.scoresList;
+		foreach (Score s in sList)
+		{
+			s.Height = 30;
+			s.Width = GetWidth();
+		}
+
+		for (int i = 1; i < sList.Count; i++)
+		{
+			sList[i].Top = sList[i-1].Top + 30;
+		}
+	}
+	
+	
+	
 	
 	public void ConfirmClose(object sender, FormClosingEventArgs e) 
 	{
@@ -289,10 +368,11 @@ public class ScoreTracker : Form
 
 		config = new FileReader("config.txt");
 		config.AddNewItem("hard_route", "0");
-		//config.AddNewItem("layout", "horizontal");
+		config.AddNewItem("layout", "horizontal");
 		config.AddNewItem("sums_horizontal_alignment", "right");
 		config.AddNewItem("font", "Segoe UI");
 		config.AddNewItem("font_size", "18");
+		config.AddNewItem("highlight_current", "0");
 		config.AddNewItem("start_highlighted", "1");
 		config.AddNewItem("background_color", "#0F0F0F");
 		config.AddNewItem("background_color_highlighted", "#0F0F0F");

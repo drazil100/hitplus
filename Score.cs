@@ -31,6 +31,7 @@ public class Score : Panel
 	
 	private Label nameLabel = new Label();
 	private Label scoreLabel = new Label();
+	private Label paceLabel = new Label();
 	
 	
 	private Color text_default = ScoreTracker.text_color;
@@ -59,7 +60,8 @@ public class Score : Panel
 		if (scores.ContainsKey(name))
 			return;
 		scores.Add(name, this);
-		//if (ScoreTracker.config["layout"] == "horizontal")
+		displayName = name;
+		if (ScoreTracker.config["layout"] == "horizontal")
 			displayName = GetName(name);
 		index = scoresList.Count;
 		scoresList.Add(this);
@@ -67,6 +69,7 @@ public class Score : Panel
 		scoreLabel.ForeColor = text_default;
 		nameLabel.BackColor = bgColor;
 		scoreLabel.BackColor = bgColor;
+		paceLabel.BackColor = bgColor;
 		if (index == 0 && ScoreTracker.config["start_highlighted"] == "1")
 			Highlight();
 		this.name = name;
@@ -76,6 +79,7 @@ public class Score : Panel
 		
 		Controls.Add(nameLabel);
 		Controls.Add(scoreLabel);
+		Controls.Add(paceLabel);
 		
 		Resize += delegate { DoLayout(); };
 		
@@ -108,23 +112,29 @@ public class Score : Panel
 			}
 			if (runScore >= oldScore)
 			{
-				scoreLabel.Text = String.Format("{0}\n+{1}", score, (runScore - oldScore));
+				scoreLabel.Text = String.Format("{0}", score);
+				paceLabel.Text = String.Format("+{0}", (runScore - oldScore));
 				scoreLabel.ForeColor = ahead;
+				paceLabel.ForeColor = ahead;
 			}
 			else
 			{
-				scoreLabel.Text = String.Format("{0}\n-{1}", score, (oldScore - runScore));
+				scoreLabel.Text = String.Format("{0}", score);
+				paceLabel.Text = String.Format("-{0}", (oldScore - runScore));
 				scoreLabel.ForeColor = behind;
+				paceLabel.ForeColor = behind;
 			}
 			if (score > best)
 			{
 				scoreLabel.ForeColor = bestColor;
+				paceLabel.ForeColor = bestColor;
 			}
 			
 			if (score == -1)
 			{
 				scoreLabel.ForeColor = text_default;
 				scoreLabel.Text = ""+pbScore;//+"\n"+best;
+				paceLabel.Text = "";
 				
 			}
 		}
@@ -200,16 +210,15 @@ public class Score : Panel
 			}
 			scoresList[i].CurrentScore = -1;
 		}
+		ScoreTracker.sobScore.Text = "" + sob;
 		
-		
-		ScoreTracker.sobScore.Text = "SoB: " + sob;
 		//string config = "";
 		
 		if (!doSave)
 			return;
 		file.Save();
 		
-		ScoreTracker.topScore.Text = "Top: " + tot;
+		ScoreTracker.topScore.Text = "" + tot;
 	}
 	
 	public static Score GetScore(string name)
@@ -254,10 +263,14 @@ public class Score : Panel
 	
 	public void Highlight()
 	{
+		if (ScoreTracker.config["highlight_current"] != "1")
+			return;
 		nameLabel.ForeColor = current;
 		scoreLabel.ForeColor = current;
+		paceLabel.ForeColor = current;
 		nameLabel.BackColor = bgColorHighlighted;
 		scoreLabel.BackColor = bgColorHighlighted;
+		paceLabel.BackColor = bgColorHighlighted;
 	}
 	
 	public void Unhighlight()
@@ -265,6 +278,7 @@ public class Score : Panel
 		nameLabel.ForeColor = text_default;
 		nameLabel.BackColor = bgColor;
 		scoreLabel.BackColor = bgColor;
+		paceLabel.BackColor = bgColor;
 	}
 	
 	public string GetName(string n)
@@ -308,11 +322,33 @@ public class Score : Panel
 	
 	private void DoLayout()
 	{
-		nameLabel.Height = Height;
-		scoreLabel.Height = Height;
-		nameLabel.Width = 65;
-		scoreLabel.Left = 65;
-		scoreLabel.Width = Width - 65;
+		if (ScoreTracker.config["layout"] == "horizontal")
+		{
+			nameLabel.Height = Height;
+			scoreLabel.Height = Height/2;
+			nameLabel.Width = 65;
+			scoreLabel.Left = 65;
+			scoreLabel.Width = Width - 65;
+			paceLabel.Top = scoreLabel.Height;
+			paceLabel.Height = Height/2;
+			paceLabel.Width = scoreLabel.Width;
+			paceLabel.Left = nameLabel.Left + nameLabel.Width;
+			//scoreLabel.TextAlign = ContentAlignment.TopRight;
+			//paceLabel.TextAlign = ContentAlignment.TopRight;
+		}
+		else
+		{
+			nameLabel.Height = Height;
+			scoreLabel.Height = Height;
+			paceLabel.Height = Height;
+			scoreLabel.TextAlign = ContentAlignment.TopRight;
+			paceLabel.TextAlign = ContentAlignment.TopRight;
+			nameLabel.Width = 150;
+			paceLabel.Left = nameLabel.Width;
+			paceLabel.Width = (Width - nameLabel.Width) / 2;
+			scoreLabel.Left = paceLabel.Left + paceLabel.Width;
+			scoreLabel.Width = paceLabel.Width;
+		}
 	}
 	
 }
