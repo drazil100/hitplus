@@ -4,12 +4,19 @@ using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 
+public enum SortingStyle
+{
+	Unsort,
+	Sort,
+	Validate
+}
+
 public class FileReader : IEnumerable<KeyValuePair<string,string>>
 {
 	private string fileName = "";
 	private List<KeyValuePair<string, string>> content = new List<KeyValuePair<string, string>>();
 	private int newItemCounter = 0;
-
+	private SortingStyle sorting = SortingStyle.Sort;
 	public IEnumerator<KeyValuePair<string,string>> GetEnumerator() {
 		return content.GetEnumerator();
 	}
@@ -19,8 +26,9 @@ public class FileReader : IEnumerable<KeyValuePair<string,string>>
 	}
 
 	private FileReader() : base() {}
-	public FileReader(string file) : base()
+	public FileReader(string file, SortingStyle sorting = SortingStyle.Sort) : base()
 	{
+		this.sorting = sorting;
 		fileName = file;
 		try
 		{
@@ -36,8 +44,9 @@ public class FileReader : IEnumerable<KeyValuePair<string,string>>
 				
 				switch (parts[0])
 				{
+					case "Cornaria":
 					case "CO":
-					parts[0] = "Cornaria";
+					parts[0] = "Corneria";
 					break;
 					case "ME":
 					parts[0] = "Meteo";
@@ -78,6 +87,20 @@ public class FileReader : IEnumerable<KeyValuePair<string,string>>
 		}
 
 	}
+	
+	public void RemoveKey(string key)
+	{
+		for (int i = 0; i < content.Count; i++)
+		{
+			if (content[i].Key == key)
+			{
+				content.RemoveAt(i);
+				if (newItemCounter >= content.Count)
+					newItemCounter = content.Count-1;
+			}
+		}
+		
+	}
 
 	public string this[string key]
 	{
@@ -109,7 +132,7 @@ public class FileReader : IEnumerable<KeyValuePair<string,string>>
 		{
 			if (content[i].Key == key)
 			{
-				if (i != newItemCounter)
+				if (i != newItemCounter && sorting != SortingStyle.Unsort)
 				{
 					KeyValuePair<string, string> temp = content[newItemCounter];
 					content[newItemCounter] = content[i];
@@ -120,7 +143,7 @@ public class FileReader : IEnumerable<KeyValuePair<string,string>>
 			}
 		}
 		content.Add(new KeyValuePair<string, string>(key, value));
-		if (content.Count-1 != newItemCounter)
+		if (content.Count-1 != newItemCounter && sorting != SortingStyle.Unsort)
 		{
 			KeyValuePair<string, string> temp = content[newItemCounter];
 			content[newItemCounter] = content[content.Count-1];
@@ -131,6 +154,13 @@ public class FileReader : IEnumerable<KeyValuePair<string,string>>
 
 	public void Save()
 	{
+		if (sorting == SortingStyle.Validate)
+		{
+			while (newItemCounter < content.Count)
+			{
+				content.RemoveAt(newItemCounter);
+			}
+		}
 		var sw = new StreamWriter(fileName);
 		foreach(KeyValuePair<string, string> pair in content)
 		{

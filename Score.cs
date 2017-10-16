@@ -32,6 +32,7 @@ public class Score : Panel
 	private Label nameLabel = new Label();
 	private Label scoreLabel = new Label();
 	private Label paceLabel = new Label();
+	private Label signLabel = new Label();
 	
 	
 	private Color text_default = ScoreTracker.text_color;
@@ -70,6 +71,7 @@ public class Score : Panel
 		nameLabel.BackColor = bgColor;
 		scoreLabel.BackColor = bgColor;
 		paceLabel.BackColor = bgColor;
+		signLabel.BackColor = bgColor;
 		if (index == 0 && ScoreTracker.config["start_highlighted"] == "1")
 			Highlight();
 		this.name = name;
@@ -79,6 +81,8 @@ public class Score : Panel
 		
 		Controls.Add(nameLabel);
 		Controls.Add(scoreLabel);
+		if (ScoreTracker.config["layout"] == "horizontal")
+			Controls.Add(signLabel);
 		Controls.Add(paceLabel);
 		
 		Resize += delegate { DoLayout(); };
@@ -116,6 +120,12 @@ public class Score : Panel
 				paceLabel.Text = String.Format("+{0}", (runScore - oldScore));
 				scoreLabel.ForeColor = ahead;
 				paceLabel.ForeColor = ahead;
+				if (ScoreTracker.config ["layout"] == "horizontal")
+				{
+					paceLabel.Text = String.Format("{0}", (runScore - oldScore));
+					signLabel.Text = "+";
+					signLabel.ForeColor = ahead;
+				}
 			}
 			else
 			{
@@ -123,11 +133,18 @@ public class Score : Panel
 				paceLabel.Text = String.Format("-{0}", (oldScore - runScore));
 				scoreLabel.ForeColor = behind;
 				paceLabel.ForeColor = behind;
+				if (ScoreTracker.config ["layout"] == "horizontal")
+				{
+					paceLabel.Text = String.Format("{0}", (oldScore - runScore));
+					signLabel.Text = "-";
+					signLabel.ForeColor = behind;
+				}
 			}
 			if (score > best)
 			{
 				scoreLabel.ForeColor = bestColor;
 				paceLabel.ForeColor = bestColor;
+				signLabel.ForeColor = bestColor;
 			}
 			
 			if (score == -1)
@@ -135,6 +152,7 @@ public class Score : Panel
 				scoreLabel.ForeColor = text_default;
 				scoreLabel.Text = ""+pbScore;//+"\n"+best;
 				paceLabel.Text = "";
+				signLabel.Text = "";
 				
 			}
 		}
@@ -218,6 +236,29 @@ public class Score : Panel
 			return;
 		file.Save();
 		
+		if (ScoreTracker.config["include_route_pbs_in_individuals_file"] == "1")
+		{
+			int total = 0;
+			foreach (KeyValuePair<string, string> pair in ScoreTracker.pbEasy)
+			{
+				total += Int32.Parse(pair.Value);
+			}
+			if (total > 0)
+			{
+				ScoreTracker.individualLevels["Easy Route"] = "" + total;
+			}
+			total = 0;
+			foreach (KeyValuePair<string, string> pair in ScoreTracker.pbHard)
+			{
+				total += Int32.Parse(pair.Value);
+			}
+			if (total > 0)
+			{
+				ScoreTracker.individualLevels["Hard Route"] = "" + total;
+			}
+			ScoreTracker.individualLevels.Save();
+		}
+		
 		ScoreTracker.topScore.Text = "" + tot;
 	}
 	
@@ -271,6 +312,7 @@ public class Score : Panel
 		nameLabel.BackColor = bgColorHighlighted;
 		scoreLabel.BackColor = bgColorHighlighted;
 		paceLabel.BackColor = bgColorHighlighted;
+		signLabel.BackColor = bgColorHighlighted;
 	}
 	
 	public void Unhighlight()
@@ -279,13 +321,14 @@ public class Score : Panel
 		nameLabel.BackColor = bgColor;
 		scoreLabel.BackColor = bgColor;
 		paceLabel.BackColor = bgColor;
+		signLabel.BackColor = bgColor;
 	}
 	
 	public string GetName(string n)
 	{
 		switch (n)
 		{
-			case "Cornaria":
+			case "Corneria":
 			n = "CO";
 			break;
 			case "Meteo":
@@ -324,7 +367,7 @@ public class Score : Panel
 	{
 		if (ScoreTracker.config["layout"] == "horizontal")
 		{
-			nameLabel.Height = Height;
+			nameLabel.Height = Height/2;
 			scoreLabel.Height = Height/2;
 			nameLabel.Width = 65;
 			scoreLabel.Left = 65;
@@ -334,7 +377,10 @@ public class Score : Panel
 			paceLabel.Width = scoreLabel.Width;
 			paceLabel.Left = nameLabel.Left + nameLabel.Width;
 			//scoreLabel.TextAlign = ContentAlignment.TopRight;
-			//paceLabel.TextAlign = ContentAlignment.TopRight;
+			signLabel.TextAlign = ContentAlignment.TopRight;
+			signLabel.Width = nameLabel.Width;
+			signLabel.Height = paceLabel.Height;
+			signLabel.Top = nameLabel.Height;
 		}
 		else
 		{

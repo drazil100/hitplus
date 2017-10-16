@@ -366,9 +366,10 @@ public class ScoreTracker : Form
 		//  Start the client if -s was not found
 
 
-		config = new FileReader("config.txt");
+		config = new FileReader("config.txt", SortingStyle.Sort);
 		config.AddNewItem("hard_route", "0");
 		config.AddNewItem("layout", "horizontal");
+		config.AddNewItem("include_route_pbs_in_individuals_file", "0");
 		config.AddNewItem("sums_horizontal_alignment", "right");
 		config.AddNewItem("font", "Segoe UI");
 		config.AddNewItem("font_size", "18");
@@ -382,9 +383,10 @@ public class ScoreTracker : Form
 		config.AddNewItem("text_color_behind", "#CC1200");
 		config.AddNewItem("text_color_best", "#D8AF1F");
 		config.AddNewItem("text_color_total", "#FFFFFF");
+		
 
-		pbEasy = new FileReader("pb_easy.txt");
-		pbEasy.AddNewItem("Cornaria", "0");
+		pbEasy = new FileReader("pb_easy.txt", SortingStyle.Validate);
+		pbEasy.AddNewItem("Corneria", "0");
 		pbEasy.AddNewItem("Meteo", "0");
 		pbEasy.AddNewItem("Katina", "0");
 		pbEasy.AddNewItem("Sector X", "0");
@@ -392,8 +394,8 @@ public class ScoreTracker : Form
 		pbEasy.AddNewItem("Area 6", "0");
 		pbEasy.AddNewItem("Venom", "0");
 
-		pbHard = new FileReader("pb_hard.txt");
-		pbHard.AddNewItem("Cornaria", "0");
+		pbHard = new FileReader("pb_hard.txt", SortingStyle.Validate);
+		pbHard.AddNewItem("Corneria", "0");
 		pbHard.AddNewItem("Sector Y", "0");
 		pbHard.AddNewItem("Aquas", "0");
 		pbHard.AddNewItem("Zoness", "0");
@@ -401,17 +403,48 @@ public class ScoreTracker : Form
 		pbHard.AddNewItem("Area 6", "0");
 		pbHard.AddNewItem("Venom", "0");
 
-		individualLevels = new FileReader("pb_individuals.txt");
-		individualLevels.AddNewItem("Cornaria", "0");
-		individualLevels.AddNewItem("Meteo", "0");
-		individualLevels.AddNewItem("Katina", "0");
-		individualLevels.AddNewItem("Sector X", "0");
-		individualLevels.AddNewItem("Sector Y", "0");
-		individualLevels.AddNewItem("Aquas", "0");
-		individualLevels.AddNewItem("Zoness", "0");
+		individualLevels = new FileReader("pb_individuals.txt", SortingStyle.Unsort);
+		individualLevels.RemoveKey("Easy Route");
+		individualLevels.RemoveKey("Hard Route");
+		individualLevels.AddNewItem("Corneria", "0");
+		if (config["hard_route"] == "0")
+		{
+			individualLevels.AddNewItem("Meteo", "0");
+			individualLevels.AddNewItem("Katina", "0");
+			individualLevels.AddNewItem("Sector X", "0");
+		}
+		if (config["hard_route"] == "1")
+		{
+			individualLevels.AddNewItem("Sector Y", "0");
+			individualLevels.AddNewItem("Aquas", "0");
+			individualLevels.AddNewItem("Zoness", "0");
+		}
 		individualLevels.AddNewItem("Macbeth", "0");
 		individualLevels.AddNewItem("Area 6", "0");
 		individualLevels.AddNewItem("Venom", "0");
+		if (config["include_route_pbs_in_individuals_file"] == "1")
+		{
+			int total = 0;
+			foreach (KeyValuePair<string, string> pair in pbEasy)
+			{
+				total += Int32.Parse(pair.Value);
+			}
+			if (total > 0)
+			{
+				individualLevels.AddNewItem("Easy Route", "" + total);
+				individualLevels["Easy Route"] = "" + total;
+			}
+			total = 0;
+			foreach (KeyValuePair<string, string> pair in pbHard)
+			{
+				total += Int32.Parse(pair.Value);
+			}
+			if (total > 0)
+			{
+				individualLevels.AddNewItem("Hard Route", "" + total);
+				individualLevels["Hard Route"] = "" + total;
+			}
+		}
 
 		try
 		{
