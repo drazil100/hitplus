@@ -26,16 +26,19 @@ public class ScoreTracker : Form
 	public static FileReader pbHard;
 	public static FileReader individualLevels;
 
+	public DisplayWindow tracker;
+
 	//  Declare and initilize UI elements
 	//private LogBox chatLog = new LogBox(); //  LogBox is my own class that has a method for adding messages and built in thread safety
-	private TextBox inputBox = new TextBox();
-	private Panel totals = new Panel();
-	private Panel levels = new Panel();
 	public static Label topScore = new Label();
 	public static Label sobScore = new Label();
-	public static Label topScoreName = new Label();
-	public static Label sobScoreName = new Label();
-	public ScoreInput sInput = new ScoreInput();
+
+	private TextBox inputBox = new TextBox();
+	private Button submit = new Button();
+	private Button undo = new Button();
+	private Button save = new Button();
+
+	public int index = 0;
 
 	//private Button sendButton = new Button();
 	//private TabControl rooms = new TabControl();
@@ -68,34 +71,41 @@ public class ScoreTracker : Form
 		text_color_behind = ColorTranslator.FromHtml(config["text_color_behind"]);
 		text_color_best = ColorTranslator.FromHtml(config["text_color_best"]);
 		text_color_total = ColorTranslator.FromHtml(config["text_color_total"]);
+
+		tracker = new DisplayWindow ();
 		//this.peanut_butter = peanut_butter;
 		//this.individual_levels = individual_levels;
 
-		Font = new Font(config["font"], Int32.Parse(config["font_size"]), FontStyle.Bold);
-		Text = "Star Fox 64 Score Tracker";
-		sInput.Text = "Input";
-		sInput.FormClosing += new FormClosingEventHandler(ConfirmClose);
+
+		Text = "Input";
 		FormClosing += new FormClosingEventHandler(ConfirmClose);
+		tracker.FormClosing += new FormClosingEventHandler(ConfirmClose);
+
+		Size = new Size(300, 89);
+
+		submit.Text = "Keep";
+		undo.Text = "Back";
+		undo.Enabled = false;
+		save.Text = "Save & Reset";
+		save.Enabled = false;
+
+
+		submit.Click += new EventHandler(OnSubmit);
+		undo.Click += new EventHandler(OnUndo);
+		save.Click += new EventHandler(OnReset);
+
+		SwapControls(submit);
 		
-		if (config["layout"] == "horizontal")
-		{
-			Size = new Size(1296, 99);
-		}
-		else
-		{
-			Size = new Size(316, 309);
-		}
+
 
 		//  Set colors
-		BackColor = background_color;
 		topScore.ForeColor = text_color_total;
 		sobScore.ForeColor = text_color_total;
-		topScoreName.ForeColor = text_color_total;
-		sobScoreName.ForeColor = text_color_total;
 
 
 
-		SetControls();
+
+		//SetControls();
 
 
 		//  Redraw the form if the window is resized
@@ -105,8 +115,11 @@ public class ScoreTracker : Form
 		//  Draw the form
 		DoLayout();
 
-		sInput.Show();
 		Show();
+
+
+
+
 
 		//  When the form is shown set the focus to the input box
 
@@ -119,192 +132,159 @@ public class ScoreTracker : Form
 	private int GetWidth()
 	{
 		return (
-				Width - (2 * SystemInformation.FrameBorderSize.Width)
-		       );
+			Width - (2 * SystemInformation.FrameBorderSize.Width)
+		);
 	}
 
 	private int GetHeight()
 	{
 		return (
-				Height - (2 * SystemInformation.FrameBorderSize.Height +
-					SystemInformation.CaptionHeight)
-		       );
+			Height - (2 * SystemInformation.FrameBorderSize.Height +
+				SystemInformation.CaptionHeight)
+		);
 	}
 
-	private void SetControls()
+	private void DoLayout()
+	{
+		inputBox.Height = 25;
+		inputBox.Width = GetWidth();
+		submit.Top = 25;
+		submit.Width = GetWidth()/2;
+		submit.Height = 25;
+		undo.Top = submit.Top;
+		undo.Width = GetWidth() - submit.Width;
+		undo.Left = submit.Width;
+		undo.Height = submit.Height;
+		save.Top = submit.Top;
+		save.Width = submit.Width;
+		save.Height = submit.Height;
+	}
+
+	public void SwapControls(Button b)
 	{
 		Controls.Clear();
 
-		FileReader run = pbEasy;
-		if (config["hard_route"] == "1")
+		if (b != save)
 		{
-			run = pbHard;
-		}
-		try
-		{
-			int total = 0;
-			int sob = 0;
-			foreach(KeyValuePair<string, string> level in run)
-			{
-				int sc = Int32.Parse(level.Value);
-				total += sc;
-				Score newScore = new Score(level.Key, sc);
-				levels.Controls.Add(newScore);
-
-			}
-
-			int i = 0;
-			foreach(KeyValuePair<string, string> level in individualLevels)
-			{
-				Score.SetBest(level.Key, Int32.Parse(level.Value), i);
-				i++;
-			}
-
-			foreach(Score s in Score.scoresList)
-			{
-				sob += s.best;
-			}
-			topScoreName.Text = "Top: ";
-			topScore.Text = "" + total;
-			totals.Controls.Add(topScoreName);
-			totals.Controls.Add(topScore);
-			if (config["layout"] == "horizontal")
-			{
-				sobScoreName.Text = "SoB:";
-				sobScore.Text = "" + sob;
-			}
-			else
-			{
-				sobScore.Text = "" + sob;
-				sobScoreName.Text = "Sum of Best:";
-			}
-			totals.Controls.Add(sobScoreName);
-			totals.Controls.Add(sobScore);
-			
-			if (config["sums_horizontal_alignment"] == "left" && config["layout"] == "horizontal")
-			{
-				Controls.Add(totals);
-				Controls.Add(levels);
-			}
-			else
-			{
-				Controls.Add(levels);
-				Controls.Add(totals);
-			}
-
-		}
-		catch (Exception e)
-		{
-			Console.WriteLine("Error: " + e.Message);
-		}
-		DoLayout();
-	}
-
-	public void DoLayout()
-	{
-		if (config["layout"] == "horizontal")
-		{
-			totals.Width = 310;
-			levels.Width = GetWidth() - totals.Width;
-			DoTotalsLayoutHorizontal();
-			DoLevelsLayoutHorizontal();
-			
-			if (config["sums_horizontal_alignment"] == "left")
-			{
-				levels.Left = totals.Width;
-			}
-			else
-			{
-				totals.Left = levels.Width;
-			}
+			Controls.Add(inputBox);
+			inputBox.Enabled = true;
 		}
 		else
 		{
-			totals.Width = GetWidth();
-			levels.Width = GetWidth();
-			totals.Height = 60;
-			levels.Height = GetHeight() - totals.Height;
-			totals.Top = levels.Height;
-			DoTotalsLayoutVertical();
-			DoLevelsLayoutVertical();
+			inputBox.Enabled = true;
 		}
-		
-		//totals.Left = sList[sList.Count - 1].Left + 135;
-		
-		
-		Refresh();
-	}
-	
-	public void DoTotalsLayoutHorizontal()
-	{
-		topScoreName.Width = 75;
-		topScore.Left = topScoreName.Width;
-		topScore.Width = 155 - topScoreName.Width;
-		topScoreName.Height = GetHeight();
-		topScore.Height = GetHeight();
-		sobScoreName.Left = topScore.Left + topScore.Width;
-		sobScore.Left = sobScoreName.Left + sobScoreName.Width;
-		sobScoreName.Width = 75;
-		sobScore.Width = 155 - sobScoreName.Width;
-		sobScoreName.Height = GetHeight();
-		sobScore.Height = GetHeight();
+		AcceptButton = b;
+		Controls.Add(b);
+		Controls.Add(undo);
 
+		DoLayout();
 	}
-	
-	public void DoLevelsLayoutHorizontal()
-	{
-		List<Score> sList = Score.scoresList;
-		foreach (Score s in sList)
-		{
-			s.Height = GetHeight();
-			s.Width = levels.Width / 7;
-		}
 
-		for (int i = 1; i < sList.Count; i++)
-		{
-			sList[i].Left = sList[i-1].Left + levels.Width / 7;
-		}
-	}
-	
-	public void DoTotalsLayoutVertical()
-	{
-		topScoreName.Width = 220;
-		topScore.Width = GetWidth() - topScoreName.Width;
-		topScore.Height = 30;
-		topScoreName.Height = topScore.Height;
-		topScore.Left = topScoreName.Width;
-		sobScoreName.Width = 220;
-		sobScoreName.Top = 30;
-		sobScore.Top = 30;
-		sobScore.Width = GetWidth() - sobScoreName.Width;
-		sobScore.Height = 30;
-		sobScore.Left = sobScoreName.Width;
-		sobScoreName.Height = sobScore.Height;
-		topScore.TextAlign = ContentAlignment.TopRight;
-		sobScore.TextAlign = ContentAlignment.TopRight;
-	}
-	
-	public void DoLevelsLayoutVertical()
-	{
-		List<Score> sList = Score.scoresList;
-		foreach (Score s in sList)
-		{
-			s.Height = 30;
-			s.Width = GetWidth();
-		}
 
-		for (int i = 1; i < sList.Count; i++)
+
+	public void OnSubmit(object sender, EventArgs e)
+	{
+		try
 		{
-			sList[i].Top = sList[i-1].Top + 30;
+			int s = Int32.Parse(inputBox.Text);
+			if (s < 0 || s > 999)
+				return;
+			Score.scoresList[index].CurrentScore = s;
+			inputBox.Text = "";
+			Score.scoresList[index].Unhighlight();
+			index++;
+			if (index != Score.scoresList.Count)
+				Score.scoresList[index].Highlight();
+
+			if (index > 0)
+			{
+				undo.Enabled = true;
+			}
+
+			inputBox.Focus();
+
+			if (index == Score.scoresList.Count)
+			{
+				submit.Enabled = false;
+				save.Enabled = true;
+				SwapControls(save);
+				return;
+			}
+			else
+			{
+				submit.Enabled = true;
+			}
+		}
+		catch (Exception)
+		{
+
 		}
 	}
+
+
+	public void OnUndo(object sender, EventArgs e)
+	{
+		try
+		{
+			if (index < Score.scoresList.Count)
+			{
+				Score.scoresList[index].CurrentScore = -1;
+				Score.scoresList[index].Unhighlight();
+			}
+			else
+			{
+				SwapControls(submit);
+				save.Enabled = false;
+			}
+			index--;
+			Score.scoresList[index].CurrentScore = -1;
+			Score.scoresList[index].Highlight();
+			inputBox.Text = "";
+
+
+			if (index < Score.scoresList.Count)
+			{
+				submit.Enabled = true;
+			}
+
+			inputBox.Focus();
+
+			if (index == 0)
+			{
+				undo.Enabled = false;
+				return;
+			}
+			else
+			{
+				undo.Enabled = true;
+			}
+		}
+		catch (Exception)
+		{
+
+		}
+	}
+
+	public void OnReset(object sender, EventArgs e)
+	{
+		Score.UpdateBestScores();
+		Score.SaveRun();
+		SwapControls(submit);
+		submit.Enabled = true;
+		index = 0;
+		if (ScoreTracker.config["start_highlighted"] == "1")
+			Score.scoresList[index].Highlight();
+		inputBox.Focus();
+	}
+	
+
 	
 	
 	
 	
 	public void ConfirmClose(object sender, FormClosingEventArgs e) 
 	{
-			if (sInput.index > 0 && !closing)
+			if (index > 0 && !closing)
 			{
 				var confirmResult =  MessageBox.Show("Your run is incomplete! Are you sure you wish to exit?\n\n(Any unsaved gold scores will be lost)\n(To save gold scores on an incomplete run fill in the rest of the levels with 0)",
                                      "Continue Closing?",
