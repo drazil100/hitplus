@@ -46,6 +46,9 @@ public class ScoreTracker : Form
 
 	public int index = 0;
 
+	private int w = 300;
+	private int h = 134;
+
 	//private Button sendButton = new Button();
 	//private TabControl rooms = new TabControl();
 
@@ -87,7 +90,10 @@ public class ScoreTracker : Form
 		Text = "Input";
 		FormClosing += new FormClosingEventHandler(ConfirmClose);
 
-		Size = new Size(300, 134);
+		Size = new Size(w, h);
+		MinimumSize  = new Size(w, h);
+		MaximumSize = new Size(w, h);
+
 
 		submit.Text = "Keep";
 		undo.Text = "Back";
@@ -305,10 +311,17 @@ public class ScoreTracker : Form
 		if (config ["hard_route"] == "0")
 		{
 			config ["hard_route"] = "1";
+			ScoreTracker.individualLevels.AddNewItem("Sector Y", "0");
+			ScoreTracker.individualLevels.AddNewItem("Aquas", "0");
+			ScoreTracker.individualLevels.AddNewItem("Zoness", "0");
 		}
 		else
 		{
 			config ["hard_route"] = "0";
+			ScoreTracker.individualLevels.AddNewItem("Meteo", "0");
+			ScoreTracker.individualLevels.AddNewItem("Katina", "0");
+			ScoreTracker.individualLevels.AddNewItem("Sector X", "0");
+			
 		}
 		config.Save ();
 		tracker = new DisplayWindow ();
@@ -382,7 +395,7 @@ public class ScoreTracker : Form
 		try
 		{
 			var handle = GetConsoleWindow();
-			//ShowWindow(handle, SW_HIDE);
+			ShowWindow(handle, SW_HIDE);
 		}
 		catch (Exception)
 		{
@@ -429,7 +442,10 @@ public class ScoreTracker : Form
 		config.AddNewItem("text_color_behind", "#CC1200");
 		config.AddNewItem("text_color_best", "#D8AF1F");
 		config.AddNewItem("text_color_total", "#FFFFFF");
-		
+		config.AddNewItem("horizontal_width", "1296");
+		config.AddNewItem("horizontal_height", "99");
+		config.AddNewItem("vertical_width", "316");
+		config.AddNewItem("vertical_height", "309");
 
 		pbEasy = new FileReader("pb_easy.txt", SortingStyle.Validate);
 		pbEasy.AddNewItem("Corneria", "0");

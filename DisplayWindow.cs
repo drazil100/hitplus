@@ -12,6 +12,11 @@ public class DisplayWindow : Form
 	private Panel totals = new Panel();
 	private Panel levels = new Panel();
 
+	private int w = 0;
+	private int h = 0;
+	private int w2;
+	private int h2;
+
 
 	public DisplayWindow()
 	{
@@ -23,12 +28,37 @@ public class DisplayWindow : Form
 
 		if (ScoreTracker.config["layout"] == "horizontal")
 		{
-			Size = new Size(1296, 99);
+			w = 1296;
+			h = 99;
+			try
+			{
+				w2 = Int32.Parse (ScoreTracker.config ["horizontal_width"]);
+				h2 = Int32.Parse (ScoreTracker.config ["horizontal_height"]);
+			}
+			catch (Exception)
+			{
+				w2 = w;
+				h2 = h;
+			}
+			Size = new Size(w2, h2);
 		}
 		else
 		{
-			Size = new Size(316, 309);
+			w = 316;
+			h = 309;
+			try
+			{
+			w2 = Int32.Parse (ScoreTracker.config ["vertical_width"]);
+			h2 = Int32.Parse (ScoreTracker.config ["vertical_height"]);
+			}
+			catch (Exception)
+			{
+				w2 = w;
+				h2 = h;
+			}
+			Size = new Size(w2, h2);
 		}
+		MinimumSize  = new Size(w, h);
 
 		FormClosing += new FormClosingEventHandler(ScoreTracker.mainWindow.ConfirmClose);
 
@@ -145,6 +175,21 @@ public class DisplayWindow : Form
 
 	public void DoLayout()
 	{
+		if (Width != w2 || Height != h2)
+		{
+			if (ScoreTracker.config ["layout"] == "horizontal")
+			{
+				ScoreTracker.config ["horizontal_width"] = "" + Width;
+				ScoreTracker.config ["horizontal_height"] = "" + Height;
+			}
+			else
+			{
+				ScoreTracker.config ["vertical_width"] = "" + Width;
+				ScoreTracker.config ["vertical_height"] = "" + Height;			
+			}
+			ScoreTracker.config.Save ();
+		}
+
 		if (ScoreTracker.config ["layout"] == "horizontal")
 		{
 			totals.Width = 310;
