@@ -20,6 +20,7 @@ public class ScoreTracker : Form
 	const int SW_SHOW = 5;
 	
 	private bool closing = false;
+	private bool reopening = false;
 
 	public static FileReader config;
 	public static FileReader pbEasy;
@@ -27,16 +28,21 @@ public class ScoreTracker : Form
 	public static FileReader individualLevels;
 
 	public DisplayWindow tracker;
+	public static ScoreTracker mainWindow;
 
 	//  Declare and initilize UI elements
 	//private LogBox chatLog = new LogBox(); //  LogBox is my own class that has a method for adding messages and built in thread safety
 	public static Label topScore = new Label();
 	public static Label sobScore = new Label();
+	public static Label topScoreName = new Label();
+	public static Label sobScoreName = new Label();
 
 	private TextBox inputBox = new TextBox();
 	private Button submit = new Button();
 	private Button undo = new Button();
 	private Button save = new Button();
+	private Button switchRoute = new Button ();
+	private Button options = new Button ();
 
 	public int index = 0;
 
@@ -62,6 +68,7 @@ public class ScoreTracker : Form
 
 	public ScoreTracker()
 	{
+		mainWindow = this;
 
 		text_color = ColorTranslator.FromHtml(config["text_color"]);
 		background_color_highlighted = ColorTranslator.FromHtml(config["background_color_highlighted"]);
@@ -79,20 +86,23 @@ public class ScoreTracker : Form
 
 		Text = "Input";
 		FormClosing += new FormClosingEventHandler(ConfirmClose);
-		tracker.FormClosing += new FormClosingEventHandler(ConfirmClose);
 
-		Size = new Size(300, 89);
+		Size = new Size(300, 134);
 
 		submit.Text = "Keep";
 		undo.Text = "Back";
 		undo.Enabled = false;
 		save.Text = "Save & Reset";
 		save.Enabled = false;
+		switchRoute.Text = "Switch Route";
+		options.Text = "Options...";
+		options.Enabled = false;
 
 
 		submit.Click += new EventHandler(OnSubmit);
 		undo.Click += new EventHandler(OnUndo);
 		save.Click += new EventHandler(OnReset);
+		switchRoute.Click += new EventHandler (SwitchRoutes);
 
 		SwapControls(submit);
 		
@@ -148,16 +158,22 @@ public class ScoreTracker : Form
 	{
 		inputBox.Height = 25;
 		inputBox.Width = GetWidth();
-		submit.Top = 25;
-		submit.Width = GetWidth()/2;
+		submit.Top = 20;
+		submit.Width = GetWidth ()/2;
 		submit.Height = 25;
 		undo.Top = submit.Top;
-		undo.Width = GetWidth() - submit.Width;
-		undo.Left = submit.Width;
+		undo.Left = submit.Left + submit.Width;
+		undo.Width = submit.Width;
 		undo.Height = submit.Height;
 		save.Top = submit.Top;
 		save.Width = submit.Width;
 		save.Height = submit.Height;
+		switchRoute.Top = submit.Top + submit.Height;
+		switchRoute.Height = submit.Height;
+		switchRoute.Width = GetWidth();
+		options.Top = switchRoute.Top + switchRoute.Height;
+		options.Height = switchRoute.Height;
+		options.Width = switchRoute.Width;
 	}
 
 	public void SwapControls(Button b)
@@ -176,6 +192,8 @@ public class ScoreTracker : Form
 		AcceptButton = b;
 		Controls.Add(b);
 		Controls.Add(undo);
+		Controls.Add (switchRoute); 
+		Controls.Add (options);
 
 		DoLayout();
 	}
@@ -276,23 +294,46 @@ public class ScoreTracker : Form
 			Score.scoresList[index].Highlight();
 		inputBox.Focus();
 	}
+
+	public void SwitchRoutes(object sender, EventArgs e)
+	{
+		try
+		{
+		reopening = true;
+		tracker.Close ();
+		reopening = false;
+		if (config ["hard_route"] == "0")
+		{
+			config ["hard_route"] = "1";
+		}
+		else
+		{
+			config ["hard_route"] = "0";
+		}
+		config.Save ();
+		tracker = new DisplayWindow ();
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex.Message);
+		}
+	}
 	
 
 	
-	
-	
-	
 	public void ConfirmClose(object sender, FormClosingEventArgs e) 
 	{
+		if (!reopening)
+		{
 			if (index > 0 && !closing)
 			{
-				var confirmResult =  MessageBox.Show("Your run is incomplete! Are you sure you wish to exit?\n\n(Any unsaved gold scores will be lost)\n(To save gold scores on an incomplete run fill in the rest of the levels with 0)",
-                                     "Continue Closing?",
-                                     MessageBoxButtons.YesNo);
+				var confirmResult = MessageBox.Show ("Your run is incomplete! Are you sure you wish to exit?\n\n(Any unsaved gold scores will be lost)\n(To save gold scores on an incomplete run fill in the rest of the levels with 0)",
+					                    "Continue Closing?",
+					                    MessageBoxButtons.YesNo);
 				if (confirmResult == DialogResult.Yes)
 				{
 					closing = true;
-					Application.Exit();
+					Application.Exit ();
 				}
 				else
 				{
@@ -302,8 +343,33 @@ public class ScoreTracker : Form
 			else
 			{
 				closing = true;
-				Application.Exit();
+				Application.Exit ();
 			}	
+		}
+		else
+		{
+			
+			if (index > 0 && !closing)
+			{
+				var confirmResult = MessageBox.Show ("Your run is incomplete! Are you sure you wish to exit?\n\n(Any unsaved gold scores will be lost)\n(To save gold scores on an incomplete run fill in the rest of the levels with 0)",
+					"Continue Closing?",
+					MessageBoxButtons.YesNo);
+				if (confirmResult == DialogResult.Yes)
+				{
+					index = 0;
+					tracker.Controls.Clear ();
+				}
+				else
+				{
+					e.Cancel = true;
+				}
+			}
+			else
+			{
+				index = 0;
+				tracker.Controls.Clear ();
+			}	
+		}
 	}
 
 
@@ -316,7 +382,7 @@ public class ScoreTracker : Form
 		try
 		{
 			var handle = GetConsoleWindow();
-			ShowWindow(handle, SW_HIDE);
+			//ShowWindow(handle, SW_HIDE);
 		}
 		catch (Exception)
 		{

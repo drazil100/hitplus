@@ -96,6 +96,13 @@ public class Score : Panel
 		scores.Remove(this.name);
 		scoresList.Remove(this);
 	}
+
+	public static void ClearScores ()
+	{
+		scores.Clear ();
+		scoresList.Clear ();
+		topData.Clear ();
+	}
 	
 	public override string ToString()
 	{

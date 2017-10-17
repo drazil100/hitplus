@@ -11,8 +11,7 @@ public class DisplayWindow : Form
 
 	private Panel totals = new Panel();
 	private Panel levels = new Panel();
-	public Label topScoreName = new Label();
-	public Label sobScoreName = new Label();
+
 
 	public DisplayWindow()
 	{
@@ -31,10 +30,12 @@ public class DisplayWindow : Form
 			Size = new Size(316, 309);
 		}
 
+		FormClosing += new FormClosingEventHandler(ScoreTracker.mainWindow.ConfirmClose);
+
 		//  Set colors
 		BackColor = ScoreTracker.background_color;
-		topScoreName.ForeColor = ScoreTracker.text_color_total;
-		sobScoreName.ForeColor = ScoreTracker.text_color_total;
+		ScoreTracker.topScoreName.ForeColor = ScoreTracker.text_color_total;
+		ScoreTracker.sobScoreName.ForeColor = ScoreTracker.text_color_total;
 
 
 
@@ -75,6 +76,7 @@ public class DisplayWindow : Form
 	private void SetControls()
 	{
 		Controls.Clear();
+		Score.ClearScores ();
 
 		FileReader run = ScoreTracker.pbEasy;
 		if (ScoreTracker.config["hard_route"] == "1")
@@ -105,21 +107,21 @@ public class DisplayWindow : Form
 			{
 				sob += s.best;
 			}
-			topScoreName.Text = "Top: ";
+			ScoreTracker.topScoreName.Text = "Top: ";
 			ScoreTracker.topScore.Text = "" + total;
-			totals.Controls.Add(topScoreName);
+			totals.Controls.Add(ScoreTracker.topScoreName);
 			totals.Controls.Add(ScoreTracker.topScore);
 			if (ScoreTracker.config["layout"] == "horizontal")
 			{
-				sobScoreName.Text = "SoB:";
+				ScoreTracker.sobScoreName.Text = "SoB:";
 				ScoreTracker.sobScore.Text = "" + sob;
 			}
 			else
 			{
 				ScoreTracker.sobScore.Text = "" + sob;
-				sobScoreName.Text = "Sum of Best:";
+				ScoreTracker.sobScoreName.Text = "Sum of Best:";
 			}
-			totals.Controls.Add(sobScoreName);
+			totals.Controls.Add(ScoreTracker.sobScoreName);
 			totals.Controls.Add(ScoreTracker.sobScore);
 
 			if (ScoreTracker.config["sums_horizontal_alignment"] == "left" && ScoreTracker.config["layout"] == "horizontal")
@@ -175,16 +177,16 @@ public class DisplayWindow : Form
 
 	public void DoTotalsLayoutHorizontal()
 	{
-		topScoreName.Width = 75;
-		ScoreTracker.topScore.Left = topScoreName.Width;
-		ScoreTracker.topScore.Width = 155 - topScoreName.Width;
-		topScoreName.Height = GetHeight();
+		ScoreTracker.topScoreName.Width = 75;
+		ScoreTracker.topScore.Left = ScoreTracker.topScoreName.Width;
+		ScoreTracker.topScore.Width = 155 - ScoreTracker.topScoreName.Width;
+		ScoreTracker.topScoreName.Height = GetHeight();
 		ScoreTracker.topScore.Height = GetHeight();
-		sobScoreName.Left = ScoreTracker.topScore.Left + ScoreTracker.topScore.Width;
-		ScoreTracker.sobScore.Left = sobScoreName.Left + sobScoreName.Width;
-		sobScoreName.Width = 75;
-		ScoreTracker.sobScore.Width = 155 - sobScoreName.Width;
-		sobScoreName.Height = GetHeight();
+		ScoreTracker.sobScoreName.Left = ScoreTracker.topScore.Left + ScoreTracker.topScore.Width;
+		ScoreTracker.sobScore.Left = ScoreTracker.sobScoreName.Left + ScoreTracker.sobScoreName.Width;
+		ScoreTracker.sobScoreName.Width = 75;
+		ScoreTracker.sobScore.Width = 155 - ScoreTracker.sobScoreName.Width;
+		ScoreTracker.sobScoreName.Height = GetHeight();
 		ScoreTracker.sobScore.Height = GetHeight();
 
 	}
@@ -206,18 +208,18 @@ public class DisplayWindow : Form
 
 	public void DoTotalsLayoutVertical()
 	{
-		topScoreName.Width = 220;
-		ScoreTracker.topScore.Width = GetWidth() - topScoreName.Width;
+		ScoreTracker.topScoreName.Width = 220;
+		ScoreTracker.topScore.Width = GetWidth() - ScoreTracker.topScoreName.Width;
 		ScoreTracker.topScore.Height = 30;
-		topScoreName.Height = ScoreTracker.topScore.Height;
-		ScoreTracker.topScore.Left = topScoreName.Width;
-		sobScoreName.Width = 220;
-		sobScoreName.Top = 30;
+		ScoreTracker.topScoreName.Height = ScoreTracker.topScore.Height;
+		ScoreTracker.topScore.Left = ScoreTracker.topScoreName.Width;
+		ScoreTracker.sobScoreName.Width = 220;
+		ScoreTracker.sobScoreName.Top = 30;
 		ScoreTracker.sobScore.Top = 30;
-		ScoreTracker.sobScore.Width = GetWidth() - sobScoreName.Width;
+		ScoreTracker.sobScore.Width = GetWidth() - ScoreTracker.sobScoreName.Width;
 		ScoreTracker.sobScore.Height = 30;
-		ScoreTracker.sobScore.Left = sobScoreName.Width;
-		sobScoreName.Height = ScoreTracker.sobScore.Height;
+		ScoreTracker.sobScore.Left = ScoreTracker.sobScoreName.Width;
+		ScoreTracker.sobScoreName.Height = ScoreTracker.sobScore.Height;
 		ScoreTracker.topScore.TextAlign = ContentAlignment.TopRight;
 		ScoreTracker.sobScore.TextAlign = ContentAlignment.TopRight;
 	}
