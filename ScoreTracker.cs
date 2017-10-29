@@ -218,6 +218,7 @@ public class ScoreTracker : Form
 		}
 		submit.Enabled = false;
 		save.Enabled = false;
+		switchRoute.Enabled = true;
 		b.Enabled = true;
 		AcceptButton = b;
 		Controls.Add(b);
@@ -347,8 +348,20 @@ public class ScoreTracker : Form
 	
 	public void OpenOptions(object sender, EventArgs e)
 	{
+		inputBox.Enabled = false;
+		submit.Enabled = false;
+		undo.Enabled = false;
+		save.Enabled = false;
+		switchRoute.Enabled = false;
+		options.Enabled = false;
 		optionsWindow = new OptionsWindow ();
+		optionsWindow.FormClosing += new FormClosingEventHandler(CloseOptions);
 		optionsWindow.Show ();
+	}
+
+	public void CloseOptions(object sender, FormClosingEventArgs e)
+	{
+		SwapControls (submit);
 	}
 	
 	public void ConfirmClose(object sender, FormClosingEventArgs e) 
