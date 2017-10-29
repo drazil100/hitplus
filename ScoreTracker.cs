@@ -305,26 +305,30 @@ public class ScoreTracker : Form
 	{
 		try
 		{
-		reopening = true;
-		tracker.Close ();
-		reopening = false;
-		if (config ["hard_route"] == "0")
-		{
-			config ["hard_route"] = "1";
-			ScoreTracker.individualLevels.AddNewItem("Sector Y", "0");
-			ScoreTracker.individualLevels.AddNewItem("Aquas", "0");
-			ScoreTracker.individualLevels.AddNewItem("Zoness", "0");
-		}
-		else
-		{
-			config ["hard_route"] = "0";
-			ScoreTracker.individualLevels.AddNewItem("Meteo", "0");
-			ScoreTracker.individualLevels.AddNewItem("Katina", "0");
-			ScoreTracker.individualLevels.AddNewItem("Sector X", "0");
+			reopening = true;
+			tracker.Close ();
+			reopening = false;
+
+			if (tracker != null)
+				return;
 			
-		}
-		config.Save ();
-		tracker = new DisplayWindow ();
+			if (config ["hard_route"] == "0")
+			{
+				config ["hard_route"] = "1";
+				ScoreTracker.individualLevels.AddNewItem("Sector Y", "0");
+				ScoreTracker.individualLevels.AddNewItem("Aquas", "0");
+				ScoreTracker.individualLevels.AddNewItem("Zoness", "0");
+			}
+			else
+			{
+				config ["hard_route"] = "0";
+				ScoreTracker.individualLevels.AddNewItem("Meteo", "0");
+				ScoreTracker.individualLevels.AddNewItem("Katina", "0");
+				ScoreTracker.individualLevels.AddNewItem("Sector X", "0");
+				
+			}
+			config.Save ();
+			tracker = new DisplayWindow ();
 		}
 		catch (Exception ex)
 		{
@@ -371,6 +375,7 @@ public class ScoreTracker : Form
 				{
 					index = 0;
 					tracker.Controls.Clear ();
+					tracker = null;
 				}
 				else
 				{
@@ -381,6 +386,7 @@ public class ScoreTracker : Form
 			{
 				index = 0;
 				tracker.Controls.Clear ();
+				tracker = null;
 			}	
 		}
 	}
