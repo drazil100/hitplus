@@ -28,6 +28,7 @@ public class ScoreTracker : Form
 	public static FileReader individualLevels;
 
 	public DisplayWindow tracker;
+	public OptionsWindow optionsWindow;
 	public static ScoreTracker mainWindow;
 
 	//  Declare and initilize UI elements
@@ -37,7 +38,7 @@ public class ScoreTracker : Form
 	public static Label topScoreName = new Label();
 	public static Label sobScoreName = new Label();
 
-	private TextBox inputBox = new TextBox();
+	private NumericTextBox inputBox = new NumericTextBox();
 	private Button submit = new Button();
 	private Button undo = new Button();
 	private Button save = new Button();
@@ -102,13 +103,14 @@ public class ScoreTracker : Form
 		save.Enabled = false;
 		switchRoute.Text = "Switch Route";
 		options.Text = "Options...";
-		options.Enabled = false;
+		//options.Enabled = false;
 
 
 		submit.Click += new EventHandler(OnSubmit);
 		undo.Click += new EventHandler(OnUndo);
 		save.Click += new EventHandler(OnReset);
 		switchRoute.Click += new EventHandler (SwitchRoutes);
+		options.Click += new EventHandler (OpenOptions);
 
 		SwapControls(submit);
 		
@@ -190,16 +192,39 @@ public class ScoreTracker : Form
 		{
 			Controls.Add(inputBox);
 			inputBox.Enabled = true;
+
+			if (index == 0)
+			{
+				undo.Enabled = false;
+				options.Enabled = true;
+				MaximumSize = new Size (w, h);
+				MinimumSize = new Size (w, h);
+			}
+			else
+			{
+				undo.Enabled = true;
+				options.Enabled = false;
+				MinimumSize  = new Size(w, h - options.Height);
+				MaximumSize = new Size(w, h - options.Height);
+			}
 		}
 		else
 		{
-			inputBox.Enabled = true;
+			inputBox.Enabled = false;
+			undo.Enabled = true;
+			options.Enabled = false;
+			MinimumSize  = new Size(w, h - options.Height);
+			MaximumSize = new Size(w, h - options.Height);
 		}
+		submit.Enabled = false;
+		save.Enabled = false;
+		b.Enabled = true;
 		AcceptButton = b;
 		Controls.Add(b);
 		Controls.Add(undo);
-		Controls.Add (switchRoute); 
-		Controls.Add (options);
+		Controls.Add (switchRoute);
+		if (index == 0)
+			Controls.Add (options);
 
 		DoLayout();
 	}
@@ -222,21 +247,15 @@ public class ScoreTracker : Form
 
 			if (index > 0)
 			{
-				undo.Enabled = true;
+				SwapControls(submit);
 			}
 
 			inputBox.Focus();
 
 			if (index == Score.scoresList.Count)
 			{
-				submit.Enabled = false;
-				save.Enabled = true;
 				SwapControls(save);
 				return;
-			}
-			else
-			{
-				submit.Enabled = true;
 			}
 		}
 		catch (Exception)
@@ -258,7 +277,6 @@ public class ScoreTracker : Form
 			else
 			{
 				SwapControls(submit);
-				save.Enabled = false;
 			}
 			index--;
 			Score.scoresList[index].CurrentScore = -1;
@@ -268,20 +286,10 @@ public class ScoreTracker : Form
 
 			if (index < Score.scoresList.Count)
 			{
-				submit.Enabled = true;
+				SwapControls(submit);
 			}
 
 			inputBox.Focus();
-
-			if (index == 0)
-			{
-				undo.Enabled = false;
-				return;
-			}
-			else
-			{
-				undo.Enabled = true;
-			}
 		}
 		catch (Exception)
 		{
@@ -296,6 +304,7 @@ public class ScoreTracker : Form
 		SwapControls(submit);
 		submit.Enabled = true;
 		index = 0;
+		SwapControls (submit);
 		if (ScoreTracker.config["start_highlighted"] == "1")
 			Score.scoresList[index].Highlight();
 		inputBox.Focus();
@@ -336,7 +345,11 @@ public class ScoreTracker : Form
 		}
 	}
 	
-
+	public void OpenOptions(object sender, EventArgs e)
+	{
+		optionsWindow = new OptionsWindow ();
+		optionsWindow.Show ();
+	}
 	
 	public void ConfirmClose(object sender, FormClosingEventArgs e) 
 	{
@@ -374,6 +387,7 @@ public class ScoreTracker : Form
 				if (confirmResult == DialogResult.Yes)
 				{
 					index = 0;
+					SwapControls (submit);
 					tracker.Controls.Clear ();
 					tracker = null;
 				}
@@ -385,6 +399,7 @@ public class ScoreTracker : Form
 			else
 			{
 				index = 0;
+				SwapControls (submit);
 				tracker.Controls.Clear ();
 				tracker = null;
 			}	
@@ -551,5 +566,18 @@ public class ScoreTracker : Form
 			Console.WriteLine("Error: " + e.Message);
 		}
 		*/
+	}
+}
+
+public class NumericTextBox : TextBox
+{
+	protected override void OnKeyPress(KeyPressEventArgs e)
+	{
+		base.OnKeyPress(e);
+		// Check if the pressed character was a backspace or numeric.
+		if (e.KeyChar != (char)8  && !char.IsNumber(e.KeyChar) && e.KeyChar != '\n')
+		{
+			e.Handled = true;
+		}
 	}
 }
