@@ -5,16 +5,20 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 
 public class ScoreTracker : Form
 {
+	public static string version = "11/1/2017";
 
 	[DllImport("kernel32.dll")]
 	static extern IntPtr GetConsoleWindow();
 
 	[DllImport("user32.dll")]
 	static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+	private Thread t;
 
 	const int SW_HIDE = 0;
 	const int SW_SHOW = 5;
@@ -128,14 +132,43 @@ public class ScoreTracker : Form
 
 		//  Redraw the form if the window is resized
 		Resize += delegate { DoLayout(); };
-		Move += delegate { DoLayout();};
+		//Move += delegate { DoLayout();};
 
 		//  Draw the form
 		DoLayout();
 
+		int x = -10000;
+		int y = -10000;
+		
+		try
+		{
+			x = Int32.Parse(ScoreTracker.config["input_x"]);
+			y = Int32.Parse(ScoreTracker.config["input_y"]);
+		}
+		catch(Exception)
+		{
+			
+		}
+		
+		if (x != -10000 && y != -10000)
+		{
+			this.StartPosition = FormStartPosition.Manual;
+			this.Location = new Point(x, y);
+		}
 		Show();
+		
+		ScoreTracker.config["input_x"] = "" + this.Location.X;
+		ScoreTracker.config["input_y"] = "" + this.Location.Y;
 
-
+		try 
+		{
+			t = new Thread(new ThreadStart(delegate { CheckVersion(config["sub_domain"]); }));
+			t.Start();
+		}
+		catch (Exception e)
+		{
+			Console.WriteLine(e);
+		}
 
 
 
@@ -144,6 +177,20 @@ public class ScoreTracker : Form
 		//  Close the network connection when the form is closed
 		//  To prevent any hangups
 		//FormClosing += delegate { CloseNetwork(); };
+	}
+
+	private void CheckVersion(string subDomain)
+	{
+		string latestVersion = HttpClient.ClientMain (subDomain + "coded-dragon.com/pagecontentdir/tracker_version.txt");
+		string[] parts = latestVersion.Split(':');
+		if (parts[0] == "CurrentTrackerVersion")
+		{
+			if (version != parts[1])
+			{
+				string whatsNew = HttpClient.ClientMain (subDomain + "coded-dragon.com/pagecontentdir/tracker_whats_new.txt");
+				MessageBox.Show(whatsNew + "\r\n\r\n" + subDomain + "coded-dragon.com/ScoreTracker/", "Update Available: (" + parts[1] + ")");
+			}
+		}
 	}
 
 	//  Just ripped the following 2 methods from dumas's code
@@ -366,6 +413,13 @@ public class ScoreTracker : Form
 	
 	public void ConfirmClose(object sender, FormClosingEventArgs e) 
 	{
+		
+		ScoreTracker.config["input_x"] = "" + this.Location.X;
+		ScoreTracker.config["input_y"] = "" + this.Location.Y;
+		ScoreTracker.config["tracker_x"] = "" + tracker.Location.X;
+		ScoreTracker.config["tracker_y"] = "" + tracker.Location.Y;
+		ScoreTracker.config.Save();
+		
 		if (!reopening)
 		{
 			if (index > 0 && !closing)

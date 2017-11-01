@@ -74,12 +74,34 @@ public class DisplayWindow : Form
 
 		//  Redraw the form if the window is resized
 		Resize += delegate { DoLayout(); };
-		Move += delegate { DoLayout();};
+		Move += delegate { DoLayout(); };
 
 		//  Draw the form
 		DoLayout();
 
+		
+		int x = -10000;
+		int y = -10000;
+		
+		try
+		{
+			x = Int32.Parse(ScoreTracker.config["tracker_x"]);
+			y = Int32.Parse(ScoreTracker.config["tracker_y"]);
+		}
+		catch(Exception)
+		{
+			
+		}
+		
+		if (x != -10000 && y != -10000)
+		{
+			this.StartPosition = FormStartPosition.Manual;
+			this.Location = new Point(x, y);
+		}
 		Show();
+		ScoreTracker.config["tracker_x"] = "" + this.Location.X;
+		ScoreTracker.config["tracker_y"] = "" + this.Location.Y;
+		ScoreTracker.config.Save();
 
 		//  When the form is shown set the focus to the input box
 
