@@ -58,11 +58,15 @@ public class OptionsWindow : Form
 	private List<ScoreField> scores = new List<ScoreField>();
 	private Button saveILs = new Button();
 
+	//private TabPage dislayConfig = new TabPage ();
+	//private Button saveDisplayConfig = new Button ();
+
 	private int w = 300;
-	private int h = 450;
+	private int h = 400;
 
 	public OptionsWindow()
 	{
+		Text = "Options";
 		config = ScoreTracker.config;
 		ils = ScoreTracker.individualLevels;
 
@@ -73,6 +77,8 @@ public class OptionsWindow : Form
 		saveILs.Click += new EventHandler(SaveILs);
 
 		Size = new Size (w, h);
+		MaximumSize = Size;
+		MinimumSize = Size;
 
 		Resize += delegate { DoLayout(); };
 

@@ -395,6 +395,10 @@ public class ScoreTracker : Form
 	
 	public void OpenOptions(object sender, EventArgs e)
 	{
+		reopening = true;
+		tracker.Close ();
+		reopening = false;
+
 		inputBox.Enabled = false;
 		submit.Enabled = false;
 		undo.Enabled = false;
@@ -404,10 +408,13 @@ public class ScoreTracker : Form
 		optionsWindow = new OptionsWindow ();
 		optionsWindow.FormClosing += new FormClosingEventHandler(CloseOptions);
 		optionsWindow.Show ();
+
+
 	}
 
 	public void CloseOptions(object sender, FormClosingEventArgs e)
 	{
+		tracker = new DisplayWindow ();
 		SwapControls (submit);
 	}
 	
