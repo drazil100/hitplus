@@ -62,7 +62,7 @@ public class Score : Panel
 			return;
 		scores.Add(name, this);
 		displayName = name;
-		if (ScoreTracker.config["layout"] == "horizontal")
+		if (ScoreTracker.config["layout"] == "0")
 			displayName = GetName(name);
 		index = scoresList.Count;
 		scoresList.Add(this);
@@ -81,7 +81,7 @@ public class Score : Panel
 		
 		Controls.Add(nameLabel);
 		Controls.Add(scoreLabel);
-		if (ScoreTracker.config["layout"] == "horizontal")
+		if (ScoreTracker.config["layout"] == "0")
 			Controls.Add(signLabel);
 		Controls.Add(paceLabel);
 		
@@ -127,7 +127,7 @@ public class Score : Panel
 				paceLabel.Text = String.Format("+{0}", (runScore - oldScore));
 				scoreLabel.ForeColor = ahead;
 				paceLabel.ForeColor = ahead;
-				if (ScoreTracker.config ["layout"] == "horizontal")
+				if (ScoreTracker.config ["layout"] == "0")
 				{
 					paceLabel.Text = String.Format("{0}", (runScore - oldScore));
 					signLabel.Text = "+";
@@ -140,7 +140,7 @@ public class Score : Panel
 				paceLabel.Text = String.Format("-{0}", (oldScore - runScore));
 				scoreLabel.ForeColor = behind;
 				paceLabel.ForeColor = behind;
-				if (ScoreTracker.config ["layout"] == "horizontal")
+				if (ScoreTracker.config ["layout"] == "0")
 				{
 					paceLabel.Text = String.Format("{0}", (oldScore - runScore));
 					signLabel.Text = "-";
@@ -160,6 +160,8 @@ public class Score : Panel
 				scoreLabel.Text = ""+pbScore;//+"\n"+best;
 				paceLabel.Text = "";
 				signLabel.Text = "";
+				if (index == 0 && ScoreTracker.config["start_highlighted"] == "0")
+					Unhighlight();
 				
 			}
 		}
@@ -372,7 +374,7 @@ public class Score : Panel
 	
 	private void DoLayout()
 	{
-		if (ScoreTracker.config["layout"] == "horizontal")
+		if (ScoreTracker.config["layout"] == "0")
 		{
 			nameLabel.Height = Height/2;
 			scoreLabel.Height = Height/2;

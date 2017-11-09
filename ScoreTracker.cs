@@ -10,7 +10,7 @@ using System.Threading;
 
 public class ScoreTracker : Form
 {
-	public static string version = "11/1/2017";
+	public static string version = "11/8/2017";
 
 	[DllImport("kernel32.dll")]
 	static extern IntPtr GetConsoleWindow();
@@ -328,7 +328,8 @@ public class ScoreTracker : Form
 			}
 			index--;
 			Score.scoresList[index].CurrentScore = -1;
-			Score.scoresList[index].Highlight();
+			if (index > 0 || ScoreTracker.config["start_highlighted"] == "1")
+				Score.scoresList[index].Highlight();
 			inputBox.Text = "";
 
 
@@ -414,8 +415,11 @@ public class ScoreTracker : Form
 
 	public void CloseOptions(object sender, FormClosingEventArgs e)
 	{
-		tracker = new DisplayWindow ();
-		SwapControls (submit);
+		if (!closing)
+		{
+			tracker = new DisplayWindow ();
+			SwapControls (submit);
+		}
 	}
 	
 	public void ConfirmClose(object sender, FormClosingEventArgs e) 
@@ -423,8 +427,21 @@ public class ScoreTracker : Form
 		
 		ScoreTracker.config["input_x"] = "" + this.Location.X;
 		ScoreTracker.config["input_y"] = "" + this.Location.Y;
-		ScoreTracker.config["tracker_x"] = "" + tracker.Location.X;
-		ScoreTracker.config["tracker_y"] = "" + tracker.Location.Y;
+		if (tracker != null)
+		{
+			ScoreTracker.config ["tracker_x"] = "" + tracker.Location.X;
+			ScoreTracker.config ["tracker_y"] = "" + tracker.Location.Y;
+			if (ScoreTracker.config ["layout"] == "0")
+			{
+				ScoreTracker.config ["horizontal_width"] = "" + tracker.Width;
+				ScoreTracker.config ["horizontal_height"] = "" + tracker.Height;
+			}
+			else
+			{
+				ScoreTracker.config ["vertical_width"] = "" + tracker.Width;
+				ScoreTracker.config ["vertical_height"] = "" + tracker.Height;			
+			}
+		}
 		ScoreTracker.config.Save();
 		
 		if (!reopening)
@@ -522,15 +539,16 @@ public class ScoreTracker : Form
 
 		config = new FileReader("config.txt", SortingStyle.Sort);
 		config.AddNewItem("hard_route", "0");
-		config.AddNewItem("layout", "horizontal");
+		config.AddNewItem("layout", "0");
 		config.AddNewItem("include_route_pbs_in_individuals_file", "0");
-		config.AddNewItem("sums_horizontal_alignment", "right");
+		config.AddNewItem("sums_horizontal_alignment", "0");
+		config.AddNewItem("vertical_scale_mode", "0");
 		config.AddNewItem("font", "Segoe UI");
 		config.AddNewItem("font_size", "18");
 		config.AddNewItem("highlight_current", "0");
 		config.AddNewItem("start_highlighted", "1");
 		config.AddNewItem("background_color", "#0F0F0F");
-		config.AddNewItem("background_color_highlighted", "#0F0F0F");
+		config.AddNewItem("background_color_highlighted", "#3373F4");
 		config.AddNewItem("text_color", "#FFFFFF");
 		config.AddNewItem("text_color_highlighted", "#FFFFFF");
 		config.AddNewItem("text_color_ahead", "#00CC36");
@@ -541,6 +559,45 @@ public class ScoreTracker : Form
 		config.AddNewItem("horizontal_height", "99");
 		config.AddNewItem("vertical_width", "316");
 		config.AddNewItem("vertical_height", "309");
+
+		if (config ["debug"] == "1")
+		{
+			try
+			{
+				var handle = GetConsoleWindow ();
+				ShowWindow (handle, SW_SHOW);
+			}
+			catch (Exception)
+			{
+
+			}
+		}
+
+		if (config ["layout"] == "horizontal")
+		{
+			config ["layout"] = "0";
+		}
+		if (config ["layout"] == "vertical")
+		{
+			config ["layout"] = "1";
+		}
+		if (config ["layout"] != "0" && config ["layout"] != "1")
+		{
+			config ["layout"] = "0";
+		}
+
+		if (config ["sums_horizontal_alignment"] == "right")
+		{
+			config ["sums_horizontal_alignment"] = "0";
+		}
+		if (config ["sums_horizontal_alignment"] == "left")
+		{
+			config ["sums_horizontal_alignment"] = "1";
+		}
+		if (config ["sums_horizontal_alignment"] != "0" && config ["sums_horizontal_alignment"] != "1")
+		{
+			config ["sums_horizontal_alignment"] = "0";
+		}
 
 		pbEasy = new FileReader("pb_easy.txt", SortingStyle.Validate);
 		pbEasy.AddNewItem("Corneria", "0");

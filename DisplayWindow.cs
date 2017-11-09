@@ -26,7 +26,7 @@ public class DisplayWindow : Form
 		Font = new Font(ScoreTracker.config["font"], Int32.Parse(ScoreTracker.config["font_size"]), FontStyle.Bold);
 		Text = "Star Fox 64 Score Tracker";
 
-		if (ScoreTracker.config["layout"] == "horizontal")
+		if (ScoreTracker.config["layout"] == "0")
 		{
 			w = 1296;
 			h = 99;
@@ -163,7 +163,7 @@ public class DisplayWindow : Form
 			ScoreTracker.topScore.Text = "" + total;
 			totals.Controls.Add(ScoreTracker.topScoreName);
 			totals.Controls.Add(ScoreTracker.topScore);
-			if (ScoreTracker.config["layout"] == "horizontal")
+			if (ScoreTracker.config["layout"] == "0")
 			{
 				ScoreTracker.sobScoreName.Text = "SoB:";
 				ScoreTracker.sobScore.Text = "" + sob;
@@ -176,7 +176,7 @@ public class DisplayWindow : Form
 			totals.Controls.Add(ScoreTracker.sobScoreName);
 			totals.Controls.Add(ScoreTracker.sobScore);
 
-			if (ScoreTracker.config["sums_horizontal_alignment"] == "left" && ScoreTracker.config["layout"] == "horizontal")
+			if (ScoreTracker.config["sums_horizontal_alignment"] == "1" && ScoreTracker.config["layout"] == "0")
 			{
 				Controls.Add(totals);
 				Controls.Add(levels);
@@ -197,29 +197,15 @@ public class DisplayWindow : Form
 
 	public void DoLayout()
 	{
-		if (Width != w2 || Height != h2)
-		{
-			if (ScoreTracker.config ["layout"] == "horizontal")
-			{
-				ScoreTracker.config ["horizontal_width"] = "" + Width;
-				ScoreTracker.config ["horizontal_height"] = "" + Height;
-			}
-			else
-			{
-				ScoreTracker.config ["vertical_width"] = "" + Width;
-				ScoreTracker.config ["vertical_height"] = "" + Height;			
-			}
-			ScoreTracker.config.Save ();
-		}
 
-		if (ScoreTracker.config ["layout"] == "horizontal")
+		if (ScoreTracker.config ["layout"] == "0")
 		{
 			totals.Width = 310;
 			levels.Width = GetWidth () - totals.Width;
 			DoTotalsLayoutHorizontal ();
 			DoLevelsLayoutHorizontal ();
 
-			if (ScoreTracker.config ["sums_horizontal_alignment"] == "left")
+			if (ScoreTracker.config ["sums_horizontal_alignment"] == "1")
 			{
 				levels.Left = totals.Width;
 			}
@@ -244,6 +230,15 @@ public class DisplayWindow : Form
 
 	public void DoTotalsLayoutHorizontal()
 	{
+		ScoreTracker.topScoreName.Top = 0;
+		ScoreTracker.topScore.Top = 0;
+		ScoreTracker.topScoreName.Left = 0;
+		ScoreTracker.topScore.Left = 0;
+		ScoreTracker.sobScoreName.Top = 0;
+		ScoreTracker.sobScore.Top = 0;
+		ScoreTracker.sobScoreName.Left = 0;
+		ScoreTracker.sobScore.Left = 0;
+
 		ScoreTracker.topScoreName.Width = 75;
 		ScoreTracker.topScore.Left = ScoreTracker.topScoreName.Width;
 		ScoreTracker.topScore.Width = 155 - ScoreTracker.topScoreName.Width;
@@ -275,6 +270,15 @@ public class DisplayWindow : Form
 
 	public void DoTotalsLayoutVertical()
 	{
+		ScoreTracker.topScoreName.Top = 0;
+		ScoreTracker.topScore.Top = 0;
+		ScoreTracker.topScoreName.Left = 0;
+		ScoreTracker.topScore.Left = 0;
+		ScoreTracker.sobScoreName.Top = 0;
+		ScoreTracker.sobScore.Top = 0;
+		ScoreTracker.sobScoreName.Left = 0;
+		ScoreTracker.sobScore.Left = 0;
+
 		ScoreTracker.topScoreName.Width = 220;
 		ScoreTracker.topScore.Width = GetWidth() - ScoreTracker.topScoreName.Width;
 		ScoreTracker.topScore.Height = 30;
@@ -296,13 +300,20 @@ public class DisplayWindow : Form
 		List<Score> sList = Score.scoresList;
 		foreach (Score s in sList)
 		{
-			s.Height = 30;
+			if (ScoreTracker.config ["vertical_scale_mode"] == "1")
+			{	
+				s.Height = 30;
+			}
+			else
+			{
+				s.Height = levels.Height / 7;
+			}
 			s.Width = GetWidth();
 		}
 
 		for (int i = 1; i < sList.Count; i++)
 		{
-			sList[i].Top = sList[i-1].Top + 30;
+			sList[i].Top = sList[i-1].Top + sList[i-1].Height;
 		}
 	}
 }
