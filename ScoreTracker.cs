@@ -370,21 +370,6 @@ public class ScoreTracker : Form
 			if (tracker != null)
 				return;
 			
-			if (config ["hard_route"] == "0")
-			{
-				config ["hard_route"] = "1";
-				ScoreTracker.individualLevels.AddNewItem("Sector Y", "0");
-				ScoreTracker.individualLevels.AddNewItem("Aquas", "0");
-				ScoreTracker.individualLevels.AddNewItem("Zoness", "0");
-			}
-			else
-			{
-				config ["hard_route"] = "0";
-				ScoreTracker.individualLevels.AddNewItem("Meteo", "0");
-				ScoreTracker.individualLevels.AddNewItem("Katina", "0");
-				ScoreTracker.individualLevels.AddNewItem("Sector X", "0");
-				
-			}
 			config.Save ();
 			tracker = new DisplayWindow ();
 		}
@@ -620,22 +605,7 @@ public class ScoreTracker : Form
 		individualLevels = new FileReader("pb_individuals.txt", SortingStyle.Unsort);
 		individualLevels.RemoveKey("Easy Route");
 		individualLevels.RemoveKey("Hard Route");
-		individualLevels.AddNewItem("Corneria", "0");
-		if (config["hard_route"] == "0")
-		{
-			individualLevels.AddNewItem("Meteo", "0");
-			individualLevels.AddNewItem("Katina", "0");
-			individualLevels.AddNewItem("Sector X", "0");
-		}
-		if (config["hard_route"] == "1")
-		{
-			individualLevels.AddNewItem("Sector Y", "0");
-			individualLevels.AddNewItem("Aquas", "0");
-			individualLevels.AddNewItem("Zoness", "0");
-		}
-		individualLevels.AddNewItem("Macbeth", "0");
-		individualLevels.AddNewItem("Area 6", "0");
-		individualLevels.AddNewItem("Venom", "0");
+
 		if (config["include_route_pbs_in_individuals_file"] == "1")
 		{
 			int total = 0;

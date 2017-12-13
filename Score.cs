@@ -176,12 +176,18 @@ public class Score : Panel
 			{
 				scoresList[i].best = scoresList[i].CurrentScore;
 				updated = true;
+				bool contains = false;
 				foreach(Entry entry in topData)
 				{
 					if (entry.name == scoresList[i].name)
 					{
 						entry.score = scoresList[i].CurrentScore;
+						contains = true;
 					}
+				}
+				if (!contains)
+				{
+					topData.Add(new Entry(scoresList[i].name, scoresList[i].CurrentScore));
 				}
 			}
 		}
