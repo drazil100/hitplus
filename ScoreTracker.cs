@@ -10,7 +10,7 @@ using System.Threading;
 
 public class ScoreTracker : Form
 {
-	public static string version = "11/8/2017";
+	public static string version = "12/22/2017";
 
 	[DllImport("kernel32.dll")]
 	static extern IntPtr GetConsoleWindow();
@@ -370,6 +370,14 @@ public class ScoreTracker : Form
 			if (tracker != null)
 				return;
 			
+			if (config ["hard_route"] == "0")
+			{
+				config ["hard_route"] = "1";
+			}
+			else
+			{
+				config ["hard_route"] = "0";
+			}
 			config.Save ();
 			tracker = new DisplayWindow ();
 		}
