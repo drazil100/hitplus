@@ -114,56 +114,77 @@ public class Score : Panel
 		set 
 		{
 			score = value;
-			int runScore = 0;
-			int oldScore = 0;
-			for (int i = 0; (i < scoresList.Count && i <= index); i++)
-			{
-				oldScore += scoresList[i].pbScore;
-				runScore += scoresList[i].CurrentScore;
-			}
-			if (runScore >= oldScore)
-			{
-				scoreLabel.Text = String.Format("{0}", score);
-				paceLabel.Text = String.Format("+{0}", (runScore - oldScore));
-				scoreLabel.ForeColor = ahead;
-				paceLabel.ForeColor = ahead;
-				if (ScoreTracker.config ["layout"] == "0")
-				{
-					paceLabel.Text = String.Format("{0}", (runScore - oldScore));
-					signLabel.Text = "+";
-					signLabel.ForeColor = ahead;
-				}
-			}
-			else
-			{
-				scoreLabel.Text = String.Format("{0}", score);
-				paceLabel.Text = String.Format("-{0}", (oldScore - runScore));
-				scoreLabel.ForeColor = behind;
-				paceLabel.ForeColor = behind;
-				if (ScoreTracker.config ["layout"] == "0")
-				{
-					paceLabel.Text = String.Format("{0}", (oldScore - runScore));
-					signLabel.Text = "-";
-					signLabel.ForeColor = behind;
-				}
-			}
 			if (score > best)
 			{
 				scoreLabel.ForeColor = bestColor;
 				paceLabel.ForeColor = bestColor;
 				signLabel.ForeColor = bestColor;
 			}
-			
 			if (score == -1)
 			{
-				scoreLabel.ForeColor = text_default;
+				scoreLabel.ForeColor = bgColor;
 				scoreLabel.Text = ""+pbScore;//+"\n"+best;
 				paceLabel.Text = "";
 				signLabel.Text = "";
-				if (index == 0 && ScoreTracker.config["start_highlighted"] == "0")
-					Unhighlight();
-				
 			}
+			if (ScoreTracker.config["casual_mode"] == "0")
+				ColorLabels();
+		}
+	}
+	
+	public void ColorLabels()
+	{
+		int runScore = 0;
+		int oldScore = 0;
+		for (int i = 0; (i < scoresList.Count && i <= index); i++)
+		{
+			oldScore += scoresList[i].pbScore;
+			runScore += scoresList[i].CurrentScore;
+		}
+		if (runScore >= oldScore)
+		{
+			scoreLabel.Text = String.Format("{0}", score);
+			paceLabel.Text = String.Format("+{0}", (runScore - oldScore));
+			scoreLabel.ForeColor = ahead;
+			paceLabel.ForeColor = ahead;
+			if (ScoreTracker.config ["layout"] == "0")
+			{
+				paceLabel.Text = String.Format("{0}", (runScore - oldScore));
+				signLabel.Text = "+";
+				signLabel.ForeColor = ahead;
+			}
+		}
+		else
+		{
+			scoreLabel.Text = String.Format("{0}", score);
+			paceLabel.Text = String.Format("-{0}", (oldScore - runScore));
+			scoreLabel.ForeColor = behind;
+			paceLabel.ForeColor = behind;
+			if (ScoreTracker.config ["layout"] == "0")
+			{
+				paceLabel.Text = String.Format("{0}", (oldScore - runScore));
+				signLabel.Text = "-";
+				signLabel.ForeColor = behind;
+			}
+		}
+		if (score > best)
+		{
+			scoreLabel.ForeColor = bestColor;
+			paceLabel.ForeColor = bestColor;
+			signLabel.ForeColor = bestColor;
+		}
+		
+		if (score == -1)
+		{
+			scoreLabel.ForeColor = text_default;
+			scoreLabel.Text = ""+pbScore;//+"\n"+best;
+			paceLabel.Text = "";
+			paceLabel.Text = text_default;
+			signLabel.Text = "";
+			signLabel.Text = text_default
+			if (index == 0 && ScoreTracker.config["start_highlighted"] == "0")
+				Unhighlight();
+			
 		}
 	}
 	
@@ -337,6 +358,36 @@ public class Score : Panel
 		scoreLabel.BackColor = bgColor;
 		paceLabel.BackColor = bgColor;
 		signLabel.BackColor = bgColor;
+		if (ScoreTracker.config["casual_mode"] == "1")
+		{
+			scoreLabel.ForeColor = text_default;
+			paceLabel.ForeColor = bgcolor;
+			signLabel.ForeColor = bgColor;
+		}
+	}
+	
+	public static void ToggleCasualMode()
+	{
+		for(int i = 0; i < scoresList.Count; i++)
+		{
+			if (ScoreTracker.config["casual_mode"] == "0")
+			{
+				scoresList[i].ColorLabels();
+			}
+			else
+			{
+				if (scoresList[i].CurrentScore > -1)
+				{
+					scoresList[i].scoreLabel.ForeColor = text_default;
+				}
+				else
+				{
+					scoresList[i].scoreLabel.ForeColor = bgColor;
+				}
+				scoresList[i].paceLabel.ForeColor = bgColor;
+				scoresList[i].signLabel.ForeColor = bgColor;
+			}
+		}
 	}
 	
 	public string GetName(string n)

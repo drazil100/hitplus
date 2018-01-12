@@ -48,12 +48,13 @@ public class ScoreTracker : Form
 	private Button undo = new Button();
 	private Button save = new Button();
 	private Button switchRoute = new Button ();
+	private Button casualMode = new Button ();
 	private Button options = new Button ();
 
 	public int index = 0;
 
 	private int w = 300;
-	private int h = 134;
+	private int h = 159;
 
 	//private Button sendButton = new Button();
 	//private TabControl rooms = new TabControl();
@@ -107,6 +108,7 @@ public class ScoreTracker : Form
 		save.Text = "Save & Reset";
 		save.Enabled = false;
 		switchRoute.Text = "Switch Route";
+		casualMode.Text = "Casual Mode";
 		options.Text = "Options...";
 		//options.Enabled = false;
 
@@ -115,6 +117,7 @@ public class ScoreTracker : Form
 		undo.Click += new EventHandler(OnUndo);
 		save.Click += new EventHandler(OnReset);
 		switchRoute.Click += new EventHandler (SwitchRoutes);
+		casualMode.Click += new EventHandler (ToggleCasualmode);
 		options.Click += new EventHandler (OpenOptions);
 
 		SwapControls(submit);
@@ -226,10 +229,14 @@ public class ScoreTracker : Form
 		save.Height = submit.Height;
 		switchRoute.Top = submit.Top + submit.Height;
 		switchRoute.Height = submit.Height;
-		switchRoute.Width = GetWidth();
+		switchRoute.Width = GetWidth() / 2;
+		casualMode.Top = switchRoute.Top;
+		casualMode.Left = switchRoute.Width;
+		casualMode.Height = submit.Height;
+		casualMode.Width = sbmit.Width;
 		options.Top = switchRoute.Top + switchRoute.Height;
 		options.Height = switchRoute.Height;
-		options.Width = switchRoute.Width;
+		options.Width = GetWidth();
 	}
 
 	public void SwapControls(Button b)
@@ -268,6 +275,7 @@ public class ScoreTracker : Form
 		save.Enabled = false;
 		switchRoute.Enabled = true;
 		b.Enabled = true;
+		casualMode.Enabled = true;
 		AcceptButton = b;
 		Controls.Add(b);
 		Controls.Add(undo);
@@ -388,6 +396,22 @@ public class ScoreTracker : Form
 		}
 	}
 	
+	public void ToggleCasualMode(object sender, EventArgs e)
+	{
+		if (config["casual_mode"] == "0")
+		{
+			config["casual_mode"] = "1";
+			casualMode.Text = "Tracking Mode";
+		}
+		else
+		{
+			config["casual_mode"] = "0";
+			casualMode.Text = "Casual Mode";
+		}
+		
+		Score.ToggleCasualmode();
+	}
+	
 	public void OpenOptions(object sender, EventArgs e)
 	{
 		reopening = true;
@@ -399,6 +423,7 @@ public class ScoreTracker : Form
 		undo.Enabled = false;
 		save.Enabled = false;
 		switchRoute.Enabled = false;
+		casualMode.Enabled = false;
 		options.Enabled = false;
 		optionsWindow = new OptionsWindow ();
 		optionsWindow.FormClosing += new FormClosingEventHandler(CloseOptions);
@@ -533,6 +558,7 @@ public class ScoreTracker : Form
 
 		config = new FileReader("config.txt", SortingStyle.Sort);
 		config.AddNewItem("hard_route", "0");
+		config.AddNewItem("casual_mode", "0");
 		config.AddNewItem("layout", "0");
 		config.AddNewItem("include_route_pbs_in_individuals_file", "0");
 		config.AddNewItem("sums_horizontal_alignment", "0");
