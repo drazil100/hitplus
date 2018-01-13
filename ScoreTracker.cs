@@ -280,6 +280,7 @@ public class ScoreTracker : Form
 		Controls.Add(b);
 		Controls.Add(undo);
 		Controls.Add (switchRoute);
+		Controls.Add (casualMode);
 		if (index == 0)
 			Controls.Add (options);
 
