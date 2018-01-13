@@ -231,7 +231,7 @@ public class ScoreTracker : Form
 		switchRoute.Height = submit.Height;
 		switchRoute.Width = GetWidth() / 2;
 		casualMode.Top = switchRoute.Top;
-		casualMode.Left = switchRoute.Width;
+		casualMode.Left = switchRoute.Left + switchRoute.Width;
 		casualMode.Height = submit.Height;
 		casualMode.Width = submit.Width;
 		options.Top = switchRoute.Top + switchRoute.Height;
