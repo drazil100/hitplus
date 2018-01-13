@@ -117,7 +117,7 @@ public class ScoreTracker : Form
 		undo.Click += new EventHandler(OnUndo);
 		save.Click += new EventHandler(OnReset);
 		switchRoute.Click += new EventHandler (SwitchRoutes);
-		casualMode.Click += new EventHandler (ToggleCasualmode);
+		casualMode.Click += new EventHandler (ToggleCasualMode);
 		options.Click += new EventHandler (OpenOptions);
 
 		SwapControls(submit);
@@ -233,7 +233,7 @@ public class ScoreTracker : Form
 		casualMode.Top = switchRoute.Top;
 		casualMode.Left = switchRoute.Width;
 		casualMode.Height = submit.Height;
-		casualMode.Width = sbmit.Width;
+		casualMode.Width = submit.Width;
 		options.Top = switchRoute.Top + switchRoute.Height;
 		options.Height = switchRoute.Height;
 		options.Width = GetWidth();
@@ -409,7 +409,7 @@ public class ScoreTracker : Form
 			casualMode.Text = "Casual Mode";
 		}
 		
-		Score.ToggleCasualmode();
+		Score.ToggleCasualMode();
 	}
 	
 	public void OpenOptions(object sender, EventArgs e)

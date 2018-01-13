@@ -35,13 +35,13 @@ public class Score : Panel
 	private Label signLabel = new Label();
 	
 	
-	private Color text_default = ScoreTracker.text_color;
-	private Color bgColor = ScoreTracker.background_color;
-	private Color bgColorHighlighted = ScoreTracker.background_color_highlighted;
-	private Color current = ScoreTracker.text_color_highlighted;
-	private Color ahead = ScoreTracker.text_color_ahead;
-	private Color behind = ScoreTracker.text_color_behind;
-	private Color bestColor = ScoreTracker.text_color_best;
+	private static Color text_default = ScoreTracker.text_color;
+	private static Color bgColor = ScoreTracker.background_color;
+	private static Color bgColorHighlighted = ScoreTracker.background_color_highlighted;
+	private static Color current = ScoreTracker.text_color_highlighted;
+	private static Color ahead = ScoreTracker.text_color_ahead;
+	private static Color behind = ScoreTracker.text_color_behind;
+	private static Color bestColor = ScoreTracker.text_color_best;
 
 	private int score = -1;
 	public int pbScore = 0;
@@ -179,9 +179,9 @@ public class Score : Panel
 			scoreLabel.ForeColor = text_default;
 			scoreLabel.Text = ""+pbScore;//+"\n"+best;
 			paceLabel.Text = "";
-			paceLabel.Text = text_default;
+			paceLabel.ForeColor = text_default;
 			signLabel.Text = "";
-			signLabel.Text = text_default;
+			signLabel.ForeColor = text_default;
 			if (index == 0 && ScoreTracker.config["start_highlighted"] == "0")
 				Unhighlight();
 			
@@ -361,7 +361,7 @@ public class Score : Panel
 		if (ScoreTracker.config["casual_mode"] == "1")
 		{
 			scoreLabel.ForeColor = text_default;
-			paceLabel.ForeColor = bgcolor;
+			paceLabel.ForeColor = bgColor;
 			signLabel.ForeColor = bgColor;
 		}
 	}
