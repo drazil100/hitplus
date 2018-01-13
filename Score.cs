@@ -181,7 +181,7 @@ public class Score : Panel
 			paceLabel.Text = "";
 			paceLabel.Text = text_default;
 			signLabel.Text = "";
-			signLabel.Text = text_default
+			signLabel.Text = text_default;
 			if (index == 0 && ScoreTracker.config["start_highlighted"] == "0")
 				Unhighlight();
 			
