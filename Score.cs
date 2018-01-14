@@ -114,6 +114,7 @@ public class Score : Panel
 		set 
 		{
 			score = value;
+			scoreLabel.Text = ""+score;
 			if (score > best)
 			{
 				scoreLabel.ForeColor = bestColor;
@@ -122,10 +123,14 @@ public class Score : Panel
 			}
 			if (score == -1)
 			{
-				scoreLabel.ForeColor = bgColor;
+				scoreLabel.ForeColor = text_default;
 				scoreLabel.Text = ""+pbScore;//+"\n"+best;
 				paceLabel.Text = "";
+				paceLabel.ForeColor = text_default;
 				signLabel.Text = "";
+				signLabel.ForeColor = text_default;
+				if (index == 0 && ScoreTracker.config["start_highlighted"] == "0")
+					Unhighlight();
 			}
 			if (ScoreTracker.config["casual_mode"] == "0")
 				ColorLabels();
@@ -143,7 +148,6 @@ public class Score : Panel
 		}
 		if (runScore >= oldScore)
 		{
-			scoreLabel.Text = String.Format("{0}", score);
 			paceLabel.Text = String.Format("+{0}", (runScore - oldScore));
 			scoreLabel.ForeColor = ahead;
 			paceLabel.ForeColor = ahead;
@@ -156,7 +160,6 @@ public class Score : Panel
 		}
 		else
 		{
-			scoreLabel.Text = String.Format("{0}", score);
 			paceLabel.Text = String.Format("-{0}", (oldScore - runScore));
 			scoreLabel.ForeColor = behind;
 			paceLabel.ForeColor = behind;
