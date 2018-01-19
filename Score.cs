@@ -124,7 +124,10 @@ public class Score : Panel
 			if (score == -1)
 			{
 				scoreLabel.ForeColor = text_default;
-				scoreLabel.Text = ""+pbScore;//+"\n"+best;
+				if (ScoreTracker.config["casual_mode"] == "0")
+					scoreLabel.Text = ""+pbScore;//+"\n"+best;
+				else
+					scoreLabel.Text = "";
 				paceLabel.Text = "";
 				paceLabel.ForeColor = text_default;
 				signLabel.Text = "";
@@ -180,7 +183,10 @@ public class Score : Panel
 		if (score == -1)
 		{
 			scoreLabel.ForeColor = text_default;
-			scoreLabel.Text = ""+pbScore;//+"\n"+best;
+			if (ScoreTracker.config["casual_mode"] == "0")
+				scoreLabel.Text = ""+pbScore;//+"\n"+best;
+			else
+				scoreLabel.Text = "";
 			paceLabel.Text = "";
 			paceLabel.ForeColor = text_default;
 			signLabel.Text = "";
