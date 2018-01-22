@@ -45,7 +45,7 @@ public class DisplayWindow : Form
 		else
 		{
 			w = 316;
-			h = 309;
+			h = 339;
 			try
 			{
 			w2 = Int32.Parse (ScoreTracker.config ["vertical_width"]);
@@ -102,6 +102,7 @@ public class DisplayWindow : Form
 		ScoreTracker.config["tracker_x"] = "" + this.Location.X;
 		ScoreTracker.config["tracker_y"] = "" + this.Location.Y;
 		ScoreTracker.config.Save();
+
 
 		//  When the form is shown set the focus to the input box
 
@@ -161,6 +162,9 @@ public class DisplayWindow : Form
 			}
 			ScoreTracker.topScoreName.Text = "Top: ";
 			ScoreTracker.topScore.Text = "" + total;
+			if (ScoreTracker.config["layout"] == "1")
+				totals.Controls.Add(ScoreTracker.currentScoreName);
+			totals.Controls.Add(ScoreTracker.currentScore);
 			totals.Controls.Add(ScoreTracker.topScoreName);
 			totals.Controls.Add(ScoreTracker.topScore);
 			if (ScoreTracker.config["layout"] == "0")
@@ -218,7 +222,7 @@ public class DisplayWindow : Form
 		{
 			totals.Width = GetWidth ();
 			levels.Width = GetWidth ();
-			totals.Height = 60;
+			totals.Height = 90;
 			levels.Height = GetHeight () - totals.Height;
 			totals.Top = levels.Height;
 			DoTotalsLayoutVertical ();
@@ -238,18 +242,24 @@ public class DisplayWindow : Form
 		ScoreTracker.sobScore.Top = 0;
 		ScoreTracker.sobScoreName.Left = 0;
 		ScoreTracker.sobScore.Left = 0;
+		ScoreTracker.currentScore.Left = 0;
+		ScoreTracker.currentScore.Top = 0;
 
 		ScoreTracker.topScoreName.Width = 75;
 		ScoreTracker.topScore.Left = ScoreTracker.topScoreName.Width;
 		ScoreTracker.topScore.Width = 155 - ScoreTracker.topScoreName.Width;
-		ScoreTracker.topScoreName.Height = GetHeight();
-		ScoreTracker.topScore.Height = GetHeight();
+		ScoreTracker.topScoreName.Height = GetHeight() / 2;
+		ScoreTracker.topScore.Height = GetHeight() / 2;
 		ScoreTracker.sobScoreName.Left = ScoreTracker.topScore.Left + ScoreTracker.topScore.Width;
 		ScoreTracker.sobScore.Left = ScoreTracker.sobScoreName.Left + ScoreTracker.sobScoreName.Width;
 		ScoreTracker.sobScoreName.Width = 75;
 		ScoreTracker.sobScore.Width = 155 - ScoreTracker.sobScoreName.Width;
-		ScoreTracker.sobScoreName.Height = GetHeight();
-		ScoreTracker.sobScore.Height = GetHeight();
+		ScoreTracker.sobScoreName.Height = GetHeight() / 2;
+		ScoreTracker.sobScore.Height = GetHeight() / 2;
+		ScoreTracker.currentScore.Top = ScoreTracker.topScore.Top + ScoreTracker.topScore.Height;
+		ScoreTracker.currentScore.Left = ScoreTracker.topScore.Left;
+		ScoreTracker.currentScore.Height = GetHeight() / 2;
+		ScoreTracker.currentScore.Width = ScoreTracker.topScore.Width;
 
 	}
 
@@ -278,21 +288,31 @@ public class DisplayWindow : Form
 		ScoreTracker.sobScore.Top = 0;
 		ScoreTracker.sobScoreName.Left = 0;
 		ScoreTracker.sobScore.Left = 0;
+		ScoreTracker.currentScore.Left = 0;
+		ScoreTracker.currentScore.Top = 0;
 
+		ScoreTracker.topScore.Top = 30;
+		ScoreTracker.topScoreName.Top = 30;
 		ScoreTracker.topScoreName.Width = 220;
 		ScoreTracker.topScore.Width = GetWidth() - ScoreTracker.topScoreName.Width;
 		ScoreTracker.topScore.Height = 30;
 		ScoreTracker.topScoreName.Height = ScoreTracker.topScore.Height;
 		ScoreTracker.topScore.Left = ScoreTracker.topScoreName.Width;
 		ScoreTracker.sobScoreName.Width = 220;
-		ScoreTracker.sobScoreName.Top = 30;
-		ScoreTracker.sobScore.Top = 30;
+		ScoreTracker.sobScoreName.Top = 60;
+		ScoreTracker.sobScore.Top = 60;
 		ScoreTracker.sobScore.Width = GetWidth() - ScoreTracker.sobScoreName.Width;
 		ScoreTracker.sobScore.Height = 30;
 		ScoreTracker.sobScore.Left = ScoreTracker.sobScoreName.Width;
 		ScoreTracker.sobScoreName.Height = ScoreTracker.sobScore.Height;
+		ScoreTracker.currentScoreName.Width = 220;
+		ScoreTracker.currentScore.Width = GetWidth() - ScoreTracker.currentScoreName.Width;
+		ScoreTracker.currentScore.Left = ScoreTracker.currentScoreName.Width;
+		ScoreTracker.currentScoreName.Height = 30;
+		ScoreTracker.currentScore.Height = 30;
 		ScoreTracker.topScore.TextAlign = ContentAlignment.TopRight;
 		ScoreTracker.sobScore.TextAlign = ContentAlignment.TopRight;
+		ScoreTracker.currentScore.TextAlign = ContentAlignment.TopRight;
 	}
 
 	public void DoLevelsLayoutVertical()

@@ -50,6 +50,7 @@ public class Score : Panel
 	private static Color background_color_highlighted = ScoreTracker.background_color_highlighted;
 
 	private PaceStatus pace = PaceStatus.Default;
+	private static PaceStatus runPace = PaceStatus.Default;
 
 	private bool highlighted = false;
 
@@ -166,7 +167,7 @@ public class Score : Panel
 
 		if (!casual)
 		{
-			nameLabel.ForeColor = text_color_ahead;
+			nameLabel.ForeColor = text_color;
 			scoreLabel.ForeColor = text_color_ahead;
 			signLabel.ForeColor = text_color_ahead;
 			paceLabel.ForeColor = text_color_ahead;
@@ -186,7 +187,7 @@ public class Score : Panel
 
 		if (!casual)
 		{
-			nameLabel.ForeColor = text_color_behind;
+			nameLabel.ForeColor = text_color;
 			scoreLabel.ForeColor = text_color_behind;
 			signLabel.ForeColor = text_color_behind;
 			paceLabel.ForeColor = text_color_behind;
@@ -206,14 +207,14 @@ public class Score : Panel
 
 		if (!casual)
 		{
-			nameLabel.ForeColor = text_color_best;
+			nameLabel.ForeColor = text_color;
 			scoreLabel.ForeColor = text_color_best;
 			signLabel.ForeColor = text_color_best;
 			paceLabel.ForeColor = text_color_best;
 		}
 		else
 		{
-			nameLabel.ForeColor = text_color_best;
+			nameLabel.ForeColor = text_color;
 			scoreLabel.ForeColor = text_color_best;
 			signLabel.ForeColor = background_color;
 			paceLabel.ForeColor = background_color;
@@ -221,7 +222,7 @@ public class Score : Panel
 	}
 	
 	public int CurrentScore {
-		get {return score;}
+		get {return (score > -1) ? score : 0;}
 		set 
 		{
 			score = value;
@@ -236,6 +237,7 @@ public class Score : Panel
 			if (runScore >= oldScore)
 			{
 				pace = PaceStatus.Ahead;
+				runPace = PaceStatus.Ahead;
 				paceLabel.Text = String.Format("+{0}", (runScore - oldScore));
 				if (ScoreTracker.config ["layout"] == "0")
 				{
@@ -246,6 +248,7 @@ public class Score : Panel
 			else
 			{
 				pace = PaceStatus.Behind;
+				runPace = PaceStatus.Behind;
 				paceLabel.Text = String.Format("-{0}", (oldScore - runScore));
 				if (ScoreTracker.config ["layout"] == "0")
 				{
@@ -270,9 +273,39 @@ public class Score : Panel
 				if (index == 0 && ScoreTracker.config["start_highlighted"] == "0")
 					Unhighlight();
 
+				if (index > 0)
+				{
+					for (int i = 0; (i < scoresList.Count && i < index); i++)
+					{
+						oldScore += scoresList[i].pbScore;
+						runScore += scoresList[i].CurrentScore;
+					}
+					if (runScore >= oldScore)
+					{
+						runPace = PaceStatus.Ahead;
+					}
+					else
+					{
+						runPace = PaceStatus.Behind;
+					}
+				}
 			}
 
 			RecolorPanel();
+		}
+	}
+
+	public Color CurrentColor
+	{
+		get 
+		{
+			Color tmp = text_color;
+			switch (runPace)
+			{
+				case PaceStatus.Ahead:   tmp = text_color_ahead; break;
+				case PaceStatus.Behind:  tmp = text_color_behind; break;
+			}
+			return tmp;
 		}
 	}
 	

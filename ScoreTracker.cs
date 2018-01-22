@@ -11,7 +11,7 @@ using System.Threading;
 
 public class ScoreTracker : Form
 {
-	public static string version = "1/11/18";
+	public static string version = "1/22/18";
 
 	[DllImport("kernel32.dll")]
 	static extern IntPtr GetConsoleWindow();
@@ -40,8 +40,10 @@ public class ScoreTracker : Form
 	//private LogBox chatLog = new LogBox(); //  LogBox is my own class that has a method for adding messages and built in thread safety
 	public static Label topScore = new Label();
 	public static Label sobScore = new Label();
+	public static Label currentScore = new Label();
 	public static Label topScoreName = new Label();
 	public static Label sobScoreName = new Label();
+	public static Label currentScoreName = new Label();
 
 	private NumericTextBox inputBox = new NumericTextBox();
 	private Button submit = new Button();
@@ -54,7 +56,7 @@ public class ScoreTracker : Form
 	public int index = 0;
 
 	private int w = 300;
-	private int h = 159;
+	private int h = 134;
 
 	//private Button sendButton = new Button();
 	//private TabControl rooms = new TabControl();
@@ -105,10 +107,10 @@ public class ScoreTracker : Form
 		submit.Text = "Keep";
 		undo.Text = "Back";
 		undo.Enabled = false;
-		save.Text = "Save & Reset";
+		save.Text = "Save && Reset";
 		save.Enabled = false;
 		switchRoute.Text = "Switch Route";
-		casualMode.Text = "Casual Mode";
+		casualMode.Text = (config["casual_mode"] == "0") ? "Casual Mode" : "Tracking Mode";
 		options.Text = "Options...";
 		//options.Enabled = false;
 
@@ -127,7 +129,8 @@ public class ScoreTracker : Form
 		//  Set colors
 		topScore.ForeColor = text_color_total;
 		sobScore.ForeColor = text_color_total;
-
+		currentScore.ForeColor = text_color;
+		currentScoreName.ForeColor = text_color;
 
 
 
@@ -140,6 +143,7 @@ public class ScoreTracker : Form
 
 		//  Draw the form
 		DoLayout();
+		UpdateCurrentScore();
 
 		int x = -10000;
 		int y = -10000;
@@ -288,6 +292,42 @@ public class ScoreTracker : Form
 	}
 
 
+	public void UpdateCurrentScore()
+	{
+		if (Score.scoresList == null || Score.scoresList.Count == 0) return;
+
+		currentScoreName.Text = "Total:";
+
+		if (config["casual_mode"] == "0")
+		{
+			if (index == 0 && config["layout"] == "0")
+			{
+				currentScore.Text = "";
+			}
+			else
+			{
+				int tmp = 0;
+				foreach (Score sc in Score.scoresList)
+				{
+					tmp += sc.CurrentScore;
+				}
+				currentScore.Text = "" + tmp;
+				if (tmp == 0)
+					currentScore.Text = "-";
+			}
+			Color p = text_color;
+			if (index > 0)
+				p = Score.scoresList[index - 1].CurrentColor;
+			currentScore.ForeColor = p;
+			currentScoreName.Text = "Total:";
+		}
+		else
+		{
+			currentScore.Text = "";
+			currentScoreName.Text = "";
+		}
+	}
+
 
 	public void OnSubmit(object sender, EventArgs e)
 	{
@@ -300,6 +340,7 @@ public class ScoreTracker : Form
 			inputBox.Text = "";
 			Score.scoresList[index].Unhighlight();
 			index++;
+			UpdateCurrentScore();
 			if (index != Score.scoresList.Count)
 				Score.scoresList[index].Highlight();
 
@@ -347,6 +388,7 @@ public class ScoreTracker : Form
 			{
 				SwapControls(submit);
 			}
+			UpdateCurrentScore();
 
 			inputBox.Focus();
 		}
@@ -363,6 +405,16 @@ public class ScoreTracker : Form
 		SwapControls(submit);
 		submit.Enabled = true;
 		index = 0;
+		currentScore.ForeColor = text_color;
+		currentScoreName.ForeColor = text_color;
+		if (config["layout"] == "0")
+		{
+			currentScore.Text = "";
+		}
+		else
+		{
+			currentScore.Text = "-";
+		}
 		SwapControls (submit);
 		if (ScoreTracker.config["start_highlighted"] == "1")
 			Score.scoresList[index].Highlight();
@@ -390,11 +442,23 @@ public class ScoreTracker : Form
 			}
 			config.Save ();
 			tracker = new DisplayWindow ();
+
+			currentScore.ForeColor = text_color;
+			currentScoreName.ForeColor = text_color;
+			if (config["layout"] == "0")
+			{
+				currentScore.Text = "";
+			}
+			else
+			{
+				currentScore.Text = "-";
+			}
 		}
 		catch (Exception ex)
 		{
 			Console.WriteLine(ex.Message);
 		}
+		inputBox.Focus();
 	}
 	
 	public void ToggleCasualMode(object sender, EventArgs e)
@@ -411,6 +475,8 @@ public class ScoreTracker : Form
 		}
 		
 		Score.ToggleCasualMode();
+		UpdateCurrentScore();
+		inputBox.Focus();
 	}
 	
 	public void OpenOptions(object sender, EventArgs e)
@@ -438,6 +504,7 @@ public class ScoreTracker : Form
 		if (!closing)
 		{
 			tracker = new DisplayWindow ();
+			UpdateCurrentScore();
 			SwapControls (submit);
 		}
 	}
