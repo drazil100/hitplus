@@ -298,34 +298,26 @@ public class ScoreTracker : Form
 
 		currentScoreName.Text = "Total:";
 
-		if (config["casual_mode"] == "0")
+		if (index == 0 && config["layout"] == "0")
 		{
-			if (index == 0 && config["layout"] == "0")
-			{
-				currentScore.Text = "";
-			}
-			else
-			{
-				int tmp = 0;
-				foreach (Score sc in Score.scoresList)
-				{
-					tmp += sc.CurrentScore;
-				}
-				currentScore.Text = "" + tmp;
-				if (tmp == 0)
-					currentScore.Text = "-";
-			}
-			Color p = text_color;
-			if (index > 0)
-				p = Score.scoresList[index - 1].CurrentColor;
-			currentScore.ForeColor = p;
-			currentScoreName.Text = "Total:";
+			currentScore.Text = "";
 		}
 		else
 		{
-			currentScore.Text = "";
-			currentScoreName.Text = "";
+			int tmp = 0;
+			foreach (Score sc in Score.scoresList)
+			{
+				tmp += sc.CurrentScore;
+			}
+			currentScore.Text = "" + tmp;
+			if (tmp == 0)
+				currentScore.Text = "-";
 		}
+		Color p = text_color;
+		if (index > 0 && config["casual_mode"] == "0")
+			p = Score.scoresList[index - 1].CurrentColor;
+		currentScore.ForeColor = p;
+		currentScoreName.Text = "Total:";
 	}
 
 

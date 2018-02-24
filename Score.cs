@@ -275,6 +275,8 @@ public class Score : Panel
 
 				if (index > 0)
 				{
+					oldScore = 0;
+					runScore = 0;
 					for (int i = 0; (i < scoresList.Count && i < index); i++)
 					{
 						oldScore += scoresList[i].pbScore;
