@@ -37,7 +37,6 @@ public class ScoreTracker : Form
 	public static ScoreTracker mainWindow;
 
 	//  Declare and initilize UI elements
-	//private LogBox chatLog = new LogBox(); //  LogBox is my own class that has a method for adding messages and built in thread safety
 	public static Label topScore = new Label();
 	public static Label sobScore = new Label();
 	public static Label currentScore = new Label();
@@ -58,9 +57,6 @@ public class ScoreTracker : Form
 	private int w = 300;
 	private int h = 134;
 
-	//private Button sendButton = new Button();
-	//private TabControl rooms = new TabControl();
-
 	//  Declare colors
 	public static Color text_color;
 	public static Color background_color_highlighted;
@@ -70,13 +66,6 @@ public class ScoreTracker : Form
 	public static Color text_color_behind;
 	public static Color text_color_best;
 	public static Color text_color_total;
-
-	//private string[] pb_run;
-	//private string[] ils;
-	//private string peanut_butter;
-	//private string individual_levels;
-
-	//private List<Score> scores = new List<Score>();
 
 	public ScoreTracker()
 	{
@@ -92,9 +81,6 @@ public class ScoreTracker : Form
 		text_color_total = ColorTranslator.FromHtml(config["text_color_total"]);
 
 		tracker = new DisplayWindow ();
-		//this.peanut_butter = peanut_butter;
-		//this.individual_levels = individual_levels;
-
 
 		Text = "Input";
 		FormClosing += new FormClosingEventHandler(ConfirmClose);
@@ -178,13 +164,6 @@ public class ScoreTracker : Form
 			Console.WriteLine(e);
 		}
 
-
-
-		//  When the form is shown set the focus to the input box
-
-		//  Close the network connection when the form is closed
-		//  To prevent any hangups
-		//FormClosing += delegate { CloseNetwork(); };
 	}
 
 	private void CheckVersion(string subDomain)
@@ -612,10 +591,6 @@ public class ScoreTracker : Form
 			}*/
 		}
 
-
-		//  Start the client if -s was not found
-
-
 		config = new FileReader("config.txt", SortingStyle.Sort);
 		config.AddNewItem("hard_route", "0");
 		config.AddNewItem("casual_mode", "0");
@@ -735,9 +710,6 @@ public class ScoreTracker : Form
 		catch (Exception e)
 		{
 			Console.WriteLine("Error: " + e.Message);
-
-			//peanut_butter = "CO:0\nME:0\nKA:0\nSX:0\nMA:0\na6:0\nVE:0";
-			//individual_levels = "CO:0\nME:0\nKA:0\nSX:0\nSY:0\nAQ:0\nZO:0\nMA:0\na6:0\nVE:0";
 		}
 
 		try
@@ -745,23 +717,6 @@ public class ScoreTracker : Form
 			Application.Run(new ScoreTracker());
 		}
 		catch (Exception) {}
-		/*
-		try
-		{
-			var sw = new StreamWriter("foundElements.txt");
-
-			int total = match(elementArray, blankList, sw);
-
-			sw.WriteLine("\nTotal combinations: {0}", total);
-			Console.WriteLine("\nTotal combinations: {0}", total);
-
-			sw.Close();
-		}
-		catch (Exception e)
-		{
-			Console.WriteLine("Error: " + e.Message);
-		}
-		*/
 	}
 }
 

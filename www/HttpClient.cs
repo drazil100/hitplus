@@ -31,7 +31,7 @@ public class HttpClient
 			request["User-Agent"] = "SimpleClient/1.1";
 			request["Host"] = host + ":" + port;
 			string message = request.ToString(); 
-			Console.Write(message);
+			//Console.Write(message);
 
 			byte[] data    = Encoding.ASCII.GetBytes(message);
 

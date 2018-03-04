@@ -18,11 +18,17 @@ public class FileReader : IEnumerable<KeyValuePair<string,string>>
 	private int newItemCounter = 0;
 	private SortingStyle sorting = SortingStyle.Sort;
 	public IEnumerator<KeyValuePair<string,string>> GetEnumerator() {
-		return content.GetEnumerator();
+		lock (content)
+		{
+			return content.GetEnumerator();
+		}
 	}
 
 	IEnumerator IEnumerable.GetEnumerator() {
-		return content.GetEnumerator();
+		lock (content)
+		{
+			return content.GetEnumerator();
+		}
 	}
 
 	private FileReader() : base() {}
@@ -32,9 +38,9 @@ public class FileReader : IEnumerable<KeyValuePair<string,string>>
 		fileName = file;
 		try
 		{
-			string contents = File.ReadAllText(file, Encoding.UTF8);
+			string content = File.ReadAllText(file, Encoding.UTF8);
 
-			string[] lines = contents.Split(new string[] { "\n" }, StringSplitOptions.None);
+			string[] lines = content.Split(new string[] { "\n" }, StringSplitOptions.None);
 
 			foreach (string line in lines)
 			{
@@ -42,41 +48,6 @@ public class FileReader : IEnumerable<KeyValuePair<string,string>>
 				parts[0] = parts[0].Trim();
 				parts[1] = parts[1].Trim();
 				
-				switch (parts[0])
-				{
-					case "Cornaria":
-					case "CO":
-					parts[0] = "Corneria";
-					break;
-					case "ME":
-					parts[0] = "Meteo";
-					break;
-					case "KA":
-					parts[0] = "Katina";
-					break;
-					case "SX":
-					parts[0] = "Sector X";
-					break;
-					case "SY":
-					parts[0] = "Sector Y";
-					break;
-					case "AQ":
-					parts[0] = "Aquas";
-					break;
-					case "ZO":
-					parts[0] = "Zoness";
-					break;
-					case "MA":
-					parts[0] = "Macbeth";
-					break;
-					case "a6":
-					parts[0] = "Area 6";
-					break;
-					case "VE":
-					parts[0] = "Venom";
-					break;
-				}
-
 				this[parts[0]] = parts[1];
 			}
 
@@ -90,13 +61,16 @@ public class FileReader : IEnumerable<KeyValuePair<string,string>>
 	
 	public void RemoveKey(string key)
 	{
-		for (int i = 0; i < content.Count; i++)
+		lock (content)
 		{
-			if (content[i].Key == key)
+			for (int i = 0; i < content.Count; i++)
 			{
-				content.RemoveAt(i);
-				if (newItemCounter >= content.Count)
-					newItemCounter = content.Count-1;
+				if (content[i].Key == key)
+				{
+					content.RemoveAt(i);
+					if (newItemCounter >= content.Count)
+						newItemCounter = content.Count-1;
+				}
 			}
 		}
 		
@@ -105,68 +79,82 @@ public class FileReader : IEnumerable<KeyValuePair<string,string>>
 	public string this[string key]
 	{
 		get {
-			foreach (KeyValuePair<string, string> pair in content)
+			lock (content)
 			{
-				if (pair.Key == key)
-					return pair.Value;
+				foreach (KeyValuePair<string, string> pair in content)
+				{
+					if (pair.Key == key)
+						return pair.Value;
+				}
 			}
 			return "";
 		}
 
 		set {
-			for (int i = 0; i < content.Count; i++)
+			lock (content)
 			{
-				if (content[i].Key == key)
+				Console.WriteLine(String.Format("{0}: {1} set to {2}", fileName, key, value));
+				for (int i = 0; i < content.Count; i++)
 				{
-					content[i] = new KeyValuePair<string, string>(key, value);
-					return;
+					if (content[i].Key == key)
+					{
+						content[i] = new KeyValuePair<string, string>(key, value);
+						return;
+					}
 				}
+				content.Add(new KeyValuePair<string, string>(key, value));
 			}
-			content.Add(new KeyValuePair<string, string>(key, value));
 		}
 	}
 
 	public void AddNewItem(string key, string value)
 	{
-		for (int i = 0; i < content.Count; i++)
+		lock (content)
 		{
-			if (content[i].Key == key)
+			for (int i = 0; i < content.Count; i++)
 			{
-				if (i != newItemCounter && sorting != SortingStyle.Unsort)
+				if (content[i].Key == key)
 				{
-					KeyValuePair<string, string> temp = content[newItemCounter];
-					content[newItemCounter] = content[i];
-					content[i] = temp;
+					if (i != newItemCounter && sorting != SortingStyle.Unsort)
+					{
+						KeyValuePair<string, string> temp = content[newItemCounter];
+						content[newItemCounter] = content[i];
+						content[i] = temp;
+					}
+					newItemCounter++;
+					return;
 				}
-				newItemCounter++;
-				return;
 			}
+			content.Add(new KeyValuePair<string, string>(key, value));
+			if (content.Count-1 != newItemCounter && sorting != SortingStyle.Unsort)
+			{
+				KeyValuePair<string, string> temp = content[newItemCounter];
+				content[newItemCounter] = content[content.Count-1];
+				content[content.Count-1] = temp;
+			}
+			newItemCounter++;
 		}
-		content.Add(new KeyValuePair<string, string>(key, value));
-		if (content.Count-1 != newItemCounter && sorting != SortingStyle.Unsort)
-		{
-			KeyValuePair<string, string> temp = content[newItemCounter];
-			content[newItemCounter] = content[content.Count-1];
-			content[content.Count-1] = temp;
-		}
-		newItemCounter++;
 	}
 
 	public void Save()
 	{
-		if (sorting == SortingStyle.Validate)
+		lock (content)
 		{
-			while (newItemCounter < content.Count)
+			Console.WriteLine("Writing to " + fileName);
+			if (sorting == SortingStyle.Validate)
 			{
-				content.RemoveAt(newItemCounter);
+				while (newItemCounter < content.Count)
+				{
+					content.RemoveAt(newItemCounter);
+				}
 			}
+			var sw = new StreamWriter(fileName);
+			foreach(KeyValuePair<string, string> pair in content)
+			{
+				sw.Write(String.Format("{0}: {1}\r\n", pair.Key, pair.Value));
+			}
+			sw.Close();
 		}
-		var sw = new StreamWriter(fileName);
-		foreach(KeyValuePair<string, string> pair in content)
-		{
-			sw.Write(String.Format("{0}: {1}\r\n", pair.Key, pair.Value));
-		}
-		sw.Close();
 	}
 
 }
