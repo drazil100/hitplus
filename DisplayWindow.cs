@@ -74,7 +74,7 @@ public class DisplayWindow : Form
 
 		//  Redraw the form if the window is resized
 		Resize += delegate { DoLayout(); };
-		Move += delegate { DoLayout(); };
+		//Move += delegate { DoLayout(); };
 
 		//  Draw the form
 		DoLayout();
