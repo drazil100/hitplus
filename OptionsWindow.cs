@@ -6,6 +6,8 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Runtime.InteropServices;
 
+
+
 public class OptionsWindow : Form
 {
 	
@@ -15,26 +17,11 @@ public class OptionsWindow : Form
 	private TabControl tabs = new TabControl();
 
 	private TabPage individual_levels = new TabPage();
-	private List<ScoreField> scores = new List<ScoreField>();
+	private List<NumericField> scores = new List<NumericField>();
 	private Button save = new Button();
 
 	private TabPage displayConfig = new TabPage ();
-	private Label routeL = new Label ();
-	private ComboBox route = new ComboBox ();
-	private Label layoutL = new Label ();
-	private ComboBox layout = new ComboBox ();
-	private Label highlightL = new Label ();
-	private CheckBox highlight = new CheckBox();
-	private Label startHighlightedL = new Label ();
-	private CheckBox startHighlighted = new CheckBox();
-	private Label sumsAlignmentL = new Label ();
-	private ComboBox sumsAlignment = new ComboBox ();
-	private Label fontL = new Label();
-	private ComboBox font = new ComboBox();
-	private Label fontSizeL = new Label();
-	private NumericTextBox fontSize = new NumericTextBox();
-	private Label vScaleModeL = new Label();
-	private ComboBox vScaleMode = new ComboBox();
+	private List<OptionField> displayOptions = new List<OptionField>();
 
 	private int w = 300;
 	private int h = 400;
@@ -55,22 +42,6 @@ public class OptionsWindow : Form
 
 		displayConfig.Text = "Display";
 		tabs.TabPages.Add (displayConfig);
-		displayConfig.Controls.Add (routeL);
-		displayConfig.Controls.Add (route);
-		displayConfig.Controls.Add (layoutL);
-		displayConfig.Controls.Add (layout);
-		displayConfig.Controls.Add (highlightL);
-		displayConfig.Controls.Add (highlight);
-		displayConfig.Controls.Add (startHighlightedL);
-		displayConfig.Controls.Add (startHighlighted);
-		displayConfig.Controls.Add (sumsAlignmentL);
-		displayConfig.Controls.Add (sumsAlignment);
-		displayConfig.Controls.Add (fontL);
-		displayConfig.Controls.Add (font);
-		displayConfig.Controls.Add (fontSizeL);
-		displayConfig.Controls.Add (fontSize);
-		displayConfig.Controls.Add (vScaleModeL);
-		displayConfig.Controls.Add (vScaleMode);
 
 		Size = new Size (w, h);
 		MaximumSize = Size;
@@ -86,19 +57,19 @@ public class OptionsWindow : Form
 
 	public void Save(object sender, EventArgs e)
 	{
-		foreach (ScoreField s in scores)
+		foreach (NumericField s in scores)
 		{
-			ils [s.Level] = s.Score;
+			ils [s.Name] = s.Number;
 		}
 		ils.Save ();
-		ScoreTracker.config ["hard_route"] = "" + route.SelectedIndex;
-		ScoreTracker.config ["layout"] = "" + layout.SelectedIndex;
-		ScoreTracker.config ["sums_horizontal_alignment"] = "" + sumsAlignment.SelectedIndex;
-		ScoreTracker.config ["highlight_current"] = (highlight.Checked) ? "1" : "0";
-		ScoreTracker.config ["start_highlighted"] = (startHighlighted.Checked) ? "1" : "0";
-		ScoreTracker.config ["font"] = font.Text;
-		ScoreTracker.config ["font_size"] = fontSize.Text;
-		ScoreTracker.config ["vertical_scale_mode"] = "" + vScaleMode.SelectedIndex;
+		ScoreTracker.config ["hard_route"]                = displayOptions[0].ToString();
+		ScoreTracker.config ["layout"]                    = displayOptions[1].ToString();
+		ScoreTracker.config ["highlight_current"]         = displayOptions[2].ToString();
+		ScoreTracker.config ["start_highlighted"]         = displayOptions[3].ToString();
+		ScoreTracker.config ["sums_horizontal_alignment"] = displayOptions[4].ToString();
+		ScoreTracker.config ["font"]                      = displayOptions[5].GetOption();
+		ScoreTracker.config ["font_size"]                 = displayOptions[6].ToString();
+		ScoreTracker.config ["vertical_scale_mode"]       = displayOptions[7].ToString();
 		//Console.WriteLine (font.Text);
 
 		ScoreTracker.config.Save ();
@@ -140,6 +111,7 @@ public class OptionsWindow : Form
 
 	private void DoDisplayConfigLayout()
 	{
+		/*
 		routeL.Height = 20;
 		route.Left = Width - route.Width - 21;
 		routeL.Width = Width - route.Width - 21;
@@ -189,11 +161,12 @@ public class OptionsWindow : Form
 		vScaleModeL.Top = fontSizeL.Top + fontSizeL.Height;
 		vScaleMode.Top = vScaleModeL.Top;
 		vScaleMode.Left = route.Left;
+		*/
 	}
 
 	private void DoILsLayout()
 	{
-		foreach (ScoreField s in scores)
+		foreach (NumericField s in scores)
 		{
 			s.Width = individual_levels.Width;
 			//s.DoLayout ();
@@ -204,31 +177,11 @@ public class OptionsWindow : Form
 
 	private void ConfigDisplayConfig()
 	{
-		routeL.Text = "Route:";
-
-		route.Items.AddRange (new Object[] { "Easy", "Hard" });
-		route.SelectedIndex = Int32.Parse(ScoreTracker.config["hard_route"]);
-		route.DropDownStyle = ComboBoxStyle.DropDownList;
-
-		layoutL.Text = "Layout:";
-
-		layout.Items.AddRange (new Object[] { "Horizontal", "Vertical" });
-		layout.SelectedIndex = Int32.Parse(ScoreTracker.config["layout"]);
-		layout.DropDownStyle = ComboBoxStyle.DropDownList;
-
-		highlightL.Text = "Highlight Current:";
-		//highlight.Appearance = Appearance.Button;
-		highlight.Checked = (ScoreTracker.config ["highlight_current"] == "0") ? false : true;
-
-		startHighlightedL.Text = "Start Highlighted:";
-		//startHighlighted.Appearance = Appearance.Button;
-		startHighlighted.Checked = (ScoreTracker.config ["start_highlighted"] == "0") ? false : true;
-
-		sumsAlignmentL.Text = "Horizontal Splits Alignment:";
-
-		sumsAlignment.Items.AddRange (new Object[] { "Left", "Right" });
-		sumsAlignment.SelectedIndex = Int32.Parse(ScoreTracker.config["sums_horizontal_alignment"]);
-		sumsAlignment.DropDownStyle = ComboBoxStyle.DropDownList;
+		displayOptions.Add(new DropdownField("Route:", ScoreTracker.config["hard_route"], "Easy", "Hard"));
+		displayOptions.Add(new DropdownField("Layout:", ScoreTracker.config["layout"], "Horizontal", "Vertical"));
+		displayOptions.Add(new CheckField("Highlight Current:", ScoreTracker.config["highlight_current"]));
+		displayOptions.Add(new CheckField("Start Highlighted:", ScoreTracker.config["start_highlighted"]));
+		displayOptions.Add(new DropdownField("Horizontal Splits Alignment:", ScoreTracker.config["sums_horizontal_alignment"], "Left", "Right"));
 
 		List<string> fonts = new List<string>();
 		int count = 0;
@@ -243,20 +196,19 @@ public class OptionsWindow : Form
 			count++;
 		}
 
-		fontL.Text = "Font:";
+		displayOptions.Add(new DropdownField("Font:", "" + ind, fonts.ToArray()));
+		displayOptions.Add(new NumericField("Font Size:", ScoreTracker.config["font_size"]));
+		displayOptions.Add(new DropdownField("Vertical Scaling Mode:", ScoreTracker.config["vertical_scale_mode"], "Space", "Split"));
 
-		font.Items.AddRange (fonts.ToArray());
-		font.SelectedIndex = ind;
-		font.DropDownStyle = ComboBoxStyle.DropDownList;
-
-		fontSizeL.Text = "Font Size:";
-		fontSize.Text = ScoreTracker.config ["font_size"];
-
-		vScaleModeL.Text = "Vertical Scaling Mode";
-
-		vScaleMode.Items.AddRange (new Object[] { "Space", "Split" });
-		vScaleMode.SelectedIndex = Int32.Parse(ScoreTracker.config["vertical_scale_mode"]);
-		vScaleMode.DropDownStyle = ComboBoxStyle.DropDownList;
+		for (int i = 0; i < displayOptions.Count; i++)
+		{
+			if (i > 0)
+			{
+				displayOptions[i].Top = displayOptions[i-1].Top + displayOptions[i-1].Height;
+			}
+			displayOptions[i].Width = Width;
+			displayConfig.Controls.Add(displayOptions[i]);
+		}
 	}
 
 	private void ConfigueILsPage ()
@@ -266,7 +218,7 @@ public class OptionsWindow : Form
 		{
 			if (il.Key != "Easy Route" && il.Key != "Hard Route")
 			{
-				ScoreField newScore = new ScoreField (il);
+				NumericField newScore = new NumericField (il.Key, il.Value);
 				individual_levels.Controls.Add (newScore);
 				if (scores.Count > 0)
 				{
@@ -279,28 +231,37 @@ public class OptionsWindow : Form
 	}
 }
 
-public class ScoreField : Panel
+public class OptionField : Panel
+{
+	public string SettingName { get; set; }
+	public virtual string GetOption()
+	{
+		return "";
+	}
+}
+
+public class NumericField : OptionField
 {
 	private Label name = new Label ();
 	private NumericTextBox score = new NumericTextBox ();
 
-	public string Level
+	public new string Name
 	{
 		get { return name.Text; }
 	}
 
-	public string Score
+	public string Number
 	{
 		get { return score.Text; }
 	}
 
-	public ScoreField(KeyValuePair<string, string> il)
+	public NumericField(string name, string number)
 	{
-		name.Text = il.Key;
-		score.Text = il.Value;
+		this.name.Text = name;
+		this.score.Text = number;
 
-		Controls.Add(name);
-		Controls.Add(score);
+		Controls.Add(this.name);
+		Controls.Add(this.score);
 
 		Height = 20;
 
@@ -317,5 +278,82 @@ public class ScoreField : Panel
 		name.Height = Height;
 		score.Left = name.Width;
 	}
+
+	public override string ToString()
+	{
+		return Number;
+	}
 }
 
+public class DropdownField : OptionField
+{
+	public Label name = new Label();
+	public ComboBox options = new ComboBox();
+
+	public DropdownField (string name, string current, params Object[] options)
+	{
+		this.name.Text = name;
+		this.options.Items.AddRange (options);
+
+		this.options.SelectedIndex = Int32.Parse(current);
+		this.options.DropDownStyle = ComboBoxStyle.DropDownList;
+		Controls.Add(this.name);
+		Controls.Add(this.options);
+
+		Resize += delegate { DoLayout(); };
+
+		DoLayout();
+	}
+	public void DoLayout()
+	{
+		Height = 20;
+
+		name.Height = 20;
+		options.Left = Width - options.Width - 21;
+		name.Width = Width - options.Width - 21;
+	}
+	public override string ToString()
+	{
+		return "" + options.SelectedIndex;
+	}
+
+	public override string GetOption()
+	{
+		return options.Text;
+	}
+
+}
+
+public class CheckField : OptionField
+{
+	public Label name = new Label();
+	public CheckBox option = new CheckBox(); 
+
+	public CheckField(string name, string current)
+	{
+		this.name.Text = name;
+		option.Checked = (current == "0") ? false : true;
+
+		Controls.Add(this.name);
+		Controls.Add(this.option);
+
+		Resize += delegate { DoLayout(); };
+
+		DoLayout();
+	}
+
+	public void DoLayout()
+	{
+		Height = 20;
+
+		option.Height = 20;
+		name.Height = 20;
+		option.Left = Width - option.Width;
+		name.Width = Width - option.Width - 21;
+	}
+
+	public override string ToString()
+	{
+		return (option.Checked) ? "1" : "0";
+	}
+}
