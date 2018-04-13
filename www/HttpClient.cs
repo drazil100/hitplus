@@ -139,18 +139,18 @@ public class HttpClient
 
 		if (!WWW.UnformatResource(resource, out path, parameters, out errMsg))
 		{
-			//Console.WriteLine(errMsg);
+			Console.WriteLine("HTTP: " + errMsg);
 			return "";
 		}
 		
 
 		if(!DoGetRequest(host, port, path, parameters, out contents, out errMsg))
 		{
-			//Console.WriteLine(errMsg);
+			Console.WriteLine("HTTP: " + errMsg);
 		}
 		else
 		{
-			//Console.WriteLine(contents);
+			Console.WriteLine("HTTP: " + contents);
 			return contents;
 		}
 		return "";

@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 public enum SortingStyle
 {
@@ -13,6 +14,7 @@ public enum SortingStyle
 
 public class FileReader : IEnumerable<KeyValuePair<string,string>>
 {
+	private static string lastCaller = "";
 	private string fileName = "";
 	private List<KeyValuePair<string, string>> content = new List<KeyValuePair<string, string>>();
 	private int newItemCounter = 0;
@@ -93,7 +95,15 @@ public class FileReader : IEnumerable<KeyValuePair<string,string>>
 		set {
 			lock (content)
 			{
-				Console.WriteLine(String.Format("{0}: {1} set to {2}", fileName, key, value));
+				string caller = GetStackTrace() + " " + fileName;
+				if (caller != lastCaller)
+				{
+					Console.WriteLine();
+					Console.WriteLine(caller);
+					lastCaller = caller;
+				}
+
+				Console.WriteLine(String.Format("  {0} = {1}", key, value));
 				for (int i = 0; i < content.Count; i++)
 				{
 					if (content[i].Key == key)
@@ -105,6 +115,17 @@ public class FileReader : IEnumerable<KeyValuePair<string,string>>
 				content.Add(new KeyValuePair<string, string>(key, value));
 			}
 		}
+
+	}
+
+	public string GetStackTrace()
+	{
+		StackTrace st = new StackTrace();
+		StackFrame sf = st.GetFrame(2);
+		string n = "." + sf.GetMethod().Name;
+		n = (n == "..ctor") ? "" : n;
+		string r = String.Format("{0}{1}():", sf.GetMethod().DeclaringType, n);
+		return r;
 	}
 
 	public void AddNewItem(string key, string value)
@@ -140,7 +161,9 @@ public class FileReader : IEnumerable<KeyValuePair<string,string>>
 	{
 		lock (content)
 		{
-			Console.WriteLine("Writing to " + fileName);
+			Console.WriteLine(" Writing to " + fileName);
+			Console.WriteLine();
+			lastCaller = "";
 			if (sorting == SortingStyle.Validate)
 			{
 				while (newItemCounter < content.Count)

@@ -99,9 +99,6 @@ public class DisplayWindow : Form
 			this.Location = new Point(x, y);
 		}
 		Show();
-		ScoreTracker.config["tracker_x"] = "" + this.Location.X;
-		ScoreTracker.config["tracker_y"] = "" + this.Location.Y;
-		ScoreTracker.config.Save();
 
 
 		//  When the form is shown set the focus to the input box

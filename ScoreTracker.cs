@@ -151,9 +151,6 @@ public class ScoreTracker : Form
 		}
 		Show();
 		
-		ScoreTracker.config["input_x"] = "" + this.Location.X;
-		ScoreTracker.config["input_y"] = "" + this.Location.Y;
-
 		try 
 		{
 			t = new Thread(new ThreadStart(delegate { CheckVersion(config["sub_domain"]); }));
@@ -479,29 +476,66 @@ public class ScoreTracker : Form
 			SwapControls (submit);
 		}
 	}
-	
-	public void ConfirmClose(object sender, FormClosingEventArgs e) 
+
+	public void SaveBounds()
 	{
-		
-		ScoreTracker.config["input_x"] = "" + this.Location.X;
-		ScoreTracker.config["input_y"] = "" + this.Location.Y;
+		// Check if the window is minimized or maximized
+		if ((this.WindowState == FormWindowState.Minimized) ||
+				(this.WindowState == FormWindowState.Maximized))
+		{
+			// Use the restored state values
+			ScoreTracker.config["input_x"] = "" + this.RestoreBounds.Left;
+			ScoreTracker.config["input_y"] = "" + this.RestoreBounds.Top;
+		}
+		else
+		{
+			// Use the normal state values
+			ScoreTracker.config["input_x"] = "" + this.Left;
+			ScoreTracker.config["input_y"] = "" + this.Top;
+		}
 		if (tracker != null)
 		{
-			ScoreTracker.config ["tracker_x"] = "" + tracker.Location.X;
-			ScoreTracker.config ["tracker_y"] = "" + tracker.Location.Y;
-			if (ScoreTracker.config ["layout"] == "0")
+			if ((tracker.WindowState == FormWindowState.Minimized) ||
+					(tracker.WindowState == FormWindowState.Maximized))
 			{
-				ScoreTracker.config ["horizontal_width"] = "" + tracker.Width;
-				ScoreTracker.config ["horizontal_height"] = "" + tracker.Height;
+				// Use the restored state values
+				ScoreTracker.config["tracker_x"] = "" + tracker.RestoreBounds.Left;
+				ScoreTracker.config["tracker_y"] = "" + tracker.RestoreBounds.Top;
+				if (ScoreTracker.config ["layout"] == "0")
+				{
+					ScoreTracker.config ["horizontal_width"] = "" + tracker.RestoreBounds.Width;
+					ScoreTracker.config ["horizontal_height"] = "" + tracker.RestoreBounds.Height;
+				}
+				else
+				{
+					ScoreTracker.config ["vertical_width"] = "" + tracker.RestoreBounds.Width;
+					ScoreTracker.config ["vertical_height"] = "" + tracker.RestoreBounds.Height;			
+				}
 			}
 			else
 			{
-				ScoreTracker.config ["vertical_width"] = "" + tracker.Width;
-				ScoreTracker.config ["vertical_height"] = "" + tracker.Height;			
+				// Use the restored state values
+				ScoreTracker.config["tracker_x"] = "" + tracker.Left;
+				ScoreTracker.config["tracker_y"] = "" + tracker.Top;
+				if (ScoreTracker.config ["layout"] == "0")
+				{
+					ScoreTracker.config ["horizontal_width"] = "" + tracker.Width;
+					ScoreTracker.config ["horizontal_height"] = "" + tracker.Height;
+				}
+				else
+				{
+					ScoreTracker.config ["vertical_width"] = "" + tracker.Width;
+					ScoreTracker.config ["vertical_height"] = "" + tracker.Height;			
+				}
 			}
 		}
-		ScoreTracker.config.Save();
-		
+	}
+
+	public void ConfirmClose(object sender, FormClosingEventArgs e) 
+	{
+		SaveBounds();
+		config.Save();
+			
 		if (!reopening)
 		{
 			if (index > 0 && !closing)
@@ -591,120 +625,123 @@ public class ScoreTracker : Form
 			}*/
 		}
 
-		config = new FileReader("config.txt", SortingStyle.Sort);
-		config.AddNewItem("hard_route", "0");
-		config.AddNewItem("casual_mode", "0");
-		config.AddNewItem("layout", "0");
-		config.AddNewItem("include_route_pbs_in_individuals_file", "0");
-		config.AddNewItem("sums_horizontal_alignment", "0");
-		config.AddNewItem("vertical_scale_mode", "0");
-		config.AddNewItem("font", "Segoe UI");
-		config.AddNewItem("font_size", "18");
-		config.AddNewItem("highlight_current", "0");
-		config.AddNewItem("start_highlighted", "1");
-		config.AddNewItem("background_color", "#0F0F0F");
-		config.AddNewItem("background_color_highlighted", "#3373F4");
-		config.AddNewItem("text_color", "#FFFFFF");
-		config.AddNewItem("text_color_highlighted", "#FFFFFF");
-		config.AddNewItem("text_color_ahead", "#00CC36");
-		config.AddNewItem("text_color_behind", "#CC1200");
-		config.AddNewItem("text_color_best", "#D8AF1F");
-		config.AddNewItem("text_color_total", "#FFFFFF");
-		config.AddNewItem("horizontal_width", "1296");
-		config.AddNewItem("horizontal_height", "99");
-		config.AddNewItem("vertical_width", "316");
-		config.AddNewItem("vertical_height", "309");
-
-		if (config ["debug"] == "1")
-		{
-			try
-			{
-				var handle = GetConsoleWindow ();
-				ShowWindow (handle, SW_SHOW);
-			}
-			catch (Exception)
-			{
-
-			}
-		}
-
-		if (config ["layout"] == "horizontal")
-		{
-			config ["layout"] = "0";
-		}
-		if (config ["layout"] == "vertical")
-		{
-			config ["layout"] = "1";
-		}
-		if (config ["layout"] != "0" && config ["layout"] != "1")
-		{
-			config ["layout"] = "0";
-		}
-
-		if (config ["sums_horizontal_alignment"] == "right")
-		{
-			config ["sums_horizontal_alignment"] = "0";
-		}
-		if (config ["sums_horizontal_alignment"] == "left")
-		{
-			config ["sums_horizontal_alignment"] = "1";
-		}
-		if (config ["sums_horizontal_alignment"] != "0" && config ["sums_horizontal_alignment"] != "1")
-		{
-			config ["sums_horizontal_alignment"] = "0";
-		}
-
-		pbEasy = new FileReader("pb_easy.txt", SortingStyle.Validate);
-		pbEasy.AddNewItem("Corneria", "0");
-		pbEasy.AddNewItem("Meteo", "0");
-		pbEasy.AddNewItem("Katina", "0");
-		pbEasy.AddNewItem("Sector X", "0");
-		pbEasy.AddNewItem("Macbeth", "0");
-		pbEasy.AddNewItem("Area 6", "0");
-		pbEasy.AddNewItem("Venom", "0");
-
-		pbHard = new FileReader("pb_hard.txt", SortingStyle.Validate);
-		pbHard.AddNewItem("Corneria", "0");
-		pbHard.AddNewItem("Sector Y", "0");
-		pbHard.AddNewItem("Aquas", "0");
-		pbHard.AddNewItem("Zoness", "0");
-		pbHard.AddNewItem("Macbeth", "0");
-		pbHard.AddNewItem("Area 6", "0");
-		pbHard.AddNewItem("Venom", "0");
-
-		individualLevels = new FileReader("pb_individuals.txt", SortingStyle.Unsort);
-		individualLevels.RemoveKey("Easy Route");
-		individualLevels.RemoveKey("Hard Route");
-
-		if (config["include_route_pbs_in_individuals_file"] == "1")
-		{
-			int total = 0;
-			foreach (KeyValuePair<string, string> pair in pbEasy)
-			{
-				total += Int32.Parse(pair.Value);
-			}
-			if (total > 0)
-			{
-				individualLevels.AddNewItem("Easy Route", "" + total);
-				individualLevels["Easy Route"] = "" + total;
-			}
-			total = 0;
-			foreach (KeyValuePair<string, string> pair in pbHard)
-			{
-				total += Int32.Parse(pair.Value);
-			}
-			if (total > 0)
-			{
-				individualLevels.AddNewItem("Hard Route", "" + total);
-				individualLevels["Hard Route"] = "" + total;
-			}
-		}
-
 		try
 		{
+
+			config = new FileReader("config.txt", SortingStyle.Sort);
+			config.AddNewItem("hard_route",                            "0");
+			config.AddNewItem("casual_mode",                           "0");
+			config.AddNewItem("layout",                                "0");
+			config.AddNewItem("include_route_pbs_in_individuals_file", "0");
+			config.AddNewItem("sums_horizontal_alignment",             "0");
+			config.AddNewItem("vertical_scale_mode",                   "0");
+			config.AddNewItem("font",                                  "Segoe UI");
+			config.AddNewItem("font_size",                             "18");
+			config.AddNewItem("highlight_current",                     "0");
+			config.AddNewItem("start_highlighted",                     "1");
+			config.AddNewItem("background_color",                      "#0F0F0F");
+			config.AddNewItem("background_color_highlighted",          "#3373F4");
+			config.AddNewItem("text_color",                            "#FFFFFF");
+			config.AddNewItem("text_color_highlighted",                "#FFFFFF");
+			config.AddNewItem("text_color_ahead",                      "#00CC36");
+			config.AddNewItem("text_color_behind",                     "#CC1200");
+			config.AddNewItem("text_color_best",                       "#D8AF1F");
+			config.AddNewItem("text_color_total",                      "#FFFFFF");
+			config.AddNewItem("horizontal_width",                      "1296");
+			config.AddNewItem("horizontal_height",                     "99");
+			config.AddNewItem("vertical_width",                        "316");
+			config.AddNewItem("vertical_height",                       "309");
+
+			if (config ["debug"] == "1")
+			{
+				try
+				{
+					var handle = GetConsoleWindow ();
+					ShowWindow (handle, SW_SHOW);
+				}
+				catch (Exception)
+				{
+
+				}
+			}
+
+			if (config ["layout"] == "horizontal")
+			{
+				config ["layout"] = "0";
+			}
+			if (config ["layout"] == "vertical")
+			{
+				config ["layout"] = "1";
+			}
+			if (config ["layout"] != "0" && config ["layout"] != "1")
+			{
+				config ["layout"] = "0";
+			}
+
+			if (config ["sums_horizontal_alignment"] == "right")
+			{
+				config ["sums_horizontal_alignment"] = "0";
+			}
+			if (config ["sums_horizontal_alignment"] == "left")
+			{
+				config ["sums_horizontal_alignment"] = "1";
+			}
+			if (config ["sums_horizontal_alignment"] != "0" && config ["sums_horizontal_alignment"] != "1")
+			{
+				config ["sums_horizontal_alignment"] = "0";
+			}
+
 			config.Save();
+
+
+			pbEasy = new FileReader("pb_easy.txt", SortingStyle.Validate);
+			pbEasy.AddNewItem("Corneria", "0");
+			pbEasy.AddNewItem("Meteo",    "0");
+			pbEasy.AddNewItem("Katina",   "0");
+			pbEasy.AddNewItem("Sector X", "0");
+			pbEasy.AddNewItem("Macbeth",  "0");
+			pbEasy.AddNewItem("Area 6",   "0");
+			pbEasy.AddNewItem("Venom",    "0");
 			pbEasy.Save();
+
+			pbHard = new FileReader("pb_hard.txt", SortingStyle.Validate);
+			pbHard.AddNewItem("Corneria", "0");
+			pbHard.AddNewItem("Sector Y", "0");
+			pbHard.AddNewItem("Aquas",    "0");
+			pbHard.AddNewItem("Zoness",   "0");
+			pbHard.AddNewItem("Macbeth",  "0");
+			pbHard.AddNewItem("Area 6",   "0");
+			pbHard.AddNewItem("Venom",    "0");
 			pbHard.Save();
+
+			individualLevels = new FileReader("pb_individuals.txt", SortingStyle.Unsort);
+			individualLevels.RemoveKey("Easy Route");
+			individualLevels.RemoveKey("Hard Route");
+
+			if (config["include_route_pbs_in_individuals_file"] == "1")
+			{
+				int total = 0;
+				foreach (KeyValuePair<string, string> pair in pbEasy)
+				{
+					total += Int32.Parse(pair.Value);
+				}
+				if (total > 0)
+				{
+					individualLevels.AddNewItem("Easy Route", "" + total);
+					individualLevels["Easy Route"] = "" + total;
+				}
+				total = 0;
+				foreach (KeyValuePair<string, string> pair in pbHard)
+				{
+					total += Int32.Parse(pair.Value);
+				}
+				if (total > 0)
+				{
+					individualLevels.AddNewItem("Hard Route", "" + total);
+					individualLevels["Hard Route"] = "" + total;
+				}
+			}
+
 			individualLevels.Save();
 		}
 		catch (Exception e)
@@ -717,6 +754,10 @@ public class ScoreTracker : Form
 			Application.Run(new ScoreTracker());
 		}
 		catch (Exception) {}
+
+
+		if (config["debug"] == "1")
+			Console.Read();
 	}
 }
 
