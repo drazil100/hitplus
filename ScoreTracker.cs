@@ -11,7 +11,7 @@ using System.Threading;
 
 public class ScoreTracker : Form
 {
-	public static string version = "1/22/18";
+	public static string version = "4/13/2018";
 
 	[DllImport("kernel32.dll")]
 	static extern IntPtr GetConsoleWindow();
