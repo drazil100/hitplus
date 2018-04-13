@@ -257,6 +257,8 @@ public class DisplayWindow : Form
 		ScoreTracker.currentScore.Left = ScoreTracker.topScore.Left;
 		ScoreTracker.currentScore.Height = GetHeight() / 2;
 		ScoreTracker.currentScore.Width = ScoreTracker.topScore.Width;
+		ScoreTracker.topScore.TextAlign = ContentAlignment.TopLeft;
+		ScoreTracker.sobScore.TextAlign = ContentAlignment.TopLeft;
 
 	}
 
