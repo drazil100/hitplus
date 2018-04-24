@@ -8,7 +8,6 @@ using System.Runtime.InteropServices;
 using System.Threading;
 
 
-
 public class ScoreTracker : Form
 {
 	public static string version = "4/13/2018";
