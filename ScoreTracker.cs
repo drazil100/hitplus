@@ -555,7 +555,8 @@ public class ScoreTracker : Form
 			else
 			{
 				closing = true;
-				Application.Exit ();
+				//Application.Exit ();
+				Environment.Exit (0);
 			}	
 		}
 		else
