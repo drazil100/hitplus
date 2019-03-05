@@ -631,7 +631,7 @@ public class ScoreTracker : Form
 			config = new FileReader("config.txt", SortingStyle.Sort);
 			config.AddNewItem("hard_route",                            "0");
 			config.AddNewItem("casual_mode",                           "0");
-			config.AddNewItem("layout",                                "0");
+			config.AddNewItem("layout",                                "1");
 			config.AddNewItem("include_route_pbs_in_individuals_file", "0");
 			config.AddNewItem("sums_horizontal_alignment",             "0");
 			config.AddNewItem("vertical_scale_mode",                   "0");

@@ -49,7 +49,7 @@ public class OptionsWindow : Form
 
 		Resize += delegate { DoLayout(); };
 
-		ConfigueILsPage ();
+		ConfigureILsPage ();
 		ConfigDisplayConfig ();
 
 		DoLayout ();
@@ -62,17 +62,17 @@ public class OptionsWindow : Form
 			ils [s.Name] = s.Number;
 		}
 		ils.Save ();
-		ScoreTracker.config ["hard_route"]                = displayOptions[0].ToString();
-		ScoreTracker.config ["layout"]                    = displayOptions[1].ToString();
-		ScoreTracker.config ["highlight_current"]         = displayOptions[2].ToString();
-		ScoreTracker.config ["start_highlighted"]         = displayOptions[3].ToString();
-		ScoreTracker.config ["sums_horizontal_alignment"] = displayOptions[4].ToString();
-		ScoreTracker.config ["font"]                      = displayOptions[5].GetOption();
-		ScoreTracker.config ["font_size"]                 = displayOptions[6].ToString();
-		ScoreTracker.config ["vertical_scale_mode"]       = displayOptions[7].ToString();
+		config ["hard_route"]                = displayOptions[0].ToString();
+		config ["layout"]                    = displayOptions[1].ToString();
+		config ["highlight_current"]         = displayOptions[2].ToString();
+		config ["start_highlighted"]         = displayOptions[3].ToString();
+		config ["sums_horizontal_alignment"] = displayOptions[4].ToString();
+		config ["font"]                      = displayOptions[5].GetOption();
+		config ["font_size"]                 = displayOptions[6].ToString();
+		config ["vertical_scale_mode"]       = displayOptions[7].ToString();
 		//Console.WriteLine (font.Text);
 
-		ScoreTracker.config.Save ();
+		config.Save ();
 	}
 
 	private int GetWidth()
@@ -177,11 +177,11 @@ public class OptionsWindow : Form
 
 	private void ConfigDisplayConfig()
 	{
-		displayOptions.Add(new DropdownField("Route:", ScoreTracker.config["hard_route"], "Easy", "Hard"));
-		displayOptions.Add(new DropdownField("Layout:", ScoreTracker.config["layout"], "Horizontal", "Vertical"));
-		displayOptions.Add(new CheckField("Highlight Current:", ScoreTracker.config["highlight_current"]));
-		displayOptions.Add(new CheckField("Start Highlighted:", ScoreTracker.config["start_highlighted"]));
-		displayOptions.Add(new DropdownField("Horizontal Splits Alignment:", ScoreTracker.config["sums_horizontal_alignment"], "Left", "Right"));
+		displayOptions.Add(new DropdownField("Route:", config["hard_route"], "Easy", "Hard"));
+		displayOptions.Add(new DropdownField("Layout:", config["layout"], "Horizontal", "Vertical"));
+		displayOptions.Add(new CheckField("Highlight Current:", config["highlight_current"]));
+		displayOptions.Add(new CheckField("Start Highlighted:", config["start_highlighted"]));
+		displayOptions.Add(new DropdownField("Horizontal Splits Alignment:", config["sums_horizontal_alignment"], "Left", "Right"));
 
 		List<string> fonts = new List<string>();
 		int count = 0;
@@ -191,14 +191,14 @@ public class OptionsWindow : Form
 		{
 			fonts.Add(f.Name);
 
-			if (f.Name == ScoreTracker.config ["font"])
+			if (f.Name == config ["font"])
 				ind = count;
 			count++;
 		}
 
 		displayOptions.Add(new DropdownField("Font:", "" + ind, fonts.ToArray()));
-		displayOptions.Add(new NumericField("Font Size:", ScoreTracker.config["font_size"]));
-		displayOptions.Add(new DropdownField("Vertical Scaling Mode:", ScoreTracker.config["vertical_scale_mode"], "Space", "Split"));
+		displayOptions.Add(new NumericField("Font Size:", config["font_size"]));
+		displayOptions.Add(new DropdownField("Vertical Scaling Mode:", config["vertical_scale_mode"], "Space", "Split"));
 
 		for (int i = 0; i < displayOptions.Count; i++)
 		{
@@ -211,7 +211,7 @@ public class OptionsWindow : Form
 		}
 	}
 
-	private void ConfigueILsPage ()
+	private void ConfigureILsPage ()
 	{
 		individual_levels.Controls.Clear ();
 		foreach (KeyValuePair<string, string> il in ils)
