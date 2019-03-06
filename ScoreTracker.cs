@@ -1,5 +1,6 @@
 using System.Text;
 using System;
+using System.Net;
 using System.IO;
 using System.Collections.Generic;
 using System.Windows.Forms;
@@ -161,18 +162,31 @@ public class ScoreTracker : Form
 		}
 
 	}
+	
 
 	private void CheckVersion(string subDomain)
 	{
-		string latestVersion = HttpClient.ClientMain (subDomain + "coded-dragon.com/pagecontentdir/tracker_version.txt");
-		string[] parts = latestVersion.Split(':');
-		if (parts[0] == "CurrentTrackerVersion")
+		try
 		{
-			if (version != parts[1])
+			using (WebClient client = new WebClient()) 
 			{
-				string whatsNew = HttpClient.ClientMain (subDomain + "coded-dragon.com/pagecontentdir/tracker_whats_new.txt");
-				MessageBox.Show(whatsNew + "\r\n\r\n" + subDomain + "coded-dragon.com/ScoreTracker/", "Update Available: (" + parts[1] + ")");
+				string latestVersion = client.DownloadString("http://" + subDomain + "coded-dragon.com/pagecontentdir/tracker_version.txt");
+
+				string[] parts = latestVersion.Split(':');
+				if (parts[0] == "CurrentTrackerVersion")
+				{
+					if (version != parts[1])
+					{
+						string whatsNew = client.DownloadString("http://" + subDomain + "coded-dragon.com/pagecontentdir/tracker_whats_new.txt");
+						MessageBox.Show(whatsNew + "\r\n\r\n" + subDomain + "coded-dragon.com/ScoreTracker/", "Update Available: (" + parts[1] + ")");
+					}
+				}
+				Console.WriteLine(latestVersion);
 			}
+		}
+		catch (Exception e)
+		{
+			Console.WriteLine(e.Message);
 		}
 	}
 
