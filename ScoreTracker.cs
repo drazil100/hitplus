@@ -7,11 +7,12 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Globalization;
 
 
 public class ScoreTracker : Form
 {
-	public static string version = "4/13/2018";
+	public static string version = "3/6/2019";
 
 	[DllImport("kernel32.dll")]
 	static extern IntPtr GetConsoleWindow();
@@ -170,15 +171,15 @@ public class ScoreTracker : Form
 		{
 			using (WebClient client = new WebClient()) 
 			{
-				string latestVersion = client.DownloadString("http://" + subDomain + "coded-dragon.com/pagecontentdir/tracker_version.txt");
+				string latestVersion = client.DownloadString("http://greenmaw.com/drazil100.php?filename=tracker_version.txt");
 
 				string[] parts = latestVersion.Split(':');
 				if (parts[0] == "CurrentTrackerVersion")
 				{
-					if (version != parts[1])
+					if (DateTime.Parse(version, CultureInfo.GetCultureInfo("en-US").DateTimeFormat) < DateTime.Parse(parts[1], CultureInfo.GetCultureInfo("en-US").DateTimeFormat))
 					{
-						string whatsNew = client.DownloadString("http://" + subDomain + "coded-dragon.com/pagecontentdir/tracker_whats_new.txt");
-						MessageBox.Show(whatsNew + "\r\n\r\n" + subDomain + "coded-dragon.com/ScoreTracker/", "Update Available: (" + parts[1] + ")");
+						string whatsNew = client.DownloadString("http://greenmaw.com/drazil100.php?filename=tracker_whats_new.txt");
+						MessageBox.Show(whatsNew + "\r\n\r\n" + subDomain + "https://bitbucket.org/drazil100/sf64scoretracker/", "Update Available: (" + parts[1] + ")");
 					}
 				}
 				Console.WriteLine(latestVersion);
