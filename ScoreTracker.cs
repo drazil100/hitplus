@@ -164,6 +164,10 @@ public class ScoreTracker : Form
 
 	}
 	
+	private int DateToNumber(string dt) {
+		string[] parts = dt.Split('/');
+		return Int32.Parse(parts[2]) * 10000 + Int32.Parse(parts[0]) * 100 + Int32.Parse(parts[1]);
+	}
 
 	private void CheckVersion(string subDomain)
 	{
@@ -176,13 +180,13 @@ public class ScoreTracker : Form
 				string[] parts = latestVersion.Split(':');
 				if (parts[0] == "CurrentTrackerVersion")
 				{
-					if (DateTime.Parse(version, CultureInfo.GetCultureInfo("en-US").DateTimeFormat) < DateTime.Parse(parts[1], CultureInfo.GetCultureInfo("en-US").DateTimeFormat))
+					if (DateToNumber(version) < DateToNumber(parts[1]))
 					{
 						string whatsNew = client.DownloadString("http://greenmaw.com/drazil100.php?filename=tracker_whats_new.txt");
 						MessageBox.Show(whatsNew + "\r\n\r\n" + subDomain + "https://bitbucket.org/drazil100/sf64scoretracker/", "Update Available: (" + parts[1] + ")");
 					}
 				}
-				Console.WriteLine(latestVersion);
+				Console.WriteLine(String.Format("Current Version: {0}, Current Public Version {1}", version, parts[1]));
 			}
 		}
 		catch (Exception e)
