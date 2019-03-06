@@ -11,7 +11,7 @@ endif
 all: SF64ScoreTracker.exe
 
 SF64ScoreTracker.exe: $(wildcard *.cs)
-	$(CSC) /out:SF64ScoreTracker.exe /win32icon:medal.ico $(REFERENCES) *.cs www/*.cs
+	$(CSC) /out:SF64ScoreTracker.exe /win32icon:medal.ico $(REFERENCES) *.cs
 
 clean:
 	$(RM) *.exe *.mdb
