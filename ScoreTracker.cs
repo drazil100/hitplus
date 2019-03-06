@@ -186,7 +186,7 @@ public class ScoreTracker : Form
 						MessageBox.Show(whatsNew + "\r\n\r\n" + subDomain + "https://bitbucket.org/drazil100/sf64scoretracker/", "Update Available: (" + parts[1] + ")");
 					}
 				}
-				Console.WriteLine(String.Format("Current Version: {0}, Current Public Version {1}", version, parts[1]));
+				Console.WriteLine(String.Format("This Version: {0}, Version Check: {1}", version, parts[1]));
 			}
 		}
 		catch (Exception e)
@@ -647,6 +647,7 @@ public class ScoreTracker : Form
 		{
 
 			config = new FileReader("config.txt", SortingStyle.Sort);
+			config.AddNewItem("version",                               "");
 			config.AddNewItem("hard_route",                            "0");
 			config.AddNewItem("casual_mode",                           "0");
 			config.AddNewItem("layout",                                "1");
@@ -669,6 +670,7 @@ public class ScoreTracker : Form
 			config.AddNewItem("horizontal_height",                     "99");
 			config.AddNewItem("vertical_width",                        "316");
 			config.AddNewItem("vertical_height",                       "309");
+			config["version"] = version;
 
 			if (config ["debug"] == "1")
 			{
