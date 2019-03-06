@@ -145,7 +145,7 @@ public class ScoreTracker : Form
 			
 		}
 		
-		if (x != -10000 && y != -10000)
+		if (x != -10000 || y != -10000)
 		{
 			this.StartPosition = FormStartPosition.Manual;
 			this.Location = new Point(x, y);
@@ -560,7 +560,7 @@ public class ScoreTracker : Form
 				if (confirmResult == DialogResult.Yes)
 				{
 					closing = true;
-					Application.Exit ();
+					Environment.Exit (0);
 				}
 				else
 				{
@@ -570,7 +570,6 @@ public class ScoreTracker : Form
 			else
 			{
 				closing = true;
-				//Application.Exit ();
 				Environment.Exit (0);
 			}	
 		}
