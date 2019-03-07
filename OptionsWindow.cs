@@ -257,10 +257,10 @@ public class OptionsWindow : Form
                 text_color_total             = new ColorField("Totals Text:",            ScoreTracker.text_color_total);              
 		
 		colors.Add(text_color);
+		colors.Add(text_color_total);
 		colors.Add(background_color);
 		colors.Add(text_color_highlighted);
 		colors.Add(background_color_highlighted);
-		colors.Add(text_color_total);
 		colors.Add(text_color_ahead);
 		colors.Add(text_color_behind);
 		colors.Add(text_color_best);
