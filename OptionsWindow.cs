@@ -343,7 +343,12 @@ public class NumericField : OptionField
 
 	public string Number
 	{
-		get { return score.Text; }
+		get 
+		{ 
+			if (score.Text != "") 
+				return score.Text; 
+			return "0";
+		}
 	}
 
 	public NumericField(string name, string number)
