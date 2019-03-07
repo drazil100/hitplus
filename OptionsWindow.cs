@@ -186,7 +186,6 @@ public class OptionsWindow : Form
 				colors[i].Top = colors[i-1].Top + colors[i-1].Height;
 			}
 			colors[i].Width = Width;
-			colorConfig.Controls.Add(displayOptions[i]);
 		}
 	}
 
@@ -258,13 +257,13 @@ public class OptionsWindow : Form
                 text_color_total             = new ColorField("Totals Text:",            ScoreTracker.text_color_total);              
 		
 		colors.Add(text_color);
-		colors.Add(background_color_highlighted);
 		colors.Add(background_color);
 		colors.Add(text_color_highlighted);
+		colors.Add(background_color_highlighted);
+		colors.Add(text_color_total);
 		colors.Add(text_color_ahead);
 		colors.Add(text_color_behind);
 		colors.Add(text_color_best);
-		colors.Add(text_color_total);
 
 		foreach (ColorField c in colors)
 		{
