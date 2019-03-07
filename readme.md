@@ -14,5 +14,6 @@ This program is written in C# which is a Microsoft programming language and does
 ### Last Updated: 3/7/2018
 
 - The display window no longer completely closes when doing anything that would reset it. It now stays on it but its content dissapears.
+- The options window now has a shiny new Colors tab for editing the colors of the tracker.
 - There are now fallback fonts if your system does not include the default Segoe UI.
 - The tracker version is now output to config.txt (for debuging reasons)
