@@ -14,9 +14,9 @@ SF64ScoreTracker.exe: $(wildcard *.cs)
 	$(CSC) /out:SF64ScoreTracker.exe /win32icon:medal.ico $(REFERENCES) *.cs
 
 clean:
-	$(RM) *.exe *.mdb
+	$(RM) *.exe *.mdb 
 cleanall:
-	$(RM) *.exe *.mb *.txt
+	$(RM) *.exe *.mdb *.zip *.txt
 
 icon.resources: icon.resx
 	resgen.exe /compile icon.resx /r:System.Drawing

@@ -41,13 +41,13 @@ public class Score : Panel
 	private Label paceLabel = new Label();
 	private Label signLabel = new Label();
 	
-	private static Color text_color = ScoreTracker.text_color;
-	private static Color text_color_highlighted = ScoreTracker.text_color_highlighted;
-	private static Color text_color_ahead = ScoreTracker.text_color_ahead;
-	private static Color text_color_behind = ScoreTracker.text_color_behind;
-	private static Color text_color_best = ScoreTracker.text_color_best;
-	private static Color background_color = ScoreTracker.background_color;
-	private static Color background_color_highlighted = ScoreTracker.background_color_highlighted;
+	private Color text_color = ScoreTracker.text_color;
+	private Color text_color_highlighted = ScoreTracker.text_color_highlighted;
+	private Color text_color_ahead = ScoreTracker.text_color_ahead;
+	private Color text_color_behind = ScoreTracker.text_color_behind;
+	private Color text_color_best = ScoreTracker.text_color_best;
+	private Color background_color = ScoreTracker.background_color;
+	private Color background_color_highlighted = ScoreTracker.background_color_highlighted;
 
 	private PaceStatus pace = PaceStatus.Default;
 	private static PaceStatus runPace = PaceStatus.Default;

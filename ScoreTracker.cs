@@ -12,7 +12,7 @@ using System.Globalization;
 
 public class ScoreTracker : Form
 {
-	public static string version = "3/6/2019";
+	public static string version = "3/7/2019";
 
 	[DllImport("kernel32.dll")]
 	static extern IntPtr GetConsoleWindow();
@@ -81,7 +81,7 @@ public class ScoreTracker : Form
 		text_color_best = ColorTranslator.FromHtml(config["text_color_best"]);
 		text_color_total = ColorTranslator.FromHtml(config["text_color_total"]);
 
-		tracker = new DisplayWindow ();
+		tracker = new DisplayWindow (new DisplayWindowContent());
 
 		Text = "Input";
 		FormClosing += new FormClosingEventHandler(ConfirmClose);
@@ -186,7 +186,7 @@ public class ScoreTracker : Form
 						MessageBox.Show(whatsNew + "\r\n\r\n" + subDomain + "https://bitbucket.org/drazil100/sf64scoretracker/", "Update Available: (" + parts[1] + ")");
 					}
 				}
-				Console.WriteLine(String.Format("Current Version: {0}, Current Public Version {1}", version, parts[1]));
+				Console.WriteLine(String.Format("This Version: {0}, Version Check: {1}", version, parts[1]));
 			}
 		}
 		catch (Exception e)
@@ -411,11 +411,34 @@ public class ScoreTracker : Form
 	{
 		try
 		{
-			reopening = true;
-			tracker.Close ();
-			reopening = false;
+			if (index > 0)
+			{
+				var confirmResult = MessageBox.Show ("Your run is incomplete! Are you sure you wish to exit?\n\n(Any unsaved gold scores will be lost)\n(To save gold scores on an incomplete run fill in the rest of the levels with 0)",
+						"Continue Closing?",
+						MessageBoxButtons.YesNo);
+				if (confirmResult == DialogResult.Yes)
+				{
+					index = 0;
+					SwapControls (submit);
+					tracker.dispContent.Controls.Clear();
+					tracker.Controls.Clear ();
+					tracker.dispContent = null;
+				}
+				else
+				{
+					return;
+				}
+			}
+			else
+			{
+				index = 0;
+				SwapControls (submit);
+				tracker.dispContent.Controls.Clear();
+				tracker.Controls.Clear ();
+				tracker.dispContent = null;
+			}	
 
-			if (tracker != null)
+			if (index != 0)
 				return;
 			
 			if (config ["hard_route"] == "0")
@@ -427,7 +450,7 @@ public class ScoreTracker : Form
 				config ["hard_route"] = "0";
 			}
 			config.Save ();
-			tracker = new DisplayWindow ();
+			tracker.Initialize(new DisplayWindowContent ());
 
 			currentScore.ForeColor = text_color;
 			currentScoreName.ForeColor = text_color;
@@ -468,7 +491,8 @@ public class ScoreTracker : Form
 	public void OpenOptions(object sender, EventArgs e)
 	{
 		reopening = true;
-		tracker.Close ();
+		tracker.dispContent.Controls.Clear();
+		tracker.Controls.Clear();
 		reopening = false;
 
 		inputBox.Enabled = false;
@@ -489,7 +513,11 @@ public class ScoreTracker : Form
 	{
 		if (!closing)
 		{
-			tracker = new DisplayWindow ();
+			topScore.ForeColor = text_color_total;
+			sobScore.ForeColor = text_color_total;
+			currentScore.ForeColor = text_color;
+			currentScoreName.ForeColor = text_color;
+			tracker.Initialize(new DisplayWindowContent ());
 			UpdateCurrentScore();
 			SwapControls (submit);
 		}
@@ -580,30 +608,6 @@ public class ScoreTracker : Form
 		else
 		{
 			
-			if (index > 0 && !closing)
-			{
-				var confirmResult = MessageBox.Show ("Your run is incomplete! Are you sure you wish to exit?\n\n(Any unsaved gold scores will be lost)\n(To save gold scores on an incomplete run fill in the rest of the levels with 0)",
-					"Continue Closing?",
-					MessageBoxButtons.YesNo);
-				if (confirmResult == DialogResult.Yes)
-				{
-					index = 0;
-					SwapControls (submit);
-					tracker.Controls.Clear ();
-					tracker = null;
-				}
-				else
-				{
-					e.Cancel = true;
-				}
-			}
-			else
-			{
-				index = 0;
-				SwapControls (submit);
-				tracker.Controls.Clear ();
-				tracker = null;
-			}	
 		}
 	}
 
@@ -647,13 +651,38 @@ public class ScoreTracker : Form
 		{
 
 			config = new FileReader("config.txt", SortingStyle.Sort);
+			config.AddNewItem("version",                               "");
 			config.AddNewItem("hard_route",                            "0");
 			config.AddNewItem("casual_mode",                           "0");
 			config.AddNewItem("layout",                                "1");
 			config.AddNewItem("include_route_pbs_in_individuals_file", "0");
 			config.AddNewItem("sums_horizontal_alignment",             "0");
 			config.AddNewItem("vertical_scale_mode",                   "0");
-			config.AddNewItem("font",                                  "Segoe UI");
+
+			List<string> fonts = new List<string>();
+			
+			foreach (FontFamily f in System.Drawing.FontFamily.Families)
+			{
+				fonts.Add(f.Name);
+			}
+
+			if (fonts.Contains("Segoe UI"))
+			{
+				config.AddNewItem("font", "Segoe UI");
+			}
+			else if (fonts.Contains("DejaVu Sans"))
+			{
+				config.AddNewItem("font", "DejaVu Sans");
+			}
+			else if (fonts.Contains("Arial"))
+			{
+				config.AddNewItem("font", "Arial");
+			}
+			else
+			{
+				config.AddNewItem("font", SystemFonts.MessageBoxFont.Name);
+			}
+
 			config.AddNewItem("font_size",                             "18");
 			config.AddNewItem("highlight_current",                     "0");
 			config.AddNewItem("start_highlighted",                     "1");
@@ -669,6 +698,7 @@ public class ScoreTracker : Form
 			config.AddNewItem("horizontal_height",                     "99");
 			config.AddNewItem("vertical_width",                        "316");
 			config.AddNewItem("vertical_height",                       "309");
+			config["version"] = version;
 
 			if (config ["debug"] == "1")
 			{
@@ -771,7 +801,10 @@ public class ScoreTracker : Form
 		{
 			Application.Run(new ScoreTracker());
 		}
-		catch (Exception) {}
+		catch (Exception e) 
+		{
+			Console.WriteLine(e.Message);
+		}
 
 
 		if (config["debug"] == "1")

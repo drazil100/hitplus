@@ -8,17 +8,14 @@ using System.Runtime.InteropServices;
 
 public class DisplayWindow : Form
 {
-
-	private Panel totals = new Panel();
-	private Panel levels = new Panel();
+	public DisplayWindowContent dispContent;
 
 	private int w = 0;
 	private int h = 0;
 	private int w2;
 	private int h2;
 
-
-	public DisplayWindow()
+	public DisplayWindow(DisplayWindowContent cont)
 	{
 		//this.peanut_butter = peanut_butter;
 		//this.individual_levels = individual_levels;
@@ -26,6 +23,63 @@ public class DisplayWindow : Form
 		Font = new Font(ScoreTracker.config["font"], Int32.Parse(ScoreTracker.config["font_size"]), FontStyle.Bold);
 		Text = "Star Fox 64 Score Tracker";
 
+
+		FormClosing += new FormClosingEventHandler(ScoreTracker.mainWindow.ConfirmClose);
+
+		//  Set colors
+		BackColor = ScoreTracker.background_color;
+		ScoreTracker.topScoreName.ForeColor = ScoreTracker.text_color_total;
+		ScoreTracker.sobScoreName.ForeColor = ScoreTracker.text_color_total;
+
+		Initialize(cont);
+
+		//  Redraw the form if the window is resized
+		Resize += delegate { DoLayout(); };
+		//Move += delegate { DoLayout(); };
+
+		//  Draw the form
+		DoLayout();
+
+		
+		int x = -10000;
+		int y = -10000;
+		
+		try
+		{
+			x = Int32.Parse(ScoreTracker.config["tracker_x"]);
+			y = Int32.Parse(ScoreTracker.config["tracker_y"]);
+		}
+		catch(Exception)
+		{
+			
+		}
+		
+		if (x != -10000 || y != -10000)
+		{
+			this.StartPosition = FormStartPosition.Manual;
+			this.Location = new Point(x, y);
+		}
+		Show();
+
+
+		//  When the form is shown set the focus to the input box
+
+		//  Close the network connection when the form is closed
+		//  To prevent any hangups
+		//FormClosing += delegate { CloseNetwork(); };
+	}
+
+	public void Initialize(DisplayWindowContent window)
+	{
+		BackColor = ScoreTracker.background_color;
+		ScoreTracker.topScoreName.ForeColor = ScoreTracker.text_color_total;
+		ScoreTracker.sobScoreName.ForeColor = ScoreTracker.text_color_total;
+
+		dispContent = window;
+		Controls.Clear();
+		Controls.Add(window);
+
+		MinimumSize  = new Size(0, 0);
 		if (ScoreTracker.config["layout"] == "0")
 		{
 			w = 1296;
@@ -59,63 +113,58 @@ public class DisplayWindow : Form
 			Size = new Size(w2, h2);
 		}
 		MinimumSize  = new Size(w, h);
-
-		FormClosing += new FormClosingEventHandler(ScoreTracker.mainWindow.ConfirmClose);
-
-		//  Set colors
-		BackColor = ScoreTracker.background_color;
-		ScoreTracker.topScoreName.ForeColor = ScoreTracker.text_color_total;
-		ScoreTracker.sobScoreName.ForeColor = ScoreTracker.text_color_total;
-
-
-
-		SetControls();
-
-
-		//  Redraw the form if the window is resized
-		Resize += delegate { DoLayout(); };
-		//Move += delegate { DoLayout(); };
-
-		//  Draw the form
 		DoLayout();
-
-		
-		int x = -10000;
-		int y = -10000;
-		
-		try
-		{
-			x = Int32.Parse(ScoreTracker.config["tracker_x"]);
-			y = Int32.Parse(ScoreTracker.config["tracker_y"]);
-		}
-		catch(Exception)
-		{
-			
-		}
-		
-		if (x != -10000 && y != -10000)
-		{
-			this.StartPosition = FormStartPosition.Manual;
-			this.Location = new Point(x, y);
-		}
-		Show();
-
-
-		//  When the form is shown set the focus to the input box
-
-		//  Close the network connection when the form is closed
-		//  To prevent any hangups
-		//FormClosing += delegate { CloseNetwork(); };
 	}
 
-	private int GetWidth()
+	public void DoLayout()
+	{
+		if (dispContent != null)
+		{
+			dispContent.Width = Width;
+			dispContent.Height = Height;
+			dispContent.DoLayout();
+		}
+	}
+
+	public int GetWidth()
 	{
 		return (
 			Width - (2 * SystemInformation.FrameBorderSize.Width)
 		);
 	}
 
-	private int GetHeight()
+	public int GetHeight()
+	{
+		return (
+			Height - (2 * SystemInformation.FrameBorderSize.Height +
+				SystemInformation.CaptionHeight)
+		);
+	}
+}
+
+
+public class DisplayWindowContent : Panel
+{
+
+	private Panel totals = new Panel();
+	private Panel levels = new Panel();
+
+
+
+	public DisplayWindowContent()
+	{
+		SetControls();
+		DoLayout();
+	}
+
+	public int GetWidth()
+	{
+		return (
+			Width - (2 * SystemInformation.FrameBorderSize.Width)
+		);
+	}
+
+	public int GetHeight()
 	{
 		return (
 			Height - (2 * SystemInformation.FrameBorderSize.Height +
@@ -123,8 +172,10 @@ public class DisplayWindow : Form
 		);
 	}
 
-	private void SetControls()
+	public void SetControls()
 	{
+		totals.Controls.Clear();
+		levels.Controls.Clear();
 		Controls.Clear();
 		Score.ClearScores ();
 
@@ -198,7 +249,6 @@ public class DisplayWindow : Form
 
 	public void DoLayout()
 	{
-
 		if (ScoreTracker.config ["layout"] == "0")
 		{
 			totals.Width = 310;
@@ -259,6 +309,7 @@ public class DisplayWindow : Form
 		ScoreTracker.currentScore.Width = ScoreTracker.topScore.Width;
 		ScoreTracker.topScore.TextAlign = ContentAlignment.TopLeft;
 		ScoreTracker.sobScore.TextAlign = ContentAlignment.TopLeft;
+		ScoreTracker.currentScore.TextAlign = ContentAlignment.TopLeft;
 
 	}
 
@@ -283,7 +334,7 @@ public class DisplayWindow : Form
 		ScoreTracker.topScore.Top = 0;
 		ScoreTracker.topScoreName.Left = 0;
 		ScoreTracker.topScore.Left = 0;
-		ScoreTracker.sobScoreName.Top = 0;
+
 		ScoreTracker.sobScore.Top = 0;
 		ScoreTracker.sobScoreName.Left = 0;
 		ScoreTracker.sobScore.Left = 0;
