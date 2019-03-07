@@ -16,15 +16,29 @@ public class OptionsWindow : Form
 
 	private TabControl tabs = new TabControl();
 
+	private Button save = new Button();
+	private Button saveClose = new Button();
+
 	private TabPage individual_levels = new TabPage();
 	private List<NumericField> scores = new List<NumericField>();
-	private Button save = new Button();
 
 	private TabPage displayConfig = new TabPage ();
 	private List<OptionField> displayOptions = new List<OptionField>();
 
+	private TabPage colorConfig = new TabPage();
+	private List<ColorField> colors = new List<ColorField>();
+
 	private int w = 300;
 	private int h = 400;
+
+	public ColorField text_color;
+	public ColorField background_color_highlighted;
+	public ColorField background_color;
+	public ColorField text_color_highlighted;
+	public ColorField text_color_ahead;
+	public ColorField text_color_behind;
+	public ColorField text_color_best;
+	public ColorField text_color_total;
 
 	public OptionsWindow()
 	{
@@ -34,14 +48,22 @@ public class OptionsWindow : Form
 
 		Controls.Add (tabs);
 		Controls.Add (save);
+		Controls.Add (saveClose);
 
 		individual_levels.Text = "Edit PBs";
 		tabs.TabPages.Add (individual_levels);
-		save.Text = "Save All Pages";
+
+		save.Text = "Save All Changes";
 		save.Click += new EventHandler(Save);
+
+		saveClose.Text = "Save and Close";
+		saveClose.Click += new EventHandler(SaveClose);
 
 		displayConfig.Text = "Display";
 		tabs.TabPages.Add (displayConfig);
+		
+		colorConfig.Text = "Colors";
+		tabs.TabPages.Add (colorConfig);
 
 		Size = new Size (w, h);
 		MaximumSize = Size;
@@ -51,11 +73,22 @@ public class OptionsWindow : Form
 
 		ConfigureILsPage ();
 		ConfigDisplayConfig ();
+		ConfigColors();
 
 		DoLayout ();
 	}
 
+	public void SaveClose(object sender, EventArgs e)
+	{
+		Save();
+		this.Close();
+	}
+
 	public void Save(object sender, EventArgs e)
+	{
+		Save();
+	}
+	public void Save()
 	{
 		foreach (NumericField s in scores)
 		{
@@ -71,6 +104,24 @@ public class OptionsWindow : Form
 		config ["font_size"]                 = displayOptions[6].ToString();
 		config ["vertical_scale_mode"]       = displayOptions[7].ToString();
 		//Console.WriteLine (font.Text);
+
+		ScoreTracker.text_color                   = text_color.GetColor();
+		ScoreTracker.background_color_highlighted = background_color_highlighted.GetColor();
+		ScoreTracker.background_color             = background_color.GetColor();
+		ScoreTracker.text_color_highlighted       = text_color_highlighted.GetColor();
+		ScoreTracker.text_color_ahead             = text_color_ahead.GetColor();
+		ScoreTracker.text_color_behind            = text_color_behind.GetColor();
+		ScoreTracker.text_color_best              = text_color_best.GetColor();
+		ScoreTracker.text_color_total            = text_color_total.GetColor();             
+
+		config["text_color"]                   = text_color.GetOption();
+		config["background_color_highlighted"] = background_color_highlighted.GetOption();
+		config["background_color"]             = background_color.GetOption();
+		config["text_color_highlighted"]       = text_color_highlighted.GetOption();
+		config["text_color_ahead"]             = text_color_ahead.GetOption();
+		config["text_color_behind"]            = text_color_behind.GetOption();
+		config["text_color_best"]              = text_color_best.GetOption();
+		config["text_color_total"]             = text_color_total.GetOption();             
 
 		config.Save ();
 	}
@@ -102,67 +153,18 @@ public class OptionsWindow : Form
 		}
 
 		DoILsLayout ();
-		DoDisplayConfigLayout ();
+		DoColorsLayout();
 
-		save.Width = GetWidth();
+		save.Width = GetWidth()/2;
 		save.Height = 20;
 		save.Top = tabs.Bottom;
+
+		saveClose.Width = save.Width;
+		saveClose.Height = 20;
+		saveClose.Top = save.Top;
+		saveClose.Left = save.Width;
 	}
 
-	private void DoDisplayConfigLayout()
-	{
-		/*
-		routeL.Height = 20;
-		route.Left = Width - route.Width - 21;
-		routeL.Width = Width - route.Width - 21;
-
-		layoutL.Width = routeL.Width;
-		layoutL.Height = routeL.Height;
-		layoutL.Top = routeL.Top + routeL.Height;
-		layout.Top = layoutL.Top;
-		layout.Left = route.Left;
-
-		highlight.Height = 20;
-		//highlight.Width = 20;
-		highlightL.Width = routeL.Width;
-		highlightL.Height = routeL.Height;
-		highlightL.Top = layoutL.Top + layoutL.Height;
-		highlight.Top = highlightL.Top;
-		highlight.Left = Width - highlight.Width;
-
-		startHighlighted.Height = 20;
-		//startHighlighted.Width = 20;
-		startHighlightedL.Width = routeL.Width;
-		startHighlightedL.Height = routeL.Height;
-		startHighlightedL.Top = highlightL.Top + highlightL.Height;
-		startHighlighted.Top = startHighlightedL.Top;
-		startHighlighted.Left = Width - startHighlighted.Width;
-
-		sumsAlignmentL.Width = routeL.Width;
-		sumsAlignmentL.Height = routeL.Height;
-		sumsAlignmentL.Top = startHighlightedL.Top + startHighlightedL.Height;
-		sumsAlignment.Top = sumsAlignmentL.Top;
-		sumsAlignment.Left = route.Left;
-
-		fontL.Width = routeL.Width;
-		fontL.Height = routeL.Height;
-		fontL.Top = sumsAlignmentL.Top + sumsAlignmentL.Height;
-		font.Top = fontL.Top;
-		font.Left = route.Left;
-
-		fontSizeL.Width = Width - fontSize.Width;
-		fontSizeL.Height = routeL.Height;
-		fontSizeL.Top = fontL.Top + fontL.Height;
-		fontSize.Top = fontSizeL.Top;
-		fontSize.Left = fontSizeL.Width;
-
-		vScaleModeL.Width = routeL.Width;
-		vScaleModeL.Height = routeL.Height;
-		vScaleModeL.Top = fontSizeL.Top + fontSizeL.Height;
-		vScaleMode.Top = vScaleModeL.Top;
-		vScaleMode.Left = route.Left;
-		*/
-	}
 
 	private void DoILsLayout()
 	{
@@ -173,6 +175,19 @@ public class OptionsWindow : Form
 		}
 
 
+	}
+
+	private void DoColorsLayout()
+	{
+		for (int i = 0; i < colors.Count; i++)
+		{
+			if (i > 0)
+			{
+				colors[i].Top = colors[i-1].Top + colors[i-1].Height;
+			}
+			colors[i].Width = Width;
+			colorConfig.Controls.Add(displayOptions[i]);
+		}
 	}
 
 	private void ConfigDisplayConfig()
@@ -229,6 +244,35 @@ public class OptionsWindow : Form
 			}
 		}
 	}
+
+	private void ConfigColors()
+	{
+		
+		text_color                   = new ColorField("Text:",                   ScoreTracker.text_color);
+                background_color_highlighted = new ColorField("Background Highlighted:", ScoreTracker.background_color_highlighted);
+                background_color             = new ColorField("Background:",             ScoreTracker.background_color);
+                text_color_highlighted       = new ColorField("Text Highlighted",        ScoreTracker.text_color_highlighted);
+                text_color_ahead             = new ColorField("Text Ahead:",             ScoreTracker.text_color_ahead);
+                text_color_behind            = new ColorField("Text Behind:",            ScoreTracker.text_color_behind);
+                text_color_best              = new ColorField("Text Best:",              ScoreTracker.text_color_best);
+                text_color_total             = new ColorField("Totals Text:",            ScoreTracker.text_color_total);              
+		
+		colors.Add(text_color);
+		colors.Add(background_color_highlighted);
+		colors.Add(background_color);
+		colors.Add(text_color_highlighted);
+		colors.Add(text_color_ahead);
+		colors.Add(text_color_behind);
+		colors.Add(text_color_best);
+		colors.Add(text_color_total);
+
+		foreach (ColorField c in colors)
+		{
+			colorConfig.Controls.Add(c);
+		}
+
+		DoColorsLayout();
+	}
 }
 
 public class OptionField : Panel
@@ -237,6 +281,54 @@ public class OptionField : Panel
 	public virtual string GetOption()
 	{
 		return "";
+	}
+}
+
+public class ColorField : OptionField
+{
+	public Label name = new Label();
+	public ColorDialog color = new ColorDialog();
+	private Button button = new Button();
+
+	public ColorField(string name, Color color)
+	{
+		this.name.Text = name;
+		this.color.Color = color;
+
+		button.BackColor = color;
+		button.Click += new EventHandler(OnClick);
+
+		this.Controls.Add(this.name);
+		this.Controls.Add(this.button);
+		Resize += delegate { DoLayout(); };
+	}
+
+	public override string GetOption()
+	{
+		return ColorTranslator.ToHtml(color.Color);
+	}
+
+	public Color GetColor()
+	{
+		return color.Color;
+	}
+	
+	public void OnClick(object sender, EventArgs e)
+	{
+		if (color.ShowDialog() == DialogResult.OK)
+			button.BackColor = color.Color;
+	}
+
+	public void DoLayout()
+	{
+		Height = 20;
+
+		name.Height = 20;
+		button.Height = 20;
+
+		button.Width = 60;
+		name.Width = Width - 60;
+		button.Left = Width - 60;
 	}
 }
 

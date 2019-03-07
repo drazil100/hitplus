@@ -513,6 +513,10 @@ public class ScoreTracker : Form
 	{
 		if (!closing)
 		{
+			topScore.ForeColor = text_color_total;
+			sobScore.ForeColor = text_color_total;
+			currentScore.ForeColor = text_color;
+			currentScoreName.ForeColor = text_color;
 			tracker.Initialize(new DisplayWindowContent ());
 			UpdateCurrentScore();
 			SwapControls (submit);

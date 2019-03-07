@@ -71,6 +71,10 @@ public class DisplayWindow : Form
 
 	public void Initialize(DisplayWindowContent window)
 	{
+		BackColor = ScoreTracker.background_color;
+		ScoreTracker.topScoreName.ForeColor = ScoreTracker.text_color_total;
+		ScoreTracker.sobScoreName.ForeColor = ScoreTracker.text_color_total;
+
 		dispContent = window;
 		Controls.Clear();
 		Controls.Add(window);
