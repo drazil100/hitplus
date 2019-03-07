@@ -10,6 +10,5 @@ The tracker will always be backwards compatible with previous config and score t
 
 ### Last Updated: 3/6/2018
 
-- Updated the update check system to point somewhere other than my home server. 
-- Fixed an infinite loop when closing the program on linux.
-- Made the default layout for the tracker vertical.
+- The display window no longer completely closes when doing anything that would reset it. It now stays on it but its content dissapears.
+- The tracker version is now output to config.txt (for debuging reasons)

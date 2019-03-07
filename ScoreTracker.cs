@@ -81,7 +81,7 @@ public class ScoreTracker : Form
 		text_color_best = ColorTranslator.FromHtml(config["text_color_best"]);
 		text_color_total = ColorTranslator.FromHtml(config["text_color_total"]);
 
-		tracker = new DisplayWindow ();
+		tracker = new DisplayWindow (new DisplayWindowContent());
 
 		Text = "Input";
 		FormClosing += new FormClosingEventHandler(ConfirmClose);
@@ -411,11 +411,34 @@ public class ScoreTracker : Form
 	{
 		try
 		{
-			reopening = true;
-			tracker.Close ();
-			reopening = false;
+			if (index > 0)
+			{
+				var confirmResult = MessageBox.Show ("Your run is incomplete! Are you sure you wish to exit?\n\n(Any unsaved gold scores will be lost)\n(To save gold scores on an incomplete run fill in the rest of the levels with 0)",
+						"Continue Closing?",
+						MessageBoxButtons.YesNo);
+				if (confirmResult == DialogResult.Yes)
+				{
+					index = 0;
+					SwapControls (submit);
+					tracker.dispContent.Controls.Clear();
+					tracker.Controls.Clear ();
+					tracker.dispContent = null;
+				}
+				else
+				{
+					return;
+				}
+			}
+			else
+			{
+				index = 0;
+				SwapControls (submit);
+				tracker.dispContent.Controls.Clear();
+				tracker.Controls.Clear ();
+				tracker.dispContent = null;
+			}	
 
-			if (tracker != null)
+			if (index != 0)
 				return;
 			
 			if (config ["hard_route"] == "0")
@@ -427,7 +450,7 @@ public class ScoreTracker : Form
 				config ["hard_route"] = "0";
 			}
 			config.Save ();
-			tracker = new DisplayWindow ();
+			tracker.Initialize(new DisplayWindowContent ());
 
 			currentScore.ForeColor = text_color;
 			currentScoreName.ForeColor = text_color;
@@ -468,7 +491,8 @@ public class ScoreTracker : Form
 	public void OpenOptions(object sender, EventArgs e)
 	{
 		reopening = true;
-		tracker.Close ();
+		tracker.dispContent.Controls.Clear();
+		tracker.Controls.Clear();
 		reopening = false;
 
 		inputBox.Enabled = false;
@@ -489,7 +513,7 @@ public class ScoreTracker : Form
 	{
 		if (!closing)
 		{
-			tracker = new DisplayWindow ();
+			tracker.Initialize(new DisplayWindowContent ());
 			UpdateCurrentScore();
 			SwapControls (submit);
 		}
@@ -580,30 +604,6 @@ public class ScoreTracker : Form
 		else
 		{
 			
-			if (index > 0 && !closing)
-			{
-				var confirmResult = MessageBox.Show ("Your run is incomplete! Are you sure you wish to exit?\n\n(Any unsaved gold scores will be lost)\n(To save gold scores on an incomplete run fill in the rest of the levels with 0)",
-					"Continue Closing?",
-					MessageBoxButtons.YesNo);
-				if (confirmResult == DialogResult.Yes)
-				{
-					index = 0;
-					SwapControls (submit);
-					tracker.Controls.Clear ();
-					tracker = null;
-				}
-				else
-				{
-					e.Cancel = true;
-				}
-			}
-			else
-			{
-				index = 0;
-				SwapControls (submit);
-				tracker.Controls.Clear ();
-				tracker = null;
-			}	
 		}
 	}
 
@@ -773,7 +773,10 @@ public class ScoreTracker : Form
 		{
 			Application.Run(new ScoreTracker());
 		}
-		catch (Exception) {}
+		catch (Exception e) 
+		{
+			Console.WriteLine(e.Message);
+		}
 
 
 		if (config["debug"] == "1")
