@@ -12,7 +12,7 @@ using System.Globalization;
 
 public class ScoreTracker : Form
 {
-	public static string version = "3/6/2019";
+	public static string version = "3/7/2019";
 
 	[DllImport("kernel32.dll")]
 	static extern IntPtr GetConsoleWindow();
@@ -654,7 +654,31 @@ public class ScoreTracker : Form
 			config.AddNewItem("include_route_pbs_in_individuals_file", "0");
 			config.AddNewItem("sums_horizontal_alignment",             "0");
 			config.AddNewItem("vertical_scale_mode",                   "0");
-			config.AddNewItem("font",                                  "Segoe UI");
+
+			List<string> fonts = new List<string>();
+			
+			foreach (FontFamily f in System.Drawing.FontFamily.Families)
+			{
+				fonts.Add(f.Name);
+			}
+
+			if (fonts.Contains("Segoe UI"))
+			{
+				config.AddNewItem("font", "Segoe UI");
+			}
+			else if (fonts.Contains("DejaVu Sans"))
+			{
+				config.AddNewItem("font", "DejaVu Sans");
+			}
+			else if (fonts.Contains("Arial"))
+			{
+				config.AddNewItem("font", "Arial");
+			}
+			else
+			{
+				config.AddNewItem("font", SystemFonts.MessageBoxFont.Name);
+			}
+
 			config.AddNewItem("font_size",                             "18");
 			config.AddNewItem("highlight_current",                     "0");
 			config.AddNewItem("start_highlighted",                     "1");

@@ -109,7 +109,6 @@ public class DisplayWindow : Form
 			Size = new Size(w2, h2);
 		}
 		MinimumSize  = new Size(w, h);
-		window.SetControls();
 		DoLayout();
 	}
 
@@ -171,6 +170,8 @@ public class DisplayWindowContent : Panel
 
 	public void SetControls()
 	{
+		totals.Controls.Clear();
+		levels.Controls.Clear();
 		Controls.Clear();
 		Score.ClearScores ();
 

@@ -8,7 +8,8 @@ The tracker will always be backwards compatible with previous config and score t
 
 # Whats New?
 
-### Last Updated: 3/6/2018
+### Last Updated: 3/7/2018
 
 - The display window no longer completely closes when doing anything that would reset it. It now stays on it but its content dissapears.
+- There are now fallback fonts if your system does not include the default Segoe UI.
 - The tracker version is now output to config.txt (for debuging reasons)
