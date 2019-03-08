@@ -5,7 +5,7 @@ The Star Fox 64 Score Tracker is a tool I created for the Star Fox 64 score runn
 
 # Whats New?
 
-### Last Updated: 3/7/2018
+### Last Updated: 3/7/2019
 
 - The display window no longer completely closes when doing anything that would reset it. It now stays on it but its content dissapears.
 - The options window now has a shiny new Colors tab for editing the colors of the tracker.
