@@ -309,6 +309,7 @@ public class DisplayWindowContent : Panel
 		ScoreTracker.currentScore.Width = ScoreTracker.topScore.Width;
 		ScoreTracker.topScore.TextAlign = ContentAlignment.TopLeft;
 		ScoreTracker.sobScore.TextAlign = ContentAlignment.TopLeft;
+		ScoreTracker.currentScore.TextAlign = ContentAlignment.TopLeft;
 
 	}
 
@@ -333,7 +334,7 @@ public class DisplayWindowContent : Panel
 		ScoreTracker.topScore.Top = 0;
 		ScoreTracker.topScoreName.Left = 0;
 		ScoreTracker.topScore.Left = 0;
-		ScoreTracker.sobScoreName.Top = 0;
+
 		ScoreTracker.sobScore.Top = 0;
 		ScoreTracker.sobScoreName.Left = 0;
 		ScoreTracker.sobScore.Left = 0;
@@ -369,14 +370,7 @@ public class DisplayWindowContent : Panel
 		List<Score> sList = Score.scoresList;
 		foreach (Score s in sList)
 		{
-			if (ScoreTracker.config ["vertical_scale_mode"] == "1")
-			{	
-				s.Height = 30;
-			}
-			else
-			{
-				s.Height = levels.Height / 7;
-			}
+			s.Height = levels.Height / 7;
 			s.Width = GetWidth();
 		}
 
