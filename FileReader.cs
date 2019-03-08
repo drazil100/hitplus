@@ -174,7 +174,7 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 			var sw = new StreamWriter(fileName);
 			foreach(KeyValuePair<string, T> pair in content)
 			{
-				sw.Write(String.Format("{0}: {1}\r\n", pair.Key, pair.Value));
+				sw.Write(String.Format("{0}: {1}\r\n", pair.Key, this.ValueToString(pair.Value)));
 			}
 			sw.Close();
 		}
