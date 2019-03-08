@@ -181,6 +181,7 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 	}
 
 	public abstract T StringToValue(string val);
+	public abstract string ValueToString(T val);
 }
 
 public class FileReader<T> : BaseFileReader<T> where T:class {
@@ -190,17 +191,29 @@ public class FileReader<T> : BaseFileReader<T> where T:class {
 	{
 		return Activator.CreateInstance(typeof(T), new object[]{ val }) as T;
 	}
+
+	public override string ValueToString(T val)
+	{
+		return val.ToString();
+	}
 }
 
-public class FileReader : FileReader<string> {
+public class FileReader : FileReader<string>
+{
 	public FileReader(string file, SortingStyle sorting = SortingStyle.Sort) : base(file, sorting) {}
 }
 
-public class ColorFileReader : BaseFileReader<Color> {
+public class ColorFileReader : BaseFileReader<Color>
+{
 	public ColorFileReader(string file, SortingStyle sorting = SortingStyle.Sort) : base(file, sorting) {}
 
 	public override Color StringToValue(string val)
 	{
-		return Color.FromName(val);
+		return ColorTranslator.FromHtml(val);
+	}
+
+	public override string ValueToString(Color val)
+	{
+		return ColorTranslator.ToHtml(val);
 	}
 }
