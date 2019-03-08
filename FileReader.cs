@@ -20,6 +20,7 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 	private List<KeyValuePair<string, T>> content = new List<KeyValuePair<string, T>>();
 	private int newItemCounter = 0;
 	private SortingStyle sorting = SortingStyle.Sort;
+	private int stackFrame = 2;
 	public IEnumerator<KeyValuePair<string, T>> GetEnumerator() {
 		lock (content)
 		{
@@ -39,6 +40,8 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 	{
 		this.sorting = sorting;
 		fileName = file;
+		
+		stackFrame = 4;
 		try
 		{
 			string content = File.ReadAllText(file, Encoding.UTF8);
@@ -59,6 +62,7 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 		{
 
 		}
+		stackFrame = 2;
 
 	}
 
@@ -95,7 +99,7 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 		set {
 			lock (content)
 			{
-				string caller = GetStackTrace() + " " + fileName;
+				string caller = GetStackTrace(stackFrame) + " " + fileName;
 				if (caller != lastCaller)
 				{
 					Console.WriteLine();
@@ -118,10 +122,10 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 
 	}
 
-	public string GetStackTrace()
+	public string GetStackTrace(int frame)
 	{
 		StackTrace st = new StackTrace();
-		StackFrame sf = st.GetFrame(2);
+		StackFrame sf = st.GetFrame(frame);
 		string n = "." + sf.GetMethod().Name;
 		n = (n == "..ctor") ? "" : n;
 		string r = String.Format("{0}{1}():", sf.GetMethod().DeclaringType, n);
