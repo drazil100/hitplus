@@ -370,14 +370,7 @@ public class DisplayWindowContent : Panel
 		List<Score> sList = Score.scoresList;
 		foreach (Score s in sList)
 		{
-			if (ScoreTracker.config ["vertical_scale_mode"] == "1")
-			{	
-				s.Height = 30;
-			}
-			else
-			{
-				s.Height = levels.Height / 7;
-			}
+			s.Height = levels.Height / 7;
 			s.Width = GetWidth();
 		}
 

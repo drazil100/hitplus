@@ -19,13 +19,13 @@ public class OptionsWindow : Form
 	private Button save = new Button();
 	private Button saveClose = new Button();
 
-	private TabPage individual_levels = new TabPage();
+	private TabPage scoreTab = new TabPage();
 	private List<NumericField> scores = new List<NumericField>();
 
-	private TabPage displayConfig = new TabPage ();
-	private List<OptionField> displayOptions = new List<OptionField>();
+	private TabPage generalTab = new TabPage ();
+	private List<OptionField> generalOptions = new List<OptionField>();
 
-	private TabPage colorConfig = new TabPage();
+	private TabPage colorTab = new TabPage();
 	private List<ColorField> colors = new List<ColorField>();
 
 	private int w = 300;
@@ -50,8 +50,14 @@ public class OptionsWindow : Form
 		Controls.Add (save);
 		Controls.Add (saveClose);
 
-		individual_levels.Text = "Edit PBs";
-		tabs.TabPages.Add (individual_levels);
+		scoreTab.Text = "Edit PBs";
+		tabs.TabPages.Add (scoreTab);
+
+		generalTab.Text = "General";
+		tabs.TabPages.Add (generalTab);
+		
+		colorTab.Text = "Colors";
+		tabs.TabPages.Add (colorTab);
 
 		save.Text = "Save All Changes";
 		save.Click += new EventHandler(Save);
@@ -59,20 +65,14 @@ public class OptionsWindow : Form
 		saveClose.Text = "Save and Close";
 		saveClose.Click += new EventHandler(SaveClose);
 
-		displayConfig.Text = "Display";
-		tabs.TabPages.Add (displayConfig);
-		
-		colorConfig.Text = "Colors";
-		tabs.TabPages.Add (colorConfig);
-
 		Size = new Size (w, h);
 		MaximumSize = Size;
 		MinimumSize = Size;
 
 		Resize += delegate { DoLayout(); };
 
-		ConfigureILsPage ();
-		ConfigDisplayConfig ();
+		ConfigureScoreTab ();
+		ConfigureGeneralTab ();
 		ConfigColors();
 
 		DoLayout ();
@@ -95,14 +95,14 @@ public class OptionsWindow : Form
 			ils [s.Name] = s.Number;
 		}
 		ils.Save ();
-		config ["hard_route"]                = displayOptions[0].ToString();
-		config ["layout"]                    = displayOptions[1].ToString();
-		config ["highlight_current"]         = displayOptions[2].ToString();
-		config ["start_highlighted"]         = displayOptions[3].ToString();
-		config ["sums_horizontal_alignment"] = displayOptions[4].ToString();
-		config ["font"]                      = displayOptions[5].GetOption();
-		config ["font_size"]                 = displayOptions[6].ToString();
-		config ["vertical_scale_mode"]       = displayOptions[7].ToString();
+		config ["hard_route"]                = generalOptions[0].ToString();
+		config ["layout"]                    = generalOptions[1].ToString();
+		config ["highlight_current"]         = generalOptions[2].ToString();
+		config ["start_highlighted"]         = generalOptions[3].ToString();
+		config ["sums_horizontal_alignment"] = generalOptions[4].ToString();
+		config ["font"]                      = generalOptions[5].GetOption();
+		config ["font_size"]                 = generalOptions[6].ToString();
+		//config ["vertical_scale_mode"]       = generalOptions[7].ToString();
 		//Console.WriteLine (font.Text);
 
 		ScoreTracker.text_color                   = text_color.GetColor();
@@ -152,8 +152,8 @@ public class OptionsWindow : Form
 			page.Height = tabs.Height - 25;
 		}
 
-		DoILsLayout ();
-		DoColorsLayout();
+		DoScoreLayout ();
+		DoColorLayout();
 
 		save.Width = GetWidth()/2;
 		save.Height = 20;
@@ -166,18 +166,18 @@ public class OptionsWindow : Form
 	}
 
 
-	private void DoILsLayout()
+	private void DoScoreLayout()
 	{
 		foreach (NumericField s in scores)
 		{
-			s.Width = individual_levels.Width;
+			s.Width = scoreTab.Width;
 			//s.DoLayout ();
 		}
 
 
 	}
 
-	private void DoColorsLayout()
+	private void DoColorLayout()
 	{
 		for (int i = 0; i < colors.Count; i++)
 		{
@@ -189,13 +189,13 @@ public class OptionsWindow : Form
 		}
 	}
 
-	private void ConfigDisplayConfig()
+	private void ConfigureGeneralTab()
 	{
-		displayOptions.Add(new DropdownField("Route:", config["hard_route"], "Easy", "Hard"));
-		displayOptions.Add(new DropdownField("Layout:", config["layout"], "Horizontal", "Vertical"));
-		displayOptions.Add(new CheckField("Highlight Current:", config["highlight_current"]));
-		displayOptions.Add(new CheckField("Start Highlighted:", config["start_highlighted"]));
-		displayOptions.Add(new DropdownField("Horizontal Splits Alignment:", config["sums_horizontal_alignment"], "Left", "Right"));
+		generalOptions.Add(new DropdownField("Route:", config["hard_route"], "Easy", "Hard"));
+		generalOptions.Add(new DropdownField("Layout:", config["layout"], "Horizontal", "Vertical"));
+		generalOptions.Add(new CheckField("Highlight Current:", config["highlight_current"]));
+		generalOptions.Add(new CheckField("Start Highlighted:", config["start_highlighted"]));
+		generalOptions.Add(new DropdownField("Horizontal Splits Alignment:", config["sums_horizontal_alignment"], "Left", "Right"));
 
 		List<string> fonts = new List<string>();
 		int count = 0;
@@ -210,30 +210,30 @@ public class OptionsWindow : Form
 			count++;
 		}
 
-		displayOptions.Add(new DropdownField("Font:", "" + ind, fonts.ToArray()));
-		displayOptions.Add(new NumericField("Font Size:", config["font_size"]));
-		displayOptions.Add(new DropdownField("Vertical Scaling Mode:", config["vertical_scale_mode"], "Space", "Split"));
+		generalOptions.Add(new DropdownField("Font:", "" + ind, fonts.ToArray()));
+		generalOptions.Add(new NumericField("Font Size:", config["font_size"]));
+		//generalOptions.Add(new DropdownField("Vertical Scaling Mode:", config["vertical_scale_mode"], "Space", "Split"));
 
-		for (int i = 0; i < displayOptions.Count; i++)
+		for (int i = 0; i < generalOptions.Count; i++)
 		{
 			if (i > 0)
 			{
-				displayOptions[i].Top = displayOptions[i-1].Top + displayOptions[i-1].Height;
+				generalOptions[i].Top = generalOptions[i-1].Top + generalOptions[i-1].Height;
 			}
-			displayOptions[i].Width = Width;
-			displayConfig.Controls.Add(displayOptions[i]);
+			generalOptions[i].Width = Width;
+			generalTab.Controls.Add(generalOptions[i]);
 		}
 	}
 
-	private void ConfigureILsPage ()
+	private void ConfigureScoreTab ()
 	{
-		individual_levels.Controls.Clear ();
+		scoreTab.Controls.Clear ();
 		foreach (KeyValuePair<string, string> il in ils)
 		{
 			if (il.Key != "Easy Route" && il.Key != "Hard Route")
 			{
 				NumericField newScore = new NumericField (il.Key, il.Value);
-				individual_levels.Controls.Add (newScore);
+				scoreTab.Controls.Add (newScore);
 				if (scores.Count > 0)
 				{
 					newScore.Top = scores [scores.Count - 1].Top + scores [scores.Count - 1].Height;
@@ -250,7 +250,7 @@ public class OptionsWindow : Form
 		text_color                   = new ColorField("Text:",                   ScoreTracker.text_color);
                 background_color_highlighted = new ColorField("Background Highlighted:", ScoreTracker.background_color_highlighted);
                 background_color             = new ColorField("Background:",             ScoreTracker.background_color);
-                text_color_highlighted       = new ColorField("Text Highlighted",        ScoreTracker.text_color_highlighted);
+                text_color_highlighted       = new ColorField("Text Highlighted:",        ScoreTracker.text_color_highlighted);
                 text_color_ahead             = new ColorField("Text Ahead:",             ScoreTracker.text_color_ahead);
                 text_color_behind            = new ColorField("Text Behind:",            ScoreTracker.text_color_behind);
                 text_color_best              = new ColorField("Text Best:",              ScoreTracker.text_color_best);
@@ -258,8 +258,8 @@ public class OptionsWindow : Form
 		
 		colors.Add(text_color);
 		colors.Add(text_color_total);
-		colors.Add(background_color);
 		colors.Add(text_color_highlighted);
+		colors.Add(background_color);
 		colors.Add(background_color_highlighted);
 		colors.Add(text_color_ahead);
 		colors.Add(text_color_behind);
@@ -267,10 +267,10 @@ public class OptionsWindow : Form
 
 		foreach (ColorField c in colors)
 		{
-			colorConfig.Controls.Add(c);
+			colorTab.Controls.Add(c);
 		}
 
-		DoColorsLayout();
+		DoColorLayout();
 	}
 }
 
