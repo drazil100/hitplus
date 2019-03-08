@@ -4,6 +4,7 @@ using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 
 public enum SortingStyle
 {
@@ -12,14 +13,14 @@ public enum SortingStyle
 	Validate
 }
 
-public class FileReader : IEnumerable<KeyValuePair<string,string>>
+public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 {
 	private static string lastCaller = "";
 	private string fileName = "";
-	private List<KeyValuePair<string, string>> content = new List<KeyValuePair<string, string>>();
+	private List<KeyValuePair<string, T>> content = new List<KeyValuePair<string, T>>();
 	private int newItemCounter = 0;
 	private SortingStyle sorting = SortingStyle.Sort;
-	public IEnumerator<KeyValuePair<string,string>> GetEnumerator() {
+	public IEnumerator<KeyValuePair<string, T>> GetEnumerator() {
 		lock (content)
 		{
 			return content.GetEnumerator();
@@ -33,8 +34,8 @@ public class FileReader : IEnumerable<KeyValuePair<string,string>>
 		}
 	}
 
-	private FileReader() : base() {}
-	public FileReader(string file, SortingStyle sorting = SortingStyle.Sort) : base()
+	private BaseFileReader() : base() {}
+	public BaseFileReader(string file, SortingStyle sorting = SortingStyle.Sort) : base()
 	{
 		this.sorting = sorting;
 		fileName = file;
@@ -49,8 +50,8 @@ public class FileReader : IEnumerable<KeyValuePair<string,string>>
 				string[] parts = line.Split(':');
 				parts[0] = parts[0].Trim();
 				parts[1] = parts[1].Trim();
-				
-				this[parts[0]] = parts[1];
+
+				this[parts[0]] = this.StringToValue(parts[1]);
 			}
 
 		}
@@ -60,7 +61,7 @@ public class FileReader : IEnumerable<KeyValuePair<string,string>>
 		}
 
 	}
-	
+
 	public void RemoveKey(string key)
 	{
 		lock (content)
@@ -75,21 +76,20 @@ public class FileReader : IEnumerable<KeyValuePair<string,string>>
 				}
 			}
 		}
-		
 	}
 
-	public string this[string key]
+	public T this[string key]
 	{
 		get {
 			lock (content)
 			{
-				foreach (KeyValuePair<string, string> pair in content)
+				foreach (KeyValuePair<string, T> pair in content)
 				{
 					if (pair.Key == key)
 						return pair.Value;
 				}
 			}
-			return "";
+			return this.StringToValue("");
 		}
 
 		set {
@@ -108,11 +108,11 @@ public class FileReader : IEnumerable<KeyValuePair<string,string>>
 				{
 					if (content[i].Key == key)
 					{
-						content[i] = new KeyValuePair<string, string>(key, value);
+						content[i] = new KeyValuePair<string, T>(key, value);
 						return;
 					}
 				}
-				content.Add(new KeyValuePair<string, string>(key, value));
+				content.Add(new KeyValuePair<string, T>(key, value));
 			}
 		}
 
@@ -128,7 +128,7 @@ public class FileReader : IEnumerable<KeyValuePair<string,string>>
 		return r;
 	}
 
-	public void AddNewItem(string key, string value)
+	public void AddNewItem(string key, T value)
 	{
 		lock (content)
 		{
@@ -138,7 +138,7 @@ public class FileReader : IEnumerable<KeyValuePair<string,string>>
 				{
 					if (i != newItemCounter && sorting != SortingStyle.Unsort)
 					{
-						KeyValuePair<string, string> temp = content[newItemCounter];
+						KeyValuePair<string, T> temp = content[newItemCounter];
 						content[newItemCounter] = content[i];
 						content[i] = temp;
 					}
@@ -146,10 +146,10 @@ public class FileReader : IEnumerable<KeyValuePair<string,string>>
 					return;
 				}
 			}
-			content.Add(new KeyValuePair<string, string>(key, value));
+			content.Add(new KeyValuePair<string, T>(key, value));
 			if (content.Count-1 != newItemCounter && sorting != SortingStyle.Unsort)
 			{
-				KeyValuePair<string, string> temp = content[newItemCounter];
+				KeyValuePair<string, T> temp = content[newItemCounter];
 				content[newItemCounter] = content[content.Count-1];
 				content[content.Count-1] = temp;
 			}
@@ -172,12 +172,59 @@ public class FileReader : IEnumerable<KeyValuePair<string,string>>
 				}
 			}
 			var sw = new StreamWriter(fileName);
-			foreach(KeyValuePair<string, string> pair in content)
+			foreach(KeyValuePair<string, T> pair in content)
 			{
-				sw.Write(String.Format("{0}: {1}\r\n", pair.Key, pair.Value));
+				sw.Write(String.Format("{0}: {1}\r\n", pair.Key, this.ValueToString(pair.Value)));
 			}
 			sw.Close();
 		}
 	}
 
+	public abstract T StringToValue(string val);
+	public abstract string ValueToString(T val);
+}
+
+public class FileReader<T> : BaseFileReader<T> where T:class
+{
+	public FileReader(string file, SortingStyle sorting = SortingStyle.Sort) : base(file, sorting) {}
+
+	public override T StringToValue(string val)
+	{
+		return Activator.CreateInstance(typeof(T), new object[]{ val }) as T;
+	}
+
+	public override string ValueToString(T val)
+	{
+		return val.ToString();
+	}
+}
+
+public class FileReader : FileReader<string>
+{
+	public FileReader(string file, SortingStyle sorting = SortingStyle.Sort) : base(file, sorting) {}
+
+	public override string StringToValue(string val)
+	{
+		return val;
+	}
+
+	public override string ValueToString(string val)
+	{
+		return val;
+	}
+}
+
+public class ColorFileReader : BaseFileReader<Color>
+{
+	public ColorFileReader(string file, SortingStyle sorting = SortingStyle.Sort) : base(file, sorting) {}
+
+	public override Color StringToValue(string val)
+	{
+		return ColorTranslator.FromHtml(val);
+	}
+
+	public override string ValueToString(Color val)
+	{
+		return ColorTranslator.ToHtml(val);
+	}
 }
