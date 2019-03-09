@@ -21,39 +21,25 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 	private List<KeyValuePair<string, string>> defaultValues = new List<KeyValuePair<string, string>>();
 	private Dictionary<string, T> cachedValues = new Dictionary<string, T>();
 	private SortingStyle sorting = SortingStyle.Sort;
-	private int stackFrame = 3;
-	public IEnumerator<KeyValuePair<string, T>> GetEnumerator() {
+	private int stackDepth = 3;
+
+	private IEnumerator<KeyValuePair<string, T>> GetEnumeratorInternal() {
 		lock (content)
 		{
-			List<KeyValuePair<string, T>> returnContent = new List<KeyValuePair<string, T>>();
-			for (int i = 0; i < content.Count; i++)
-			{
-				string key = content[i].Key;
-				if(!cachedValues.ContainsKey(key))
-				{
-					cachedValues[key] = StringToValue(content[i].Value);
-				}
-				returnContent.Add(new KeyValuePair<string, T>(key, cachedValues[key]));
+			var returnContent = new List<KeyValuePair<string, T>>();
+			foreach (var pair in content) {
+				returnContent.Add(new KeyValuePair<string, T>(pair.Key, this[pair.Key]));
 			}
 			return returnContent.GetEnumerator();
 		}
 	}
 
+	public IEnumerator<KeyValuePair<string, T>> GetEnumerator() {
+  	return this.GetEnumeratorInternal();
+	}
+
 	IEnumerator IEnumerable.GetEnumerator() {
-		lock (content)
-		{
-			List<KeyValuePair<string, T>> returnContent = new List<KeyValuePair<string, T>>();
-			for (int i = 0; i < content.Count; i++)
-			{
-				string key = content[i].Key;
-				if(!cachedValues.ContainsKey(key))
-				{
-					cachedValues[key] = StringToValue(content[i].Value);
-				}
-				returnContent.Add(new KeyValuePair<string, T>(key, cachedValues[key]));
-			}
-			return returnContent.GetEnumerator();
-		}
+		return this.GetEnumeratorInternal();
 	}
 
 	private BaseFileReader() : base() {}
@@ -100,48 +86,24 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 
 	}
 
-	public void RemoveKey(string key)
-	{
-		lock (content)
-		{
-			for (int i = 0; i < content.Count; i++)
-			{
-				if (content[i].Key == key)
-				{
-					content.RemoveAt(i);
-					cachedValues.Remove(key);
-				}
-			}
-			for (int i = 0; i < defaultValues.Count; i++)
-			{
-				if (defaultValues[i].Key == key)
-				{
-					defaultValues.RemoveAt(i);
-				}
-			}
-		}
-	}
-
 	public T this[string key]
 	{
 		get {
 			lock (content)
 			{
-				if (cachedValues.ContainsKey(key))
-				{
-					return cachedValues[key];
-				}
-				foreach (KeyValuePair<string, string> pair in content)
-				{
-					if (pair.Key == key)
-					{
-						T val = StringToValue(pair.Value);
-						cachedValues[key] = val;
-						return val;
+				if (!cachedValues.ContainsKey(key)) {
+					int index = content.FindIndex(pair => pair.Key == key);
+					if (index >= 0) {
+						this.cachedValues[key] = StringToValue(content[index].Value);
+					} else {
+						index = defaultValues.FindIndex(pair => pair.Key == key);
+						if (index >= 0) {
+							this.cachedValues[key] = StringToValue(defaultValues[index].Value);
+						}
 					}
 				}
+				return this.cachedValues[key];
 			}
-			return this.StringToValue("");
 		}
 
 		set {
@@ -165,34 +127,12 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 		}
 
 	}
-	public void WriteDebug(string key, string value, int frame)
-	{
-
-		string caller = GetStackTrace(frame) + " " + fileName;
-		if (caller != lastCaller)
-		{
-			Console.WriteLine();
-			Console.WriteLine(caller);
-			lastCaller = caller;
-		}
-		Console.WriteLine(String.Format("  {0} = {1}", key, value));
-	}
-
-	public string GetStackTrace(int frame)
-	{
-		StackTrace st = new StackTrace();
-		StackFrame sf = st.GetFrame(frame);
-		string n = "." + sf.GetMethod().Name;
-		n = (n == "..ctor") ? "" : n;
-		string r = String.Format("{0}{1}():", sf.GetMethod().DeclaringType, n);
-		return r;
-	}
 	
 	public void AddNewItem(string key, T value)
 	{
-		stackFrame = 4;
+		stackDepth = 4;
 		AddNewItem(key, ValueToString(value));
-		stackFrame = 3;
+		stackDepth = 3;
 	}
 
 	public void AddNewItem(string key, string value)
@@ -229,7 +169,7 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 					return;
 				}
 			}
-			WriteDebug(key, value, stackFrame);
+			WriteDebug(key, value, stackDepth);
 			content.Add(new KeyValuePair<string, string>(key, value));
 			if (content.Count-1 != j && sorting != SortingStyle.Unsort)
 			{
@@ -238,6 +178,67 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 				content[content.Count-1] = temp;
 			}
 		}
+	}
+
+	public void RemoveKey(string key)
+	{
+		lock (content)
+		{
+			for (int i = 0; i < content.Count; i++)
+			{
+				if (content[i].Key == key)
+				{
+					content.RemoveAt(i);
+					cachedValues.Remove(key);
+					break;
+				}
+			}
+			for (int i = 0; i < defaultValues.Count; i++)
+			{
+				if (defaultValues[i].Key == key)
+				{
+					defaultValues.RemoveAt(i);
+					break;
+				}
+			}
+		}
+	}
+
+	public bool ContainsKey(string key)
+	{
+		bool contains = false;
+		foreach (KeyValuePair<string, string> pair in content)
+		{
+			if (pair.Key == key)
+			{
+				contains = true;
+				break;
+			}
+		}
+		return contains;
+	}
+
+	private void WriteDebug(string key, string value, int frame)
+	{
+
+		string caller = GetStackTrace(frame) + " " + fileName;
+		if (caller != lastCaller)
+		{
+			Console.WriteLine();
+			Console.WriteLine(caller);
+			lastCaller = caller;
+		}
+		Console.WriteLine(String.Format("  {0} = {1}", key, value));
+	}
+
+	public string GetStackTrace(int frame)
+	{
+		StackTrace st = new StackTrace();
+		StackFrame sf = st.GetFrame(frame);
+		string n = "." + sf.GetMethod().Name;
+		n = (n == "..ctor") ? "" : n;
+		string r = String.Format("{0}{1}():", sf.GetMethod().DeclaringType, n);
+		return r;
 	}
 
 	public void Save()

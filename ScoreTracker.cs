@@ -154,7 +154,7 @@ public class ScoreTracker : Form
 		
 		try 
 		{
-			t = new Thread(new ThreadStart(delegate { CheckVersion(config["sub_domain"]); }));
+			t = new Thread(new ThreadStart(delegate { CheckVersion(); }));
 			t.Start();
 		}
 		catch (Exception e)
@@ -169,7 +169,7 @@ public class ScoreTracker : Form
 		return Int32.Parse(parts[2]) * 10000 + Int32.Parse(parts[0]) * 100 + Int32.Parse(parts[1]);
 	}
 
-	private void CheckVersion(string subDomain)
+	private void CheckVersion()
 	{
 		try
 		{
@@ -183,7 +183,7 @@ public class ScoreTracker : Form
 					if (DateToNumber(version) < DateToNumber(parts[1]))
 					{
 						string whatsNew = client.DownloadString("http://greenmaw.com/drazil100.php?filename=tracker_whats_new.txt");
-						MessageBox.Show(whatsNew + "\r\n\r\n" + subDomain + "https://bitbucket.org/drazil100/sf64scoretracker/", "Update Available: (" + parts[1] + ")");
+						MessageBox.Show(whatsNew + "\r\n\r\n" + "https://bitbucket.org/drazil100/sf64scoretracker/", "Update Available: (" + parts[1] + ")");
 					}
 				}
 				Console.WriteLine(String.Format("This Version: {0}, Version Check: {1}", version, parts[1]));
@@ -699,7 +699,7 @@ public class ScoreTracker : Form
 			config.AddNewItem("vertical_height",                       "309");
 			config["version"] = version;
 
-			if (config ["debug"] == "1")
+			if (config.ContainsKey("debug") && config ["debug"] == "1")
 			{
 				try
 				{
