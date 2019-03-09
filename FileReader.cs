@@ -17,21 +17,42 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 {
 	private static string lastCaller = "";
 	private string fileName = "";
-	private List<KeyValuePair<string, T>> content = new List<KeyValuePair<string, T>>();
-	private int newItemCounter = 0;
+	private List<KeyValuePair<string, string>> content = new List<KeyValuePair<string, string>>();
+	private List<KeyValuePair<string, string>> defaultValues = new List<KeyValuePair<string, string>>();
+	private Dictionary<string, T> cachedValues = new Dictionary<string, T>();
 	private SortingStyle sorting = SortingStyle.Sort;
-	private int stackFrame = 2;
+	private int stackFrame = 3;
 	public IEnumerator<KeyValuePair<string, T>> GetEnumerator() {
 		lock (content)
 		{
-			return content.GetEnumerator();
+			List<KeyValuePair<string, T>> returnContent = new List<KeyValuePair<string, T>>();
+			for (int i = 0; i < content.Count; i++)
+			{
+				string key = content[i].Key;
+				if(!cachedValues.ContainsKey(key))
+				{
+					cachedValues[key] = StringToValue(content[i].Value);
+				}
+				returnContent.Add(new KeyValuePair<string, T>(key, cachedValues[key]));
+			}
+			return returnContent.GetEnumerator();
 		}
 	}
 
 	IEnumerator IEnumerable.GetEnumerator() {
 		lock (content)
 		{
-			return content.GetEnumerator();
+			List<KeyValuePair<string, T>> returnContent = new List<KeyValuePair<string, T>>();
+			for (int i = 0; i < content.Count; i++)
+			{
+				string key = content[i].Key;
+				if(!cachedValues.ContainsKey(key))
+				{
+					cachedValues[key] = StringToValue(content[i].Value);
+				}
+				returnContent.Add(new KeyValuePair<string, T>(key, cachedValues[key]));
+			}
+			return returnContent.GetEnumerator();
 		}
 	}
 
@@ -41,7 +62,6 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 		this.sorting = sorting;
 		fileName = file;
 		
-		stackFrame = 4;
 		try
 		{
 			string content = File.ReadAllText(file, Encoding.UTF8);
@@ -50,11 +70,26 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 
 			foreach (string line in lines)
 			{
-				string[] parts = line.Split(':');
+				string[] parts = line.Split(new char[] { ':' }, 2);
 				parts[0] = parts[0].Trim();
 				parts[1] = parts[1].Trim();
 
-				this[parts[0]] = this.StringToValue(parts[1]);
+				WriteDebug(parts[0], parts[1], 5);
+
+				bool contains = false;
+				for (int i = 0; i < this.content.Count; i++)
+				{
+					if (this.content[i].Key == parts[0])
+					{
+						this.content[i] = new KeyValuePair<string, string>(parts[0], parts[1]);
+						contains = true;
+						break;
+					}
+				}
+				if (!contains)
+				{
+					this.content.Add(new KeyValuePair<string, string>(parts[0], parts[1]));
+				}
 			}
 
 		}
@@ -62,7 +97,6 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 		{
 
 		}
-		stackFrame = 2;
 
 	}
 
@@ -75,8 +109,14 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 				if (content[i].Key == key)
 				{
 					content.RemoveAt(i);
-					if (newItemCounter >= content.Count)
-						newItemCounter = content.Count-1;
+					cachedValues.Remove(key);
+				}
+			}
+			for (int i = 0; i < defaultValues.Count; i++)
+			{
+				if (defaultValues[i].Key == key)
+				{
+					defaultValues.RemoveAt(i);
 				}
 			}
 		}
@@ -87,10 +127,18 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 		get {
 			lock (content)
 			{
-				foreach (KeyValuePair<string, T> pair in content)
+				if (cachedValues.ContainsKey(key))
+				{
+					return cachedValues[key];
+				}
+				foreach (KeyValuePair<string, string> pair in content)
 				{
 					if (pair.Key == key)
-						return pair.Value;
+					{
+						T val = StringToValue(pair.Value);
+						cachedValues[key] = val;
+						return val;
+					}
 				}
 			}
 			return this.StringToValue("");
@@ -99,27 +147,35 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 		set {
 			lock (content)
 			{
-				string caller = GetStackTrace(stackFrame) + " " + fileName;
-				if (caller != lastCaller)
-				{
-					Console.WriteLine();
-					Console.WriteLine(caller);
-					lastCaller = caller;
-				}
+				string val = ValueToString(value);
+				WriteDebug(key, val, 3);
 
-				Console.WriteLine(String.Format("  {0} = {1}", key, value));
+				cachedValues[key] = value;
+				
 				for (int i = 0; i < content.Count; i++)
 				{
 					if (content[i].Key == key)
 					{
-						content[i] = new KeyValuePair<string, T>(key, value);
+						content[i] = new KeyValuePair<string, string>(key, val);
 						return;
 					}
 				}
-				content.Add(new KeyValuePair<string, T>(key, value));
+				content.Add(new KeyValuePair<string, string>(key, val));
 			}
 		}
 
+	}
+	public void WriteDebug(string key, string value, int frame)
+	{
+
+		string caller = GetStackTrace(frame) + " " + fileName;
+		if (caller != lastCaller)
+		{
+			Console.WriteLine();
+			Console.WriteLine(caller);
+			lastCaller = caller;
+		}
+		Console.WriteLine(String.Format("  {0} = {1}", key, value));
 	}
 
 	public string GetStackTrace(int frame)
@@ -131,33 +187,56 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 		string r = String.Format("{0}{1}():", sf.GetMethod().DeclaringType, n);
 		return r;
 	}
-
+	
 	public void AddNewItem(string key, T value)
+	{
+		stackFrame = 4;
+		AddNewItem(key, ValueToString(value));
+		stackFrame = 3;
+	}
+
+	public void AddNewItem(string key, string value)
 	{
 		lock (content)
 		{
+			bool contains = false;
+			int j = 0;
+			for (int i = 0; i < defaultValues.Count; i++)
+			{
+				if (defaultValues[i].Key == key)
+				{
+					contains = true;
+					defaultValues[i] = new KeyValuePair<string, string>(key, value);
+					j = i;
+					break;
+				}
+			}
+			if (!contains)
+			{
+				defaultValues.Add(new KeyValuePair<string, string>(key, value));
+				j = defaultValues.Count - 1;
+			}
 			for (int i = 0; i < content.Count; i++)
 			{
 				if (content[i].Key == key)
 				{
-					if (i != newItemCounter && sorting != SortingStyle.Unsort)
+					if (i != j && sorting != SortingStyle.Unsort)
 					{
-						KeyValuePair<string, T> temp = content[newItemCounter];
-						content[newItemCounter] = content[i];
+						KeyValuePair<string, string> temp = content[j];
+						content[j] = content[i];
 						content[i] = temp;
 					}
-					newItemCounter++;
 					return;
 				}
 			}
-			content.Add(new KeyValuePair<string, T>(key, value));
-			if (content.Count-1 != newItemCounter && sorting != SortingStyle.Unsort)
+			WriteDebug(key, value, stackFrame);
+			content.Add(new KeyValuePair<string, string>(key, value));
+			if (content.Count-1 != j && sorting != SortingStyle.Unsort)
 			{
-				KeyValuePair<string, T> temp = content[newItemCounter];
-				content[newItemCounter] = content[content.Count-1];
+				KeyValuePair<string, string> temp = content[j];
+				content[j] = content[content.Count-1];
 				content[content.Count-1] = temp;
 			}
-			newItemCounter++;
 		}
 	}
 
@@ -170,15 +249,20 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 			lastCaller = "";
 			if (sorting == SortingStyle.Validate)
 			{
-				while (newItemCounter < content.Count)
+				while (defaultValues.Count < content.Count)
 				{
-					content.RemoveAt(newItemCounter);
+					content.RemoveAt(defaultValues.Count);
 				}
 			}
 			var sw = new StreamWriter(fileName);
-			foreach(KeyValuePair<string, T> pair in content)
-			{
-				sw.Write(String.Format("{0}: {1}\r\n", pair.Key, this.ValueToString(pair.Value)));
+			foreach(KeyValuePair<string, string> pair in content)
+			{	
+				string val = pair.Value;
+				if (cachedValues.ContainsKey(pair.Key))
+				{
+					val = ValueToString(cachedValues[pair.Key]);
+				}
+				sw.Write(String.Format("{0}: {1}\r\n", pair.Key, val));
 			}
 			sw.Close();
 		}
