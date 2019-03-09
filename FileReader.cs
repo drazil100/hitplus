@@ -13,9 +13,14 @@ public enum SortingStyle
 	Validate
 }
 
+public class DebugVariables
+{
+	public static string lastCaller = "";
+	public static string lastFileName = "";
+}
+
 public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 {
-	private static string lastCaller = "";
 	private string fileName = "";
 	private List<KeyValuePair<string, string>> content = new List<KeyValuePair<string, string>>();
 	private List<KeyValuePair<string, string>> defaultValues = new List<KeyValuePair<string, string>>();
@@ -57,10 +62,11 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 			foreach (string line in lines)
 			{
 				string[] parts = line.Split(new char[] { ':' }, 2);
+				if (parts.Length < 2) continue;
 				parts[0] = parts[0].Trim();
 				parts[1] = parts[1].Trim();
 
-				WriteDebug(parts[0], parts[1], 5);
+				WriteDebug(MakeModifyMessage(parts[0], parts[1]));
 
 				bool contains = false;
 				for (int i = 0; i < this.content.Count; i++)
@@ -79,9 +85,9 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 			}
 
 		}
-		catch (Exception)
+		catch (Exception e)
 		{
-
+			Console.WriteLine("Error: " + e.Message);
 		}
 
 	}
@@ -110,7 +116,7 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 			lock (content)
 			{
 				string val = ValueToString(value);
-				WriteDebug(key, val, 3);
+				WriteDebug(MakeModifyMessage(key, val), 3);
 
 				cachedValues[key] = value;
 				
@@ -169,7 +175,7 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 					return;
 				}
 			}
-			WriteDebug(key, value, stackDepth);
+			WriteDebug("ADD: " + MakeModifyMessage(key, value), stackDepth);
 			content.Add(new KeyValuePair<string, string>(key, value));
 			if (content.Count-1 != j && sorting != SortingStyle.Unsort)
 			{
@@ -190,6 +196,7 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 				{
 					content.RemoveAt(i);
 					cachedValues.Remove(key);
+					WriteDebug(String.Format("DEL: {0}", key), 3);
 					break;
 				}
 			}
@@ -218,17 +225,25 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 		return contains;
 	}
 
-	private void WriteDebug(string key, string value, int frame)
+	private string MakeModifyMessage(string key, string value)
+	{
+		return String.Format("{0} = {1}", key, value);
+	}
+
+	private void WriteDebug(string message, int frame = -1)
 	{
 
-		string caller = GetStackTrace(frame) + " " + fileName;
-		if (caller != lastCaller)
+		string caller = "FileReader(): " + fileName;
+		if (frame > -1) caller = GetStackTrace(frame) + " " + fileName;
+		//Console.WriteLine(String.Format("caller: {0}, lastCaller: {1}, fileName: {2}, lastFileName {3}", caller, lastCaller, fileName, lastFileName));
+		if (caller != DebugVariables.lastCaller || fileName != DebugVariables.lastFileName)
 		{
 			Console.WriteLine();
 			Console.WriteLine(caller);
-			lastCaller = caller;
+			DebugVariables.lastCaller = caller;
+			DebugVariables.lastFileName = fileName;
 		}
-		Console.WriteLine(String.Format("  {0} = {1}", key, value));
+		Console.WriteLine("  " + message);
 	}
 
 	public string GetStackTrace(int frame)
@@ -247,7 +262,8 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 		{
 			Console.WriteLine(" Writing to " + fileName);
 			Console.WriteLine();
-			lastCaller = "";
+			DebugVariables.lastCaller = "";
+			DebugVariables.lastFileName = "";
 			if (sorting == SortingStyle.Validate)
 			{
 				while (defaultValues.Count < content.Count)
@@ -288,7 +304,7 @@ public class FileReader<T> : BaseFileReader<T> where T:class
 	}
 }
 
-public class FileReader : FileReader<string>
+public class FileReader : BaseFileReader<string>
 {
 	public FileReader(string file, SortingStyle sorting = SortingStyle.Sort) : base(file, sorting) {}
 

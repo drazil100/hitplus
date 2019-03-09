@@ -32,6 +32,7 @@ public class ScoreTracker : Form
 	public static FileReader pbEasy;
 	public static FileReader pbHard;
 	public static FileReader individualLevels;
+	public static ColorFileReader colors;
 
 	public DisplayWindow tracker;
 	public OptionsWindow optionsWindow;
@@ -58,28 +59,9 @@ public class ScoreTracker : Form
 	private int w = 300;
 	private int h = 134;
 
-	//  Declare colors
-	public static Color text_color;
-	public static Color background_color_highlighted;
-	public static Color background_color;
-	public static Color text_color_highlighted;
-	public static Color text_color_ahead;
-	public static Color text_color_behind;
-	public static Color text_color_best;
-	public static Color text_color_total;
-
 	public ScoreTracker()
 	{
 		mainWindow = this;
-
-		text_color = ColorTranslator.FromHtml(config["text_color"]);
-		background_color_highlighted = ColorTranslator.FromHtml(config["background_color_highlighted"]);
-		background_color = ColorTranslator.FromHtml(config["background_color"]);
-		text_color_highlighted = ColorTranslator.FromHtml(config["text_color_highlighted"]);
-		text_color_ahead = ColorTranslator.FromHtml(config["text_color_ahead"]);
-		text_color_behind = ColorTranslator.FromHtml(config["text_color_behind"]);
-		text_color_best = ColorTranslator.FromHtml(config["text_color_best"]);
-		text_color_total = ColorTranslator.FromHtml(config["text_color_total"]);
 
 		tracker = new DisplayWindow (new DisplayWindowContent());
 
@@ -114,10 +96,10 @@ public class ScoreTracker : Form
 
 
 		//  Set colors
-		topScore.ForeColor = text_color_total;
-		sobScore.ForeColor = text_color_total;
-		currentScore.ForeColor = text_color;
-		currentScoreName.ForeColor = text_color;
+		topScore.ForeColor = colors["text_color_total"];
+		sobScore.ForeColor = colors["text_color_total"];
+		currentScore.ForeColor = colors["text_color"];
+		currentScoreName.ForeColor = colors["text_color"];
 
 
 
@@ -307,7 +289,7 @@ public class ScoreTracker : Form
 			if (tmp == 0)
 				currentScore.Text = "-";
 		}
-		Color p = text_color;
+		Color p = colors["text_color"];
 		if (index > 0 && config["casual_mode"] == "0")
 			p = Score.scoresList[index - 1].CurrentColor;
 		currentScore.ForeColor = p;
@@ -391,8 +373,8 @@ public class ScoreTracker : Form
 		SwapControls(submit);
 		submit.Enabled = true;
 		index = 0;
-		currentScore.ForeColor = text_color;
-		currentScoreName.ForeColor = text_color;
+		currentScore.ForeColor = colors["text_color"];
+		currentScoreName.ForeColor = colors["text_color"];
 		if (config["layout"] == "0")
 		{
 			currentScore.Text = "";
@@ -452,8 +434,8 @@ public class ScoreTracker : Form
 			config.Save ();
 			tracker.Initialize(new DisplayWindowContent ());
 
-			currentScore.ForeColor = text_color;
-			currentScoreName.ForeColor = text_color;
+			currentScore.ForeColor = colors["text_color"];
+			currentScoreName.ForeColor = colors["text_color"];
 			if (config["layout"] == "0")
 			{
 				currentScore.Text = "";
@@ -513,10 +495,10 @@ public class ScoreTracker : Form
 	{
 		if (!closing)
 		{
-			topScore.ForeColor = text_color_total;
-			sobScore.ForeColor = text_color_total;
-			currentScore.ForeColor = text_color;
-			currentScoreName.ForeColor = text_color;
+			topScore.ForeColor = colors["text_color_total"];
+			sobScore.ForeColor = colors["text_color_total"];
+			currentScore.ForeColor = colors["text_color"];
+			currentScoreName.ForeColor = colors["text_color"];
 			tracker.Initialize(new DisplayWindowContent ());
 			UpdateCurrentScore();
 			SwapControls (submit);
@@ -685,14 +667,6 @@ public class ScoreTracker : Form
 			config.AddNewItem("font_size",                             "18");
 			config.AddNewItem("highlight_current",                     "0");
 			config.AddNewItem("start_highlighted",                     "1");
-			config.AddNewItem("background_color",                      "#0F0F0F");
-			config.AddNewItem("background_color_highlighted",          "#3373F4");
-			config.AddNewItem("text_color",                            "#FFFFFF");
-			config.AddNewItem("text_color_highlighted",                "#FFFFFF");
-			config.AddNewItem("text_color_ahead",                      "#00CC36");
-			config.AddNewItem("text_color_behind",                     "#CC1200");
-			config.AddNewItem("text_color_best",                       "#D8AF1F");
-			config.AddNewItem("text_color_total",                      "#FFFFFF");
 			config.AddNewItem("horizontal_width",                      "1296");
 			config.AddNewItem("horizontal_height",                     "99");
 			config.AddNewItem("vertical_width",                        "316");
@@ -738,6 +712,68 @@ public class ScoreTracker : Form
 				config ["sums_horizontal_alignment"] = "0";
 			}
 
+			config.Save();
+
+			colors = new ColorFileReader("color_theme.txt", SortingStyle.Validate);
+			colors.AddNewItem("text_color",                            "#FFFFFF");
+			colors.AddNewItem("text_color_total",                      "#FFFFFF");
+			colors.AddNewItem("text_color_highlighted",                "#FFFFFF");
+			colors.AddNewItem("background_color",                      "#0F0F0F");
+			colors.AddNewItem("background_color_highlighted",          "#3373F4");
+			colors.AddNewItem("text_color_ahead",                      "#00CC36");
+			colors.AddNewItem("text_color_behind",                     "#CC1200");
+			colors.AddNewItem("text_color_best",                       "#D8AF1F");
+
+			if (config.ContainsKey("text_color"))
+			{
+				string c = config["text_color"];
+				config.RemoveKey("text_color");
+				colors["text_color"] = ColorTranslator.FromHtml(c);
+			}
+			if (config.ContainsKey("text_color_total"))
+			{
+				string c = config["text_color_total"];
+				config.RemoveKey("text_color_total");
+				colors["text_color_total"] = ColorTranslator.FromHtml(c);
+			}
+			if (config.ContainsKey("text_color_highlighted"))
+			{
+				string c = config["text_color_highlighted"];
+				config.RemoveKey("text_color_highlighted");
+				colors["text_color_highlighted"] = ColorTranslator.FromHtml(c);
+			}
+			if (config.ContainsKey("background_color"))
+			{
+				string c = config["background_color"];
+				config.RemoveKey("background_color");
+				colors["background_color"] = ColorTranslator.FromHtml(c);
+			}
+			if (config.ContainsKey("background_color_highlighted"))
+			{
+				string c = config["background_color_highlighted"];
+				config.RemoveKey("background_color_highlighted");
+				colors["background_color_highlighted"] = ColorTranslator.FromHtml(c);
+			}
+			if (config.ContainsKey("text_color_ahead"))
+			{
+				string c = config["text_color_ahead"];
+				config.RemoveKey("text_color_ahead");
+				colors["text_color_ahead"] = ColorTranslator.FromHtml(c);
+			}
+			if (config.ContainsKey("text_color_behind"))
+			{
+				string c = config["text_color_behind"];
+				config.RemoveKey("text_color_behind");
+				colors["text_color_behind"] = ColorTranslator.FromHtml(c);
+			}
+			if (config.ContainsKey("text_color_best"))
+			{
+				string c = config["text_color_best"];
+				config.RemoveKey("text_color_best");
+				colors["text_color_best"] = ColorTranslator.FromHtml(c);
+			}
+
+			colors.Save();
 			config.Save();
 
 

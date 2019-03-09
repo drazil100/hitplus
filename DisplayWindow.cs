@@ -27,9 +27,9 @@ public class DisplayWindow : Form
 		FormClosing += new FormClosingEventHandler(ScoreTracker.mainWindow.ConfirmClose);
 
 		//  Set colors
-		BackColor = ScoreTracker.background_color;
-		ScoreTracker.topScoreName.ForeColor = ScoreTracker.text_color_total;
-		ScoreTracker.sobScoreName.ForeColor = ScoreTracker.text_color_total;
+		BackColor = ScoreTracker.colors["background_color"];
+		ScoreTracker.topScoreName.ForeColor = ScoreTracker.colors["text_color_total"];
+		ScoreTracker.sobScoreName.ForeColor = ScoreTracker.colors["text_color_total"];
 
 		Initialize(cont);
 
@@ -71,9 +71,9 @@ public class DisplayWindow : Form
 
 	public void Initialize(DisplayWindowContent window)
 	{
-		BackColor = ScoreTracker.background_color;
-		ScoreTracker.topScoreName.ForeColor = ScoreTracker.text_color_total;
-		ScoreTracker.sobScoreName.ForeColor = ScoreTracker.text_color_total;
+		BackColor = ScoreTracker.colors["background_color"];
+		ScoreTracker.topScoreName.ForeColor = ScoreTracker.colors["text_color_total"];
+		ScoreTracker.sobScoreName.ForeColor = ScoreTracker.colors["text_color_total"];
 
 		dispContent = window;
 		Controls.Clear();

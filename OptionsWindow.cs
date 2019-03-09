@@ -13,6 +13,7 @@ public class OptionsWindow : Form
 	
 	private FileReader config;
 	private FileReader ils;
+	private ColorFileReader colorTheme;
 
 	private TabControl tabs = new TabControl();
 
@@ -31,20 +32,13 @@ public class OptionsWindow : Form
 	private int w = 300;
 	private int h = 400;
 
-	public ColorField text_color;
-	public ColorField background_color_highlighted;
-	public ColorField background_color;
-	public ColorField text_color_highlighted;
-	public ColorField text_color_ahead;
-	public ColorField text_color_behind;
-	public ColorField text_color_best;
-	public ColorField text_color_total;
-
 	public OptionsWindow()
 	{
 		Text = "Options";
+
 		config = ScoreTracker.config;
 		ils = ScoreTracker.individualLevels;
+		colorTheme = ScoreTracker.colors;
 
 		Controls.Add (tabs);
 		Controls.Add (save);
@@ -95,6 +89,7 @@ public class OptionsWindow : Form
 			ils [s.Name] = s.Number;
 		}
 		ils.Save ();
+
 		config ["hard_route"]                = generalOptions[0].ToString();
 		config ["layout"]                    = generalOptions[1].ToString();
 		config ["highlight_current"]         = generalOptions[2].ToString();
@@ -104,26 +99,14 @@ public class OptionsWindow : Form
 		config ["font_size"]                 = generalOptions[6].ToString();
 		//config ["vertical_scale_mode"]       = generalOptions[7].ToString();
 		//Console.WriteLine (font.Text);
-
-		ScoreTracker.text_color                   = text_color.GetColor();
-		ScoreTracker.background_color_highlighted = background_color_highlighted.GetColor();
-		ScoreTracker.background_color             = background_color.GetColor();
-		ScoreTracker.text_color_highlighted       = text_color_highlighted.GetColor();
-		ScoreTracker.text_color_ahead             = text_color_ahead.GetColor();
-		ScoreTracker.text_color_behind            = text_color_behind.GetColor();
-		ScoreTracker.text_color_best              = text_color_best.GetColor();
-		ScoreTracker.text_color_total            = text_color_total.GetColor();             
-
-		config["text_color"]                   = text_color.GetOption();
-		config["background_color_highlighted"] = background_color_highlighted.GetOption();
-		config["background_color"]             = background_color.GetOption();
-		config["text_color_highlighted"]       = text_color_highlighted.GetOption();
-		config["text_color_ahead"]             = text_color_ahead.GetOption();
-		config["text_color_behind"]            = text_color_behind.GetOption();
-		config["text_color_best"]              = text_color_best.GetOption();
-		config["text_color_total"]             = text_color_total.GetOption();             
-
 		config.Save ();
+
+		foreach (ColorField color in colors)
+		{
+			colorTheme[LabelNameToOptionName(color.GetName())] = color.GetColor();
+		}
+
+		colorTheme.Save();
 	}
 
 	private int GetWidth()
@@ -246,33 +229,51 @@ public class OptionsWindow : Form
 
 	private void ConfigColors()
 	{
-		
-		text_color                   = new ColorField("Text:",                   ScoreTracker.text_color);
-                background_color_highlighted = new ColorField("Background Highlighted:", ScoreTracker.background_color_highlighted);
-                background_color             = new ColorField("Background:",             ScoreTracker.background_color);
-                text_color_highlighted       = new ColorField("Text Highlighted:",        ScoreTracker.text_color_highlighted);
-                text_color_ahead             = new ColorField("Text Ahead:",             ScoreTracker.text_color_ahead);
-                text_color_behind            = new ColorField("Text Behind:",            ScoreTracker.text_color_behind);
-                text_color_best              = new ColorField("Text Best:",              ScoreTracker.text_color_best);
-                text_color_total             = new ColorField("Totals Text:",            ScoreTracker.text_color_total);              
-		
-		colors.Add(text_color);
-		colors.Add(text_color_total);
-		colors.Add(text_color_highlighted);
-		colors.Add(background_color);
-		colors.Add(background_color_highlighted);
-		colors.Add(text_color_ahead);
-		colors.Add(text_color_behind);
-		colors.Add(text_color_best);
-
-		foreach (ColorField c in colors)
+		foreach (KeyValuePair<string, Color> pair in colorTheme)
 		{
+			ColorField c = new ColorField(OptionNameToLabelName(pair.Key), pair.Value);
+			colors.Add(c);
 			colorTab.Controls.Add(c);
 		}
 
 		DoColorLayout();
 	}
+
+	public string OptionNameToLabelName(string name)
+	{
+		switch (name)
+		{
+			case "text_color":                   name = "Text:";                   break;
+			case "text_color_total":             name = "Totals Text:";            break;
+			case "text_color_highlighted":       name = "Text Highlighted";        break;
+			case "background_color":             name = "Background:";             break;
+			case "background_color_highlighted": name = "Background Highlighted:"; break;
+			case "text_color_ahead":             name = "Text Ahead:";             break;
+			case "text_color_behind":            name = "Text Behind:";            break;
+			case "text_color_best":              name = "Text Best:";              break;
+		}
+
+		return name;
+	}
+
+	public string LabelNameToOptionName(string name)
+	{
+		switch (name)
+		{
+			case "Text:":                   name = "text_color";                   break;
+			case "Totals Text:":            name = "text_color_total";             break;
+			case "Text Highlighted":        name = "text_color_highlighted";       break;
+			case "Background:":             name = "background_color";             break;
+			case "Background Highlighted:": name = "background_color_highlighted"; break;
+			case "Text Ahead:":             name = "text_color_ahead";             break;
+			case "Text Behind:":            name = "text_color_behind";            break;
+			case "Text Best:":              name = "text_color_best";              break;
+		}
+
+		return name;
+	}
 }
+
 
 public class OptionField : Panel
 {
@@ -305,6 +306,11 @@ public class ColorField : OptionField
 	public override string GetOption()
 	{
 		return ColorTranslator.ToHtml(color.Color);
+	}
+
+	public string GetName()
+	{
+		return name.Text;
 	}
 
 	public Color GetColor()
