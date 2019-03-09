@@ -40,14 +40,8 @@ public class Score : Panel
 	private Label scoreLabel = new Label();
 	private Label paceLabel = new Label();
 	private Label signLabel = new Label();
-	
-	private Color text_color = ScoreTracker.text_color;
-	private Color text_color_highlighted = ScoreTracker.text_color_highlighted;
-	private Color text_color_ahead = ScoreTracker.text_color_ahead;
-	private Color text_color_behind = ScoreTracker.text_color_behind;
-	private Color text_color_best = ScoreTracker.text_color_best;
-	private Color background_color = ScoreTracker.background_color;
-	private Color background_color_highlighted = ScoreTracker.background_color_highlighted;
+
+	private ColorFileReader colors = ScoreTracker.colors;
 
 	private PaceStatus pace = PaceStatus.Default;
 	private static PaceStatus runPace = PaceStatus.Default;
@@ -137,87 +131,87 @@ public class Score : Panel
 
 		if (!highlighted)
 		{
-			nameLabel.ForeColor = text_color;
+			nameLabel.ForeColor = colors["text_color"];
 			if (casual)
-				scoreLabel.ForeColor = background_color;
+				scoreLabel.ForeColor = colors["background_color"];
 			else
-				scoreLabel.ForeColor = text_color;
-			signLabel.ForeColor = background_color;
-			paceLabel.ForeColor = background_color;
+				scoreLabel.ForeColor = colors["text_color"];
+			signLabel.ForeColor = colors["background_color"];
+			paceLabel.ForeColor = colors["background_color"];
 
-			BackColor = background_color;
+			BackColor = colors["background_color"];
 		}
 		else
 		{
-			nameLabel.ForeColor = text_color_highlighted;
+			nameLabel.ForeColor = colors["text_color_highlighted"];
 			if (casual)
-				scoreLabel.ForeColor = background_color_highlighted;
+				scoreLabel.ForeColor = colors["background_color_highlighted"];
 			else
-				scoreLabel.ForeColor = text_color_highlighted;
-			signLabel.ForeColor = background_color_highlighted;
-			paceLabel.ForeColor = background_color_highlighted;
+				scoreLabel.ForeColor = colors["text_color_highlighted"];
+			signLabel.ForeColor = colors["background_color_highlighted"];
+			paceLabel.ForeColor = colors["background_color_highlighted"];
 
-			BackColor = background_color_highlighted;
+			BackColor = colors["background_color_highlighted"];
 		}
 	}
 
 	public void ColorAhead(bool casual)
 	{
-		BackColor = background_color;
+		BackColor = colors["background_color"];
 
 		if (!casual)
 		{
-			nameLabel.ForeColor = text_color;
-			scoreLabel.ForeColor = text_color_ahead;
-			signLabel.ForeColor = text_color_ahead;
-			paceLabel.ForeColor = text_color_ahead;
+			nameLabel.ForeColor = colors["text_color"];
+			scoreLabel.ForeColor = colors["text_color_ahead"];
+			signLabel.ForeColor = colors["text_color_ahead"];
+			paceLabel.ForeColor = colors["text_color_ahead"];
 		}
 		else
 		{
-			nameLabel.ForeColor = text_color;
-			scoreLabel.ForeColor = text_color;
-			signLabel.ForeColor = background_color;
-			paceLabel.ForeColor = background_color;
+			nameLabel.ForeColor = colors["text_color"];
+			scoreLabel.ForeColor = colors["text_color"];
+			signLabel.ForeColor = colors["background_color"];
+			paceLabel.ForeColor = colors["background_color"];
 		}
 	}
 
 	public void ColorBehind(bool casual)
 	{
-		BackColor = background_color;
+		BackColor = colors["background_color"];
 
 		if (!casual)
 		{
-			nameLabel.ForeColor = text_color;
-			scoreLabel.ForeColor = text_color_behind;
-			signLabel.ForeColor = text_color_behind;
-			paceLabel.ForeColor = text_color_behind;
+			nameLabel.ForeColor = colors["text_color"];
+			scoreLabel.ForeColor = colors["text_color_behind"];
+			signLabel.ForeColor = colors["text_color_behind"];
+			paceLabel.ForeColor = colors["text_color_behind"];
 		}
 		else
 		{
-			nameLabel.ForeColor = text_color;
-			scoreLabel.ForeColor = text_color;
-			signLabel.ForeColor = background_color;
-			paceLabel.ForeColor = background_color;
+			nameLabel.ForeColor = colors["text_color"];
+			scoreLabel.ForeColor = colors["text_color"];
+			signLabel.ForeColor = colors["background_color"];
+			paceLabel.ForeColor = colors["background_color"];
 		}
 	}
 
 	public void ColorGold(bool casual)
 	{
-		BackColor = background_color;
+		BackColor = colors["background_color"];
 
 		if (!casual)
 		{
-			nameLabel.ForeColor = text_color;
-			scoreLabel.ForeColor = text_color_best;
-			signLabel.ForeColor = text_color_best;
-			paceLabel.ForeColor = text_color_best;
+			nameLabel.ForeColor = colors["text_color"];
+			scoreLabel.ForeColor = colors["text_color_best"];
+			signLabel.ForeColor = colors["text_color_best"];
+			paceLabel.ForeColor = colors["text_color_best"];
 		}
 		else
 		{
-			nameLabel.ForeColor = text_color;
-			scoreLabel.ForeColor = text_color_best;
-			signLabel.ForeColor = background_color;
-			paceLabel.ForeColor = background_color;
+			nameLabel.ForeColor = colors["text_color"];
+			scoreLabel.ForeColor = colors["text_color_best"];
+			signLabel.ForeColor = colors["background_color"];
+			paceLabel.ForeColor = colors["background_color"];
 		}
 	}
 	
@@ -301,11 +295,11 @@ public class Score : Panel
 	{
 		get 
 		{
-			Color tmp = text_color;
+			Color tmp = colors["text_color"];
 			switch (runPace)
 			{
-				case PaceStatus.Ahead:   tmp = text_color_ahead; break;
-				case PaceStatus.Behind:  tmp = text_color_behind; break;
+				case PaceStatus.Ahead:   tmp = colors["text_color_ahead"]; break;
+				case PaceStatus.Behind:  tmp = colors["text_color_behind"]; break;
 			}
 			return tmp;
 		}
