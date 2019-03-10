@@ -179,7 +179,7 @@ public class DisplayWindowContent : Panel
 		totals.Controls.Clear();
 		levels.Controls.Clear();
 		Controls.Clear();
-		Score.ClearScores ();
+		ScorePanel.ClearScores ();
 
 		FileReader run = ScoreTracker.pbEasy;
 		if (ScoreTracker.config["hard_route"] == "1")
@@ -194,7 +194,7 @@ public class DisplayWindowContent : Panel
 			{
 				int sc = Int32.Parse(level.Value);
 				total += sc;
-				Score newScore = new Score(level.Key, sc);
+				ScorePanel newScore = new ScorePanel(level.Key, sc);
 				levels.Controls.Add(newScore);
 
 			}
@@ -202,11 +202,11 @@ public class DisplayWindowContent : Panel
 			int i = 0;
 			foreach(KeyValuePair<string, string> level in ScoreTracker.individualLevels)
 			{
-				Score.SetBest(level.Key, Int32.Parse(level.Value), i);
+				ScorePanel.SetBest(level.Key, Int32.Parse(level.Value), i);
 				i++;
 			}
 
-			foreach(Score s in Score.scoresList)
+			foreach(ScorePanel s in ScorePanel.scoresList)
 			{
 				sob += s.best;
 			}
@@ -317,8 +317,8 @@ public class DisplayWindowContent : Panel
 
 	public void DoLevelsLayoutHorizontal()
 	{
-		List<Score> sList = Score.scoresList;
-		foreach (Score s in sList)
+		List<ScorePanel> sList = ScorePanel.scoresList;
+		foreach (ScorePanel s in sList)
 		{
 			s.Height = GetHeight();
 			s.Width = levels.Width / 7;
@@ -369,8 +369,8 @@ public class DisplayWindowContent : Panel
 
 	public void DoLevelsLayoutVertical()
 	{
-		List<Score> sList = Score.scoresList;
-		foreach (Score s in sList)
+		List<ScorePanel> sList = ScorePanel.scoresList;
+		foreach (ScorePanel s in sList)
 		{
 			s.Height = levels.Height / 7;
 			s.Width = GetWidth();

@@ -6,35 +6,11 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Runtime.InteropServices;
 
-public enum PaceStatus
+public class ScorePanel : Panel
 {
-	Default,
-	Ahead,
-	Behind,
-	Gold
-}
-public class Entry
-{
-	public string name = "";
-	public int score = 0;
-	
-	public Entry(string name, int score)
-	{
-		this.name = name;
-		this.score = score;
-	}
-	
-	public override string ToString()
-	{
-		return String.Format("{0}: {1}", name, score);
-	}
-}
-
-public class Score : Panel
-{
-	private static Dictionary<string, Score> scores = new Dictionary<string, Score>();
-	public static List<Score> scoresList = new List<Score>();
-	public static List<Entry> topData = new List<Entry>();
+	private static Dictionary<string, ScorePanel> scores = new Dictionary<string, ScorePanel>();
+	public static List<ScorePanel> scoresList = new List<ScorePanel>();
+	public static List<ScoreEntry> topData = new List<ScoreEntry>();
 	
 	private Label nameLabel = new Label();
 	private Label scoreLabel = new Label();
@@ -56,12 +32,12 @@ public class Score : Panel
 	private int index = 0;
 	public int arrayIndex = 0;
 	
-	private Score()
+	private ScorePanel()
 	{
 		
 	}
 	
-	public Score(string name, int score)
+	public ScorePanel(string name, int score)
 	{
 		if (scores.ContainsKey(name))
 			return;
@@ -92,7 +68,7 @@ public class Score : Panel
 		
 	}
 	
-	~Score()
+	~ScorePanel()
 	{
 		scores.Remove(this.name);
 		scoresList.Remove(this);
@@ -315,7 +291,7 @@ public class Score : Panel
 				scoresList[i].best = scoresList[i].CurrentScore;
 				updated = true;
 				bool contains = false;
-				foreach(Entry entry in topData)
+				foreach(ScoreEntry entry in topData)
 				{
 					if (entry.name == scoresList[i].name)
 					{
@@ -325,7 +301,7 @@ public class Score : Panel
 				}
 				if (!contains)
 				{
-					topData.Add(new Entry(scoresList[i].name, scoresList[i].CurrentScore));
+					topData.Add(new ScoreEntry(scoresList[i].name, scoresList[i].CurrentScore));
 				}
 			}
 		}
@@ -415,7 +391,7 @@ public class Score : Panel
 		InputWindow.topScore.Text = "" + tot;
 	}
 	
-	public static Score GetScore(string name)
+	public static ScorePanel GetScore(string name)
 	{
 		if (scores.ContainsKey(name))
 			return scores[name];
@@ -432,13 +408,13 @@ public class Score : Panel
 			if (arrayIndex > -1)
 				scores[name].arrayIndex = arrayIndex;
 		}
-		topData.Add(new Entry(name, score));
+		topData.Add(new ScoreEntry(name, score));
 	}
 	
 	public static int GetTotal()
 	{
 		int t = 0;
-		foreach (Score s in scoresList)
+		foreach (ScorePanel s in scoresList)
 		{
 			t += s.CurrentScore;
 		}
@@ -448,7 +424,7 @@ public class Score : Panel
 	public static int GetOldScore()
 	{
 		int t = 0;
-		foreach (Score s in scoresList)
+		foreach (ScorePanel s in scoresList)
 		{
 			t += s.pbScore;
 		}

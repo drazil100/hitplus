@@ -142,7 +142,7 @@ public class InputWindow : Form
 
 	public void UpdateCurrentScore()
 	{
-		if (tracker == null || Score.scoresList == null || Score.scoresList.Count == 0) return;
+		if (tracker == null || ScorePanel.scoresList == null || ScorePanel.scoresList.Count == 0) return;
 
 		currentScoreName.Text = "Total:";
 
@@ -158,7 +158,7 @@ public class InputWindow : Form
 		}
 		Color p = colors["text_color"];
 		if (tracker.IsRunning() && config["casual_mode"] == "0")
-			p = Score.scoresList[tracker.index - 1].CurrentColor;
+			p = ScorePanel.scoresList[tracker.index - 1].CurrentColor;
 		currentScore.ForeColor = p;
 		currentScoreName.Text = "Total:";
 	}
@@ -426,7 +426,7 @@ public class InputWindow : Form
 		}
 		config.Save();
 		
-		Score.ToggleCasualMode();
+		ScorePanel.ToggleCasualMode();
 		UpdateCurrentScore();
 		inputBox.Focus();
 	}
