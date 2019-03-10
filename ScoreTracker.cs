@@ -784,7 +784,12 @@ public class ScoreTracker : Form
 			pbEasy.AddNewItem("Sector X", "0");
 			pbEasy.AddNewItem("Macbeth",  "0");
 			pbEasy.AddNewItem("Area 6",   "0");
-			pbEasy.AddNewItem("Venom",    "0");
+			pbEasy.AddNewItem("Venom 2",    "0");
+			if (pbEasy.ContainsKey("Venom"))
+			{
+				pbEasy["Venom 2"] = pbEasy["Venom"];
+				pbEasy.RemoveKey("Venom");
+			}
 			pbEasy.Save();
 
 			pbHard = new FileReader("pb_hard.txt", SortingStyle.Validate);
@@ -794,7 +799,12 @@ public class ScoreTracker : Form
 			pbHard.AddNewItem("Zoness",   "0");
 			pbHard.AddNewItem("Macbeth",  "0");
 			pbHard.AddNewItem("Area 6",   "0");
-			pbHard.AddNewItem("Venom",    "0");
+			pbHard.AddNewItem("Venom 2",    "0");
+			if (pbHard.ContainsKey("Venom"))
+			{
+				pbHard["Venom 2"] = pbHard["Venom"];
+				pbHard.RemoveKey("Venom");
+			}
 			pbHard.Save();
 
 			individualLevels = new FileReader("pb_individuals.txt", SortingStyle.Unsort);
@@ -823,6 +833,13 @@ public class ScoreTracker : Form
 					individualLevels.AddNewItem("Hard Route", "" + total);
 					individualLevels["Hard Route"] = "" + total;
 				}
+			}
+			
+			
+			if (individualLevels.ContainsKey("Venom"))
+			{
+				individualLevels["Venom 2"] = individualLevels["Venom"];
+				individualLevels.RemoveKey("Venom");
 			}
 
 			individualLevels.Save();
