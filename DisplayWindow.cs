@@ -19,8 +19,6 @@ public class DisplayWindow : Form
 	{
 		//this.peanut_butter = peanut_butter;
 		//this.individual_levels = individual_levels;
-
-		Font = new Font(ScoreTracker.config["font"], Int32.Parse(ScoreTracker.config["font_size"]), FontStyle.Bold);
 		Text = "Star Fox 64 Score Tracker";
 
 
@@ -28,8 +26,6 @@ public class DisplayWindow : Form
 
 		//  Set colors
 		BackColor = ScoreTracker.colors["background_color"];
-		ScoreTracker.topScoreName.ForeColor = ScoreTracker.colors["text_color_total"];
-		ScoreTracker.sobScoreName.ForeColor = ScoreTracker.colors["text_color_total"];
 
 		Initialize(cont);
 
@@ -153,6 +149,12 @@ public class DisplayWindowContent : Panel
 
 	public DisplayWindowContent()
 	{
+		Font = new Font(ScoreTracker.config["font"], Int32.Parse(ScoreTracker.config["font_size"]), FontStyle.Bold);
+
+		BackColor = ScoreTracker.colors["background_color"];
+		ScoreTracker.topScoreName.ForeColor = ScoreTracker.colors["text_color_total"];
+		ScoreTracker.sobScoreName.ForeColor = ScoreTracker.colors["text_color_total"];
+
 		SetControls();
 		DoLayout();
 	}

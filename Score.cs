@@ -506,7 +506,7 @@ public class Score : Panel
 			n = "MA";
 			break;
 			case "Area 6":
-			n = "a6";
+			n = "A6";
 			break;
 			case "Venom 1":
 			case "Venom 2":
