@@ -381,7 +381,7 @@ public class Score : Panel
 			}
 			scoresList[i].CurrentScore = -1;
 		}
-		ScoreTracker.sobScore.Text = "" + sob;
+		InputWindow.sobScore.Text = "" + sob;
 		
 		//string config = "";
 		
@@ -412,7 +412,7 @@ public class Score : Panel
 			ScoreTracker.individualLevels.Save();
 		}
 		
-		ScoreTracker.topScore.Text = "" + tot;
+		InputWindow.topScore.Text = "" + tot;
 	}
 	
 	public static Score GetScore(string name)
