@@ -47,6 +47,12 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 		return this.GetEnumeratorInternal();
 	}
 
+	public string FileName
+	{
+		get { return fileName; }
+		set { fileName = value; }
+	}
+
 	private BaseFileReader() : base() {}
 	public BaseFileReader(string file, SortingStyle sorting = SortingStyle.Sort) : base()
 	{

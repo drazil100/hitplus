@@ -50,7 +50,7 @@ public class InputWindow : Form
 	public InputWindow()
 	{
 		mainWindow = this;
-		tracker = new TrackerCore();
+		tracker = ScoreTracker.tracker;
 		display = new DisplayWindow (new DisplayWindowContent());
 
 		config = ScoreTracker.config;
@@ -142,7 +142,7 @@ public class InputWindow : Form
 
 	public void UpdateCurrentScore()
 	{
-		if (tracker == null || ScorePanel.scoresList == null || ScorePanel.scoresList.Count == 0) return;
+		if (tracker == null) return;
 
 		currentScoreName.Text = "Total:";
 
@@ -152,13 +152,12 @@ public class InputWindow : Form
 		}
 		else
 		{
-			currentScore.Text = "" + tracker.GetScore();
-			if (tracker.GetScore() == 0)
+			currentScore.Text = "" + tracker.GetTotalScore();
+			if (tracker.GetTotalScore() == 0)
 				currentScore.Text = "-";
 		}
 		Color p = colors["text_color"];
-		if (tracker.IsRunning() && config["casual_mode"] == "0")
-			p = ScorePanel.scoresList[tracker.index - 1].CurrentColor;
+		//if (tracker.IsRunning() && config["casual_mode"] == "0")
 		currentScore.ForeColor = p;
 		currentScoreName.Text = "Total:";
 	}
@@ -296,6 +295,7 @@ public class InputWindow : Form
 			}
 
 			inputBox.Focus();
+			display.UpdateContent();
 
 			if (tracker.IsFinished())
 			{
@@ -323,6 +323,7 @@ public class InputWindow : Form
 			UpdateCurrentScore();
 
 			inputBox.Focus();
+			display.UpdateContent();
 		}
 		catch (Exception e2)
 		{
@@ -346,7 +347,10 @@ public class InputWindow : Form
 			currentScore.Text = "-";
 		}
 		SwapControls (submit);
+		topScore.Text = "" + tracker.GetOldTotal();
+		sobScore.Text = "" + tracker.GetSOB();
 		inputBox.Focus();
+		display.UpdateContent();
 	}
 
 	public void SwitchRoutes(object sender, EventArgs e)
@@ -410,6 +414,7 @@ public class InputWindow : Form
 			Console.WriteLine(ex.Message);
 		}
 		inputBox.Focus();
+		display.UpdateContent();
 	}
 	
 	public void ToggleCasualMode(object sender, EventArgs e)
@@ -426,9 +431,10 @@ public class InputWindow : Form
 		}
 		config.Save();
 		
-		ScorePanel.ToggleCasualMode();
+		//ScorePanel.ToggleCasualMode();
 		UpdateCurrentScore();
 		inputBox.Focus();
+		display.UpdateContent();
 	}
 	
 	public void OpenOptions(object sender, EventArgs e)
@@ -464,6 +470,7 @@ public class InputWindow : Form
 			UpdateCurrentScore();
 			SwapControls (submit);
 		}
+		display.UpdateContent();
 	}
 
 	public void SaveBounds()

@@ -9,35 +9,29 @@ public enum PaceStatus
 	Gold
 }
 
-public class ScoreEntry
-{
-	public string name = "";
-	public int score = 0;
-	
-	public ScoreEntry(string name, int score)
-	{
-		this.name = name;
-		this.score = score;
-	}
-	
-	public override string ToString()
-	{
-		return String.Format("{0}: {1}", name, score);
-	}
-}
-
 public class TrackerCore
 {
+	private TrackerData scores;
 	public int index = 0;
 
-	public int GetScore()
+	public TrackerCore(TrackerData data)
 	{
-		int tmp = 0;
-			foreach (ScorePanel sc in ScorePanel.scoresList)
-			{
-				tmp += sc.CurrentScore;
-			}
-			return tmp;
+		scores = data;
+	}
+
+
+	public int GetTotalScore()
+	{
+		return scores.GetScoreSet().GetScoreTotal();
+	}
+	public int GetOldTotal()
+	{
+		return scores.GetScoreSet(0).GetComparisonTotal();
+	}
+
+	public int GetSOB()
+	{
+		return scores.GetScoreSet(1).GetComparisonTotal();
 	}
 
 	public bool IsRunning()
@@ -47,19 +41,15 @@ public class TrackerCore
 
 	public bool IsFinished()
 	{
-		return (index == ScorePanel.scoresList.Count);
+		return (index == scores.Count);
 	}
 	
 	public void Submit(int score)
 	{	
 		if (IsFinished()) return;
-		ScorePanel.scoresList[index].CurrentScore = score;
-		ScorePanel.scoresList[index].Unhighlight();
+		scores[index] = score;
 
 		index++;
-
-		if (index != ScorePanel.scoresList.Count)
-			ScorePanel.scoresList[index].Highlight();
 	}
 
 	public void Undo()
@@ -67,28 +57,29 @@ public class TrackerCore
 		if (index == 0) return;
 		if (!IsFinished())
 		{
-			ScorePanel.scoresList[index].CurrentScore = -1;
-			ScorePanel.scoresList[index].Unhighlight();
+			scores[index] = -1;
 		}
 		index--;
-		ScorePanel.scoresList[index].CurrentScore = -1;
-		if (index > 0 || ScoreTracker.config["start_highlighted"] == "1")
-			ScorePanel.scoresList[index].Highlight();
+		scores[index] = -1;
 	}
 
 	public void SaveAndReset()
 	{
-		ScorePanel.UpdateBestScores();
-		ScorePanel.SaveRun();
+		scores.UpdateBestScores();
+		scores.SaveRun();
+		ClearScores();
 		index = 0;
-		if (ScoreTracker.config["start_highlighted"] == "1")
-			ScorePanel.scoresList[index].Highlight();
 	}
 
 	public void Reset()
 	{
 		index = 0;
-		if (ScoreTracker.config["start_highlighted"] == "1")
-			ScorePanel.scoresList[index].Highlight();
+	}
+	public void ClearScores ()
+	{
+		for (int i = 0; i < scores.Count; i++)
+		{
+			scores[i] = -1;
+		}
 	}
 }

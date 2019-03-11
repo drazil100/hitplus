@@ -112,6 +112,11 @@ public class DisplayWindow : Form
 		DoLayout();
 	}
 
+	public void UpdateContent()
+	{
+		dispContent.SetControls();
+	}
+
 	public void DoLayout()
 	{
 		if (dispContent != null)
@@ -144,7 +149,7 @@ public class DisplayWindowContent : Panel
 
 	private Panel totals = new Panel();
 	private Panel levels = new Panel();
-
+	private List<Panel> panels = new List<Panel>();
 
 
 	public DisplayWindowContent()
@@ -178,38 +183,21 @@ public class DisplayWindowContent : Panel
 	{
 		totals.Controls.Clear();
 		levels.Controls.Clear();
+		panels.Clear();
 		Controls.Clear();
-		ScorePanel.ClearScores ();
 
-		FileReader run = ScoreTracker.pbEasy;
-		if (ScoreTracker.config["hard_route"] == "1")
-		{
-			run = ScoreTracker.pbHard;
-		}
+		TrackerData run = ScoreTracker.data;
 		try
 		{
-			int total = 0;
-			int sob = 0;
-			foreach(KeyValuePair<string, string> level in run)
+			int total = run.GetScoreSet().GetComparisonTotal();
+			int sob = run.GetScoreSet(1).GetComparisonTotal();
+			foreach(ScoreEntry entry in run.GetScoreSet())
 			{
-				int sc = Int32.Parse(level.Value);
-				total += sc;
-				ScorePanel newScore = new ScorePanel(level.Key, sc);
+				ScorePanel newScore = new ScorePanel(entry);
 				levels.Controls.Add(newScore);
-
+				panels.Add(newScore);
 			}
 
-			int i = 0;
-			foreach(KeyValuePair<string, string> level in ScoreTracker.individualLevels)
-			{
-				ScorePanel.SetBest(level.Key, Int32.Parse(level.Value), i);
-				i++;
-			}
-
-			foreach(ScorePanel s in ScorePanel.scoresList)
-			{
-				sob += s.best;
-			}
 			InputWindow.topScoreName.Text = "Top: ";
 			InputWindow.topScore.Text = "" + total;
 			if (ScoreTracker.config["layout"] == "1")
@@ -317,8 +305,8 @@ public class DisplayWindowContent : Panel
 
 	public void DoLevelsLayoutHorizontal()
 	{
-		List<ScorePanel> sList = ScorePanel.scoresList;
-		foreach (ScorePanel s in sList)
+		List<Panel> sList = panels;
+		foreach (Panel s in sList)
 		{
 			s.Height = GetHeight();
 			s.Width = levels.Width / 7;
@@ -369,8 +357,8 @@ public class DisplayWindowContent : Panel
 
 	public void DoLevelsLayoutVertical()
 	{
-		List<ScorePanel> sList = ScorePanel.scoresList;
-		foreach (ScorePanel s in sList)
+		List<Panel> sList = panels;
+		foreach (Panel s in sList)
 		{
 			s.Height = levels.Height / 7;
 			s.Width = GetWidth();

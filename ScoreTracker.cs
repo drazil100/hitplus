@@ -23,6 +23,8 @@ public class ScoreTracker : Form
 	const int SW_HIDE = 0;
 	const int SW_SHOW = 5;
 	
+	public static TrackerCore tracker;
+	public static TrackerData data;
 
 	public static FileReader config;
 	public static FileReader pbEasy;
@@ -290,6 +292,9 @@ public class ScoreTracker : Form
 			}
 
 			individualLevels.Save();
+
+			data = new TrackerData(pbEasy);
+			tracker = new TrackerCore(data);
 		}
 		catch (Exception e)
 		{
