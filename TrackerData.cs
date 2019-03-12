@@ -13,7 +13,7 @@ public class TrackerData
 	public TrackerData(FileReader route)
 	{
 		scores = new ScoreSet(route);
-		if (!Directory.Exists(route.Name)) 
+		if (!Directory.Exists(route.Name))
 			Directory.CreateDirectory(route.Name);
 
 		FileReader bestsFile = new FileReader(Path.Combine(route.Name, "best.txt"), SortingStyle.Validate);
@@ -25,7 +25,7 @@ public class TrackerData
 
 	private void Validate(FileReader template, FileReader toCheck)
 	{
-		foreach(KeyValuePair<string, string> pair in template.GetSectionEnumerator("General"))
+		foreach(KeyValuePair<string, string> pair in template.GetSection("General"))
 		{
 			toCheck.AddNewItem(pair.Key, "0");
 		}

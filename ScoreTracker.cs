@@ -263,7 +263,7 @@ public class ScoreTracker : Form
 			if (config["include_route_pbs_in_individuals_file"] == "1")
 			{
 				int total = 0;
-				foreach (KeyValuePair<string, string> pair in pbEasy.GetSectionEnumerator("General"))
+				foreach (KeyValuePair<string, string> pair in pbEasy.GetSection("General"))
 				{
 					total += Int32.Parse(pair.Value);
 				}
@@ -273,7 +273,7 @@ public class ScoreTracker : Form
 					individualLevels["Easy Route"] = "" + total;
 				}
 				total = 0;
-				foreach (KeyValuePair<string, string> pair in pbHard.GetSectionEnumerator("General"))
+				foreach (KeyValuePair<string, string> pair in pbHard.GetSection("General"))
 				{
 					total += Int32.Parse(pair.Value);
 				}

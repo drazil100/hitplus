@@ -10,7 +10,7 @@ public class ScoreSet : IEnumerable<ScoreEntry>
 	public ScoreSet(FileReader file)
 	{
 		this.file = file;
-		foreach (KeyValuePair<string, string> pair in file.GetSectionEnumerator("General"))
+		foreach (KeyValuePair<string, string> pair in file.GetSection("General"))
 		{
 			scores.Add(new ScoreEntry(pair.Key, Int32.Parse(pair.Value)));
 		}

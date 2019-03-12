@@ -211,7 +211,7 @@ public class OptionsWindow : Form
 	private void ConfigureScoreTab ()
 	{
 		scoreTab.Controls.Clear ();
-		foreach (KeyValuePair<string, string> il in ils.GetSectionEnumerator("General"))
+		foreach (KeyValuePair<string, string> il in ils.GetSection("General"))
 		{
 			if (il.Key != "Easy Route" && il.Key != "Hard Route")
 			{
@@ -229,7 +229,7 @@ public class OptionsWindow : Form
 
 	private void ConfigColors()
 	{
-		foreach (KeyValuePair<string, Color> pair in colorTheme.GetSectionEnumerator("General"))
+		foreach (KeyValuePair<string, Color> pair in colorTheme.GetSection("General"))
 		{
 			ColorField c = new ColorField(OptionNameToLabelName(pair.Key), pair.Value);
 			colors.Add(c);

@@ -35,6 +35,52 @@ public struct SectionKeyValue<T>
 
 public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 {
+	public class Section: IEnumerable<KeyValuePair<string, T>>
+	{
+		private BaseFileReader<T> owner;
+		private string section;
+
+		public Section(BaseFileReader<T> owner, string section) : base()
+		{
+			this.owner = owner;
+			this.section = section;
+		}
+
+		private IEnumerator<KeyValuePair<string, T>> GetEnumeratorInternal()
+		{
+			lock (owner.content)
+			{
+				foreach (var entry in owner) {
+					if (entry.Section == section) {
+						yield return new KeyValuePair<string, T>(entry.Key, entry.Value);
+					}
+				}
+				yield break;
+			}
+		}
+
+		public IEnumerator<KeyValuePair<string, T>> GetEnumerator()
+		{
+			return this.GetEnumeratorInternal();
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return this.GetEnumeratorInternal();
+		}
+
+		public T this[string key]
+		{
+			get {
+				return owner[section, key];
+			}
+
+			set {
+				owner[section, key] = value;
+			}
+		}
+	}
+
 	protected sealed class StackMonitor
 	{
 		private int depth;
@@ -79,9 +125,9 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 
 	private char[] keySeparator = { '=' };
 	private static string[] lineSeparator = { "\n" };
-	private OrderedDictionary<string, OrderedDictionary<string, string>> content = new OrderedDictionary<string, OrderedDictionary<string, string>>();
-	private OrderedDictionary<string, OrderedDictionary<string, string>> defaultValues = new OrderedDictionary<string, OrderedDictionary<string, string>>();
-	private Dictionary<Tuple<string, string>, T> cachedValues = new Dictionary<Tuple<string, string>, T>();
+	protected OrderedDictionary<string, OrderedDictionary<string, string>> content = new OrderedDictionary<string, OrderedDictionary<string, string>>();
+	protected OrderedDictionary<string, OrderedDictionary<string, string>> defaultValues = new OrderedDictionary<string, OrderedDictionary<string, string>>();
+	protected Dictionary<Tuple<string, string>, T> cachedValues = new Dictionary<Tuple<string, string>, T>();
 	private SortingStyle sorting = SortingStyle.Sort;
 
 	private IEnumerator<SectionKeyValue<T>> GetEnumeratorInternal()
@@ -365,7 +411,7 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 				foreach (var entry in this)
 				{
 					if (lastSection != entry.Section) {
-						sw.Write(String.Format("[{0}]\n", entry.Section));
+						sw.Write(String.Format("[{0}]\r\n", entry.Section));
 						lastSection = entry.Section;
 					}
 					sw.Write(String.Format("{0}{2} {1}\r\n", entry.Key, ValueToString(entry.Value), KeySeparator));
@@ -374,16 +420,8 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 		}
 	}
 
-	public IEnumerable<KeyValuePair<string, T>> GetSectionEnumerator(string section) {
-		lock (content)
-		{
-			foreach (var entry in this) {
-				if (entry.Section == section) {
-					yield return new KeyValuePair<string, T>(entry.Key, entry.Value);
-				}
-			}
-			yield break;
-		}
+	public Section GetSection(string section) {
+		return new Section(this, section);
 	}
 
 	public abstract T StringToValue(string val);
