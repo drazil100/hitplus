@@ -10,24 +10,21 @@ public class TrackerData
 
 	private int comparisonIndex = 0;
 
-	public TrackerData(FileReader route)
+	public TrackerData(FileReader file)
 	{
-		scores = new ScoreSet(route);
-		if (!Directory.Exists(route.Name))
-			Directory.CreateDirectory(route.Name);
-
-		FileReader bestsFile = new FileReader(Path.Combine(route.Name, "best.txt"), SortingStyle.Validate);
-		Validate(route, bestsFile);
-		bestsFile.Save();
-		best = new ScoreSet(bestsFile);
+		scores = new ScoreSet(file, "Best Run");
+		Validate(file, "Best Run");
+		Validate(file, "Best Scores");
+		file.Save();
+		best = new ScoreSet(file, "Best Scores");
 
 	}
 
-	private void Validate(FileReader template, FileReader toCheck)
+	private void Validate(FileReader file, string section)
 	{
-		foreach(KeyValuePair<string, string> pair in template.GetSection("General"))
+		foreach(var pair in file.GetSection("Best Run"))
 		{
-			toCheck.AddNewItem(pair.Key, "0");
+			file.AddNewItem(section, pair.Key, "0");
 		}
 	}
 

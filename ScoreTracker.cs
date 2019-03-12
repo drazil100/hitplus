@@ -227,13 +227,13 @@ public class ScoreTracker : Form
 
 
 			pbEasy = new FileReader("pb_easy.txt", SortingStyle.Validate);
-			pbEasy.AddNewItem("Corneria", "0");
-			pbEasy.AddNewItem("Meteo",    "0");
-			pbEasy.AddNewItem("Katina",   "0");
-			pbEasy.AddNewItem("Sector X", "0");
-			pbEasy.AddNewItem("Macbeth",  "0");
-			pbEasy.AddNewItem("Area 6",   "0");
-			pbEasy.AddNewItem("Venom 2",    "0");
+			pbEasy.AddNewItem("Best Run", "Corneria", "0");
+			pbEasy.AddNewItem("Best Run", "Meteo",    "0");
+			pbEasy.AddNewItem("Best Run", "Katina",   "0");
+			pbEasy.AddNewItem("Best Run", "Sector X", "0");
+			pbEasy.AddNewItem("Best Run", "Macbeth",  "0");
+			pbEasy.AddNewItem("Best Run", "Area 6",   "0");
+			pbEasy.AddNewItem("Best Run", "Venom 2",    "0");
 			if (pbEasy.ContainsKey("Venom"))
 			{
 				pbEasy["Venom 2"] = pbEasy["Venom"];
@@ -242,13 +242,13 @@ public class ScoreTracker : Form
 			pbEasy.Save();
 
 			pbHard = new FileReader("pb_hard.txt", SortingStyle.Validate);
-			pbHard.AddNewItem("Corneria", "0");
-			pbHard.AddNewItem("Sector Y", "0");
-			pbHard.AddNewItem("Aquas",    "0");
-			pbHard.AddNewItem("Zoness",   "0");
-			pbHard.AddNewItem("Macbeth",  "0");
-			pbHard.AddNewItem("Area 6",   "0");
-			pbHard.AddNewItem("Venom 2",    "0");
+			pbHard.AddNewItem("Best Run", "Corneria", "0");
+			pbHard.AddNewItem("Best Run", "Sector Y", "0");
+			pbHard.AddNewItem("Best Run", "Aquas",    "0");
+			pbHard.AddNewItem("Best Run", "Zoness",   "0");
+			pbHard.AddNewItem("Best Run", "Macbeth",  "0");
+			pbHard.AddNewItem("Best Run", "Area 6",   "0");
+			pbHard.AddNewItem("Best Run", "Venom 2",    "0");
 			if (pbHard.ContainsKey("Venom"))
 			{
 				pbHard["Venom 2"] = pbHard["Venom"];

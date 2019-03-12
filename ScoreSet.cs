@@ -5,14 +5,16 @@ using System.Collections.Generic;
 public class ScoreSet : IEnumerable<ScoreEntry>
 {
 	private FileReader file;
+	private string section = "";
 	private List<ScoreEntry> scores = new List<ScoreEntry>();
 
-	public ScoreSet(FileReader file)
+	public ScoreSet(FileReader file, string section)
 	{
 		this.file = file;
+		this.section = section;
 
 		int i = 0;
-		foreach (KeyValuePair<string, string> pair in file.GetSection("General"))
+		foreach (KeyValuePair<string, string> pair in file.GetSection(section))
 		{
 			ScoreEntry entry = new ScoreEntry(pair.Key, Int32.Parse(pair.Value));
 			entry.Position = i++;
@@ -123,7 +125,7 @@ public class ScoreSet : IEnumerable<ScoreEntry>
 	{
 		foreach (ScoreEntry score in scores)
 		{
-			file[score.Name] = "" + score.Score;
+			file[section, score.Name] = "" + score.Score;
 		}
 		file.Save();
 	}
@@ -131,7 +133,7 @@ public class ScoreSet : IEnumerable<ScoreEntry>
 	{
 		foreach (ScoreEntry score in scores)
 		{
-			file[score.Name] = "" + score.Comparison;
+			file[section, score.Name] = "" + score.Comparison;
 		}
 		file.Save();
 	}
