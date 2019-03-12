@@ -421,7 +421,7 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 						sw.Write(String.Format("[{0}]\r\n", entry.Section));
 						lastSection = entry.Section;
 					}
-					sw.Write(String.Format("{0}{2} {1}\r\n", entry.Key, ValueToString(entry.Value), KeySeparator));
+					sw.Write(String.Format("{0} {2} {1}\r\n", entry.Key, ValueToString(entry.Value), KeySeparator));
 				}
 			}
 		}
