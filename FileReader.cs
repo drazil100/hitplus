@@ -152,15 +152,26 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 		this.sorting = sorting;
 		FileName = "";
 		DefaultSection = "General";
+		content.Add(DefaultSection, new OrderedDictionary<string, string>());
 	}
 
 	public BaseFileReader(string file, SortingStyle sorting = SortingStyle.Sort) : this(sorting)
 	{
+		Load(file);
+	}
+
+	public BaseFileReader(char separator, string file, SortingStyle sorting = SortingStyle.Sort) : this(sorting)
+	{
+		KeySeparator = separator;
+		Load(file);
+	}
+
+	public void Load(string file)
+	{
 		FileName = file;
 
 		string sectionName = DefaultSection;
-		var section = new OrderedDictionary<string, string>();
-		content.Add(sectionName, section);
+		var section = content[sectionName];
 
 		try
 		{
@@ -357,7 +368,7 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 						sw.Write(String.Format("[{0}]\n", entry.Section));
 						lastSection = entry.Section;
 					}
-					sw.Write(String.Format("{0}: {1}\r\n", entry.Key, ValueToString(entry.Value)));
+					sw.Write(String.Format("{0}{2} {1}\r\n", entry.Key, ValueToString(entry.Value), KeySeparator));
 				}
 			}
 		}
