@@ -22,7 +22,7 @@ public class ScoreTracker : Form
 
 	const int SW_HIDE = 0;
 	const int SW_SHOW = 5;
-	
+
 	public static TrackerCore tracker;
 	public static TrackerData data;
 
@@ -36,7 +36,7 @@ public class ScoreTracker : Form
 	{
 
 	}
-	
+
 	public static int DateToNumber(string dt) {
 		string[] parts = dt.Split('/');
 		return Int32.Parse(parts[2]) * 10000 + Int32.Parse(parts[0]) * 100 + Int32.Parse(parts[1]);
@@ -90,7 +90,7 @@ public class ScoreTracker : Form
 			config.AddNewItem("sums_horizontal_alignment",             "0");
 
 			List<string> fonts = new List<string>();
-			
+
 			foreach (FontFamily f in System.Drawing.FontFamily.Families)
 			{
 				fonts.Add(f.Name);
@@ -263,7 +263,7 @@ public class ScoreTracker : Form
 			if (config["include_route_pbs_in_individuals_file"] == "1")
 			{
 				int total = 0;
-				foreach (KeyValuePair<string, string> pair in pbEasy)
+				foreach (KeyValuePair<string, string> pair in pbEasy.GetSection("General"))
 				{
 					total += Int32.Parse(pair.Value);
 				}
@@ -273,7 +273,7 @@ public class ScoreTracker : Form
 					individualLevels["Easy Route"] = "" + total;
 				}
 				total = 0;
-				foreach (KeyValuePair<string, string> pair in pbHard)
+				foreach (KeyValuePair<string, string> pair in pbHard.GetSection("General"))
 				{
 					total += Int32.Parse(pair.Value);
 				}
@@ -283,8 +283,8 @@ public class ScoreTracker : Form
 					individualLevels["Hard Route"] = "" + total;
 				}
 			}
-			
-			
+
+
 			if (individualLevels.ContainsKey("Venom"))
 			{
 				individualLevels["Venom 2"] = individualLevels["Venom"];
@@ -312,7 +312,7 @@ public class ScoreTracker : Form
 		{
 			Application.Run(new InputWindow());
 		}
-		catch (Exception e) 
+		catch (Exception e)
 		{
 			Console.WriteLine(e.Message);
 		}

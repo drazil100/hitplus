@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 
 public class OptionsWindow : Form
 {
-	
+
 	private FileReader config;
 	private FileReader ils;
 	private ColorFileReader colorTheme;
@@ -49,7 +49,7 @@ public class OptionsWindow : Form
 
 		generalTab.Text = "General";
 		tabs.TabPages.Add (generalTab);
-		
+
 		colorTab.Text = "Colors";
 		tabs.TabPages.Add (colorTab);
 
@@ -211,7 +211,7 @@ public class OptionsWindow : Form
 	private void ConfigureScoreTab ()
 	{
 		scoreTab.Controls.Clear ();
-		foreach (KeyValuePair<string, string> il in ils)
+		foreach (KeyValuePair<string, string> il in ils.GetSection("General"))
 		{
 			if (il.Key != "Easy Route" && il.Key != "Hard Route")
 			{
@@ -229,7 +229,7 @@ public class OptionsWindow : Form
 
 	private void ConfigColors()
 	{
-		foreach (KeyValuePair<string, Color> pair in colorTheme)
+		foreach (KeyValuePair<string, Color> pair in colorTheme.GetSection("General"))
 		{
 			ColorField c = new ColorField(OptionNameToLabelName(pair.Key), pair.Value);
 			colors.Add(c);
@@ -317,7 +317,7 @@ public class ColorField : OptionField
 	{
 		return color.Color;
 	}
-	
+
 	public void OnClick(object sender, EventArgs e)
 	{
 		if (color.ShowDialog() == DialogResult.OK)
@@ -349,10 +349,10 @@ public class NumericField : OptionField
 
 	public string Number
 	{
-		get 
-		{ 
-			if (score.Text != "") 
-				return score.Text; 
+		get
+		{
+			if (score.Text != "")
+				return score.Text;
 			return "0";
 		}
 	}
@@ -429,7 +429,7 @@ public class DropdownField : OptionField
 public class CheckField : OptionField
 {
 	public Label name = new Label();
-	public CheckBox option = new CheckBox(); 
+	public CheckBox option = new CheckBox();
 
 	public CheckField(string name, string current)
 	{

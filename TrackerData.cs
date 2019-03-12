@@ -13,19 +13,19 @@ public class TrackerData
 	public TrackerData(FileReader route)
 	{
 		scores = new ScoreSet(route);
-		if (!Directory.Exists(route.Name)) 
+		if (!Directory.Exists(route.Name))
 			Directory.CreateDirectory(route.Name);
 
 		FileReader bestsFile = new FileReader(Path.Combine(route.Name, "best.txt"), SortingStyle.Validate);
 		Validate(route, bestsFile);
 		bestsFile.Save();
 		best = new ScoreSet(bestsFile);
-		
+
 	}
 
 	private void Validate(FileReader template, FileReader toCheck)
 	{
-		foreach(KeyValuePair<string, string> pair in template)
+		foreach(KeyValuePair<string, string> pair in template.GetSection("General"))
 		{
 			toCheck.AddNewItem(pair.Key, "0");
 		}
@@ -33,13 +33,13 @@ public class TrackerData
 
 	public int this[int index]
 	{
-		set 
+		set
 		{
 			SetScore(scores, index, value);
 			SetScore(best, index, value);
 			foreach (ScoreSet scoreSet in comparisons)
 			{
-				SetScore(scoreSet, index, value); 
+				SetScore(scoreSet, index, value);
 			}
 		}
 	}
@@ -139,22 +139,22 @@ public class TrackerData
 				updated = true;
 			}
 		}
-		
-		if (updated) 
+
+		if (updated)
 		{
 			ScoreTracker.individualLevels.Save();
 			best.SaveComparisons();
 		}
 	}
-	
+
 	public void SaveRun()
 	{
 		int tot = scores.GetScoreTotal();
 		bool doSave = false;
-		
+
 		if (tot > scores.GetComparisonTotal())
 			doSave = true;
-		
+
 		for(int i = 0; i < scores.Count; i++)
 		{
 			if (doSave)
@@ -162,7 +162,7 @@ public class TrackerData
 				scores[i].Comparison = scores[i].Score;
 			}
 		}
-		
+
 		if (!doSave)
 			return;
 		scores.SaveScores();
