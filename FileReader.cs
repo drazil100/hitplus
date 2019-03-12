@@ -79,6 +79,13 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 				owner[section, key] = value;
 			}
 		}
+
+		public IList<string> Keys
+		{
+			get {
+				return owner.GetKeys(section);
+			}
+		}
 	}
 
 	protected sealed class StackMonitor
@@ -422,6 +429,38 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 
 	public Section GetSection(string section) {
 		return new Section(this, section);
+	}
+
+	public IEnumerable<string> Sections {
+		get {
+			lock (content) {
+				var first = (sorting != SortingStyle.Unsort) ? defaultValues : content;
+				var second = (sorting != SortingStyle.Unsort) ? content : defaultValues;
+				foreach (var firstSectionPair in first) {
+					yield return firstSectionPair.Key;
+				}
+				foreach (var secondSectionPair in second) {
+					if (!first.ContainsKey(secondSectionPair.Key)) {
+						yield return secondSectionPair.Key;
+					}
+				}
+				yield break;
+			}
+		}
+	}
+
+	public IList<string> GetKeys(string section) {
+		lock (content) {
+			var first = ((sorting != SortingStyle.Unsort) ? defaultValues : content).GetWithDefault(section, null);
+			var second = ((sorting != SortingStyle.Unsort) ? content : defaultValues).GetWithDefault(section, null);
+			List<string> result = new List<string>(first.Keys);
+			foreach (string key in second.Keys) {
+				if (!result.Contains(key)) {
+					result.Add(key);
+				}
+			}
+			return result;
+		}
 	}
 
 	public abstract T StringToValue(string val);
