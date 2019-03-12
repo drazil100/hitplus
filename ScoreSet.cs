@@ -60,7 +60,7 @@ public class ScoreSet : IEnumerable<ScoreEntry>
 		{
 			score.IsCurrent = false;
 		}
-		scores[index].IsCurrent = true;
+		if (index < Count && index >= 0) scores[index].IsCurrent = true;
 	}
 
 	public int GetScoreTotal()
