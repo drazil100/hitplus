@@ -47,6 +47,10 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 		return this.GetEnumeratorInternal();
 	}
 
+	public string Name
+	{
+		get { return Path.GetFileNameWithoutExtension(fileName); }
+	}
 	public string FileName
 	{
 		get { return fileName; }

@@ -65,16 +65,8 @@ public class DisplayWindow : Form
 		//FormClosing += delegate { CloseNetwork(); };
 	}
 
-	public void Initialize(DisplayWindowContent window)
+	public void DoResize()
 	{
-		BackColor = ScoreTracker.colors["background_color"];
-		InputWindow.topScoreName.ForeColor = ScoreTracker.colors["text_color_total"];
-		InputWindow.sobScoreName.ForeColor = ScoreTracker.colors["text_color_total"];
-
-		dispContent = window;
-		Controls.Clear();
-		Controls.Add(window);
-
 		MinimumSize  = new Size(0, 0);
 		if (ScoreTracker.config["layout"] == "0")
 		{
@@ -109,11 +101,31 @@ public class DisplayWindow : Form
 			Size = new Size(w2, h2);
 		}
 		MinimumSize  = new Size(w, h);
+	}
+
+	public void Initialize(DisplayWindowContent window)
+	{
+
+		dispContent = window;
+		Controls.Clear();
+		Controls.Add(window);
+
+		DoResize();
+
 		DoLayout();
 	}
 
 	public void UpdateContent()
 	{
+		dispContent.DoLayout();
+	}
+	public void ResetContent()
+	{
+		BackColor = ScoreTracker.colors["background_color"];
+		InputWindow.topScoreName.ForeColor = ScoreTracker.colors["text_color_total"];
+		InputWindow.sobScoreName.ForeColor = ScoreTracker.colors["text_color_total"];
+		DoResize();
+		DoLayout();
 		dispContent.SetControls();
 	}
 
@@ -149,7 +161,7 @@ public class DisplayWindowContent : Panel
 
 	private Panel totals = new Panel();
 	private Panel levels = new Panel();
-	private List<Panel> panels = new List<Panel>();
+	private List<ScorePanel> panels = new List<ScorePanel>();
 
 
 	public DisplayWindowContent()
@@ -181,12 +193,17 @@ public class DisplayWindowContent : Panel
 
 	public void SetControls()
 	{
+		Font = new Font(ScoreTracker.config["font"], Int32.Parse(ScoreTracker.config["font_size"]), FontStyle.Bold);
+		BackColor = ScoreTracker.colors["background_color"];
+		InputWindow.topScoreName.ForeColor = ScoreTracker.colors["text_color_total"];
+		InputWindow.sobScoreName.ForeColor = ScoreTracker.colors["text_color_total"];
+
 		totals.Controls.Clear();
 		levels.Controls.Clear();
 		panels.Clear();
 		Controls.Clear();
 
-		TrackerData run = ScoreTracker.data;
+		TrackerData run = ScoreTracker.tracker.Data;
 		try
 		{
 			int total = run.GetScoreSet().GetComparisonTotal();
@@ -239,6 +256,9 @@ public class DisplayWindowContent : Panel
 
 	public void DoLayout()
 	{
+		totals.Top = 0;
+		totals.Left = 0;
+		levels.Left = 0;
 		if (ScoreTracker.config ["layout"] == "0")
 		{
 			totals.Width = 310;
@@ -305,16 +325,16 @@ public class DisplayWindowContent : Panel
 
 	public void DoLevelsLayoutHorizontal()
 	{
-		List<Panel> sList = panels;
-		foreach (Panel s in sList)
+		foreach (ScorePanel panel in panels)
 		{
-			s.Height = GetHeight();
-			s.Width = levels.Width / 7;
+			panel.Height = GetHeight();
+			panel.Width = levels.Width / 7;
+			panel.UpdatePanel();
 		}
 
-		for (int i = 1; i < sList.Count; i++)
+		for (int i = 1; i < panels.Count; i++)
 		{
-			sList[i].Left = sList[i-1].Left + levels.Width / 7;
+			panels[i].Left = panels[i-1].Left + levels.Width / 7;
 		}
 	}
 
@@ -357,16 +377,16 @@ public class DisplayWindowContent : Panel
 
 	public void DoLevelsLayoutVertical()
 	{
-		List<Panel> sList = panels;
-		foreach (Panel s in sList)
+		foreach (ScorePanel panel in panels)
 		{
-			s.Height = levels.Height / 7;
-			s.Width = GetWidth();
+			panel.Height = levels.Height / 7;
+			panel.Width = GetWidth();
+			panel.UpdatePanel();
 		}
 
-		for (int i = 1; i < sList.Count; i++)
+		for (int i = 1; i < panels.Count; i++)
 		{
-			sList[i].Top = sList[i-1].Top + sList[i-1].Height;
+			panels[i].Top = panels[i-1].Top + panels[i-1].Height;
 		}
 	}
 }

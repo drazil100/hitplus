@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 
 public class TrackerData
@@ -12,7 +13,10 @@ public class TrackerData
 	public TrackerData(FileReader route)
 	{
 		scores = new ScoreSet(route);
-		FileReader bestsFile = new FileReader("golds_" + route.FileName, SortingStyle.Validate);
+		if (!Directory.Exists(route.Name)) 
+			Directory.CreateDirectory(route.Name);
+
+		FileReader bestsFile = new FileReader(Path.Combine(route.Name, "best.txt"), SortingStyle.Validate);
 		Validate(route, bestsFile);
 		bestsFile.Save();
 		best = new ScoreSet(bestsFile);
@@ -102,6 +106,16 @@ public class TrackerData
 		return GetScoreSet(comparisonIndex);
 	}
 
+	public PaceStatus GetCurrentPace()
+	{
+		return GetCurrentPace(comparisonIndex);
+	}
+
+	public PaceStatus GetCurrentPace(int index)
+	{
+		return GetScoreSet(index).GetCurrentPace();
+	}
+
 	public void UpdateBestScores()
 	{
 		bool updated = false;
@@ -111,7 +125,7 @@ public class TrackerData
 			if (entry.Score > entry.Comparison)
 			{
 				entry.Comparison = entry.Score;
-				ScoreTracker.individualLevels[entry.Name] = "" + entry.Score;
+				//ScoreTracker.individualLevels[entry.Name] = "" + entry.Score;
 				updated = true;
 			}
 		}

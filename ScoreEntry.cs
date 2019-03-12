@@ -4,7 +4,7 @@ using System.Collections.Generic;
 public class ScoreEntry
 {
 	private string name = "";
-	private int score = 0;
+	private int score = -1;
 	private int comparison = 0;
 	private int pace = 0;
 	private PaceStatus status = PaceStatus.Default;

@@ -19,6 +19,19 @@ public class TrackerCore
 		scores = data;
 	}
 
+	public TrackerData Data
+	{
+		get 
+		{
+			return scores;
+		}
+		set 
+		{
+			scores = value;
+			Reset();
+		}
+	}
+
 
 	public int GetTotalScore()
 	{
@@ -32,6 +45,11 @@ public class TrackerCore
 	public int GetSOB()
 	{
 		return scores.GetScoreSet(1).GetComparisonTotal();
+	}
+
+	public PaceStatus GetCurrentPace()
+	{
+		return scores.GetCurrentPace();
 	}
 
 	public bool IsRunning()
@@ -73,6 +91,7 @@ public class TrackerCore
 
 	public void Reset()
 	{
+		ClearScores();
 		index = 0;
 	}
 	public void ClearScores ()

@@ -293,7 +293,14 @@ public class ScoreTracker : Form
 
 			individualLevels.Save();
 
-			data = new TrackerData(pbEasy);
+			if (config["hard_route"] == "0")
+			{
+				data = new TrackerData(pbEasy);
+			}
+			else
+			{
+				data = new TrackerData(pbHard);
+			}
 			tracker = new TrackerCore(data);
 		}
 		catch (Exception e)

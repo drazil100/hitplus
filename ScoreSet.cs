@@ -83,6 +83,28 @@ public class ScoreSet : IEnumerable<ScoreEntry>
 		return total;
 	}
 
+	public PaceStatus GetCurrentPace()
+	{
+		PaceStatus stat = PaceStatus.Default;
+
+		int temp = 0;
+		for (int i = 0; i < scores.Count && scores[i].IsSet; i++)
+		{
+			temp = scores[i].Pace;
+			//Console.WriteLine(i);
+		}
+		if (temp < 0)
+		{
+			stat = PaceStatus.Behind;
+		}
+		else
+		{
+			stat = PaceStatus.Ahead;
+		}
+
+		return stat;
+	}
+
 	public void SaveScores()
 	{
 		foreach (ScoreEntry score in scores)

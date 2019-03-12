@@ -166,20 +166,6 @@ public class ScorePanel : Panel
 	}
 	
 
-	public Color CurrentColor
-	{
-		get 
-		{
-			Color tmp = colors["text_color"];
-			switch (entry.Status)
-			{
-				case PaceStatus.Ahead:   tmp = colors["text_color_ahead"]; break;
-				case PaceStatus.Behind:  tmp = colors["text_color_behind"]; break;
-			}
-			return tmp;
-		}
-	}
-	
 	public void Highlight()
 	{
 		if (ScoreTracker.config["highlight_current"] != "1")
