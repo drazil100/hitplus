@@ -10,10 +10,15 @@ public class ScoreSet : IEnumerable<ScoreEntry>
 	public ScoreSet(FileReader file)
 	{
 		this.file = file;
+
+		int i = 0;
 		foreach (KeyValuePair<string, string> pair in file.GetSection("General"))
 		{
-			scores.Add(new ScoreEntry(pair.Key, Int32.Parse(pair.Value)));
+			ScoreEntry entry = new ScoreEntry(pair.Key, Int32.Parse(pair.Value));
+			entry.Position = i++;
+			scores.Add(entry);
 		}
+		scores[0].IsCurrent = true;
 	}
 
 	public IEnumerator<ScoreEntry> GetEnumerator() {
@@ -45,6 +50,15 @@ public class ScoreSet : IEnumerable<ScoreEntry>
 	public int Count
 	{
 		get { return scores.Count; }
+	}
+
+	public void SetCurrent(int index)
+	{
+		foreach (ScoreEntry score in scores)
+		{
+			score.IsCurrent = false;
+		}
+		scores[index].IsCurrent = true;
 	}
 
 	public int GetScoreTotal()

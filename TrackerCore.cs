@@ -68,6 +68,8 @@ public class TrackerCore
 		scores[index] = score;
 
 		index++;
+
+		scores.SetCurrent(index);
 	}
 
 	public void Undo()
@@ -79,20 +81,21 @@ public class TrackerCore
 		}
 		index--;
 		scores[index] = -1;
+		scores.SetCurrent(index);
 	}
 
 	public void SaveAndReset()
 	{
 		scores.UpdateBestScores();
 		scores.SaveRun();
-		ClearScores();
-		index = 0;
+		Reset();
 	}
 
 	public void Reset()
 	{
 		ClearScores();
 		index = 0;
+		scores.SetCurrent(0);
 	}
 	public void ClearScores ()
 	{

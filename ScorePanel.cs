@@ -38,20 +38,45 @@ public class ScorePanel : Panel
 		
 		if (ScoreTracker.config["layout"] == "0")
 			displayName = GetAlias(entry.Name);
-		
-		if (ScoreTracker.config["start_highlighted"] == "1")
+
+		Unhighlight();
+
+		if (ScoreTracker.config["highlight_current"] == "1" && entry.IsCurrent)
 			Highlight();
 		
 		scoreLabel.Text = String.Format("{0}", entry.Score);
 		nameLabel.Text = String.Format("{0}:", displayName);
+		paceLabel.Text = "" + Math.Abs(entry.Pace);
 		
 		Controls.Add(nameLabel);
 		Controls.Add(scoreLabel);
 
 		if (ScoreTracker.config["layout"] == "0")
+		{
+			if (entry.Pace < 0) 
+			{
+				signLabel.Text = "-";
+			}
+			else
+			{
+				signLabel.Text = "+";
+			}
 			Controls.Add(signLabel);
+			Controls.Add(paceLabel);
+		}
+		else
+		{
+			if (entry.Pace < 0) 
+			{
+				paceLabel.Text = "-" + paceLabel.Text;
+			}
+			else
+			{
+				paceLabel.Text = "+" + paceLabel.Text;
+			}
+			Controls.Add(paceLabel);
+		}
 		
-		Controls.Add(paceLabel);
 		
 		Resize += delegate { DoLayout(); };
 		
@@ -168,7 +193,7 @@ public class ScorePanel : Panel
 
 	public void Highlight()
 	{
-		if (ScoreTracker.config["highlight_current"] != "1")
+		if (ScoreTracker.config["highlight_current"] != "1" || (ScoreTracker.config["start_highlighted"] != "1" && entry.Position == 0))
 			return;
 		highlighted = true;
 		RecolorPanel();

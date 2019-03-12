@@ -256,11 +256,9 @@ public class DisplayWindowContent : Panel
 
 	public void DoLayout()
 	{
-		totals.Top = 0;
-		totals.Left = 0;
-		levels.Left = 0;
 		if (ScoreTracker.config ["layout"] == "0")
 		{
+			totals.Top = 0;
 			totals.Width = 310;
 			levels.Width = GetWidth () - totals.Width;
 			DoTotalsLayoutHorizontal ();
@@ -268,15 +266,19 @@ public class DisplayWindowContent : Panel
 
 			if (ScoreTracker.config ["sums_horizontal_alignment"] == "1")
 			{
+				totals.Left = 0;
 				levels.Left = totals.Width;
 			}
 			else
 			{
+				levels.Left = 0;
 				totals.Left = levels.Width;
 			}
 		}
 		else
 		{
+			//totals.Top = 0;
+			levels.Left = 0;
 			totals.Width = GetWidth ();
 			levels.Width = GetWidth ();
 			totals.Height = 90;
@@ -293,14 +295,12 @@ public class DisplayWindowContent : Panel
 	{
 		InputWindow.topScoreName.Top = 0;
 		InputWindow.topScore.Top = 0;
-		InputWindow.topScoreName.Left = 0;
-		InputWindow.topScore.Left = 0;
+		//InputWindow.topScoreName.Left = 0;
+		//InputWindow.topScore.Left = 0;
 		InputWindow.sobScoreName.Top = 0;
 		InputWindow.sobScore.Top = 0;
-		InputWindow.sobScoreName.Left = 0;
-		InputWindow.sobScore.Left = 0;
-		InputWindow.currentScore.Left = 0;
-		InputWindow.currentScore.Top = 0;
+		//InputWindow.currentScore.Left = 0;
+		//InputWindow.currentScore.Top = 0;
 
 		InputWindow.topScoreName.Width = 75;
 		InputWindow.topScore.Left = InputWindow.topScoreName.Width;
@@ -340,15 +340,15 @@ public class DisplayWindowContent : Panel
 
 	public void DoTotalsLayoutVertical()
 	{
-		InputWindow.topScoreName.Top = 0;
-		InputWindow.topScore.Top = 0;
+		//InputWindow.topScoreName.Top = 0;
+		//InputWindow.topScore.Top = 0;
 		InputWindow.topScoreName.Left = 0;
-		InputWindow.topScore.Left = 0;
+		//InputWindow.topScore.Left = 0;
 
-		InputWindow.sobScore.Top = 0;
+		//InputWindow.sobScore.Top = 0;
 		InputWindow.sobScoreName.Left = 0;
-		InputWindow.sobScore.Left = 0;
-		InputWindow.currentScore.Left = 0;
+		//InputWindow.sobScore.Left = 0;
+		//InputWindow.currentScore.Left = 0;
 		InputWindow.currentScore.Top = 0;
 
 		InputWindow.topScore.Top = 30;

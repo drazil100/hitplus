@@ -73,6 +73,16 @@ public class TrackerData
 		}
 	}
 
+	public void SetCurrent(int index)
+	{
+		scores.SetCurrent(index);
+		best.SetCurrent(index);
+		foreach (ScoreSet scoreSet in comparisons)
+		{
+			scoreSet.SetCurrent(index); 
+		}
+	}
+
 	public ScoreSet NextComparison()
 	{
 		comparisonIndex++;

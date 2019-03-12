@@ -7,7 +7,9 @@ public class ScoreEntry
 	private int score = -1;
 	private int comparison = 0;
 	private int pace = 0;
+	private int position = 0;
 	private PaceStatus status = PaceStatus.Default;
+	private bool isCurrent = false;
 
 	public string Name
 	{
@@ -51,6 +53,17 @@ public class ScoreEntry
 	public bool IsSet
 	{
 		get { return (score > -1) ? true : false; }
+	}
+	public bool IsCurrent
+	{
+		get { return isCurrent; }
+		set { isCurrent = value; }
+	}
+
+	public int Position
+	{
+		get { return position; }
+		set { position = value; }
 	}
 	
 	public ScoreEntry(string name, int comparisonScore)
