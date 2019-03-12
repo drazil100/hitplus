@@ -237,7 +237,7 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 				string[] parts = line.Split(keySeparator, 2);
 				parts[0] = parts[0].Trim();
 				if (parts.Length == 1) {
-					if (parts[0][0] == '[') {
+					if (parts[0].Length >= 2 && parts[0][0] == '[') {
 						int end = parts[0].IndexOf(']');
 						sectionName = parts[0].Substring(1, end - 1);
 						if (content.ContainsKey(sectionName)) {

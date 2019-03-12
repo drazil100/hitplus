@@ -83,6 +83,7 @@ public class ScoreTracker : Form
 
 			config = new FileReader("config.txt", SortingStyle.Sort);
 			config.AddNewItem("version",                               "");
+                        config.AddNewItem("debug",                                 "0");
 			config.AddNewItem("hard_route",                            "0");
 			config.AddNewItem("casual_mode",                           "0");
 			config.AddNewItem("layout",                                "1");
@@ -122,7 +123,7 @@ public class ScoreTracker : Form
 			config.AddNewItem("vertical_height",                       "309");
 			config["version"] = version;
 
-			if (config.ContainsKey("debug") && config ["debug"] == "1")
+			if (config ["debug"] == "1")
 			{
 				try
 				{

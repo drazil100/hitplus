@@ -22,9 +22,9 @@ public class TrackerData
 
 	private void Validate(FileReader file, string section)
 	{
-		foreach(var pair in file.GetSection("Best Run"))
+		foreach(string key in file.GetSection("Best Run").Keys)
 		{
-			file.AddNewItem(section, pair.Key, "0");
+			file.AddNewItem(section, key, "0");
 		}
 	}
 
@@ -76,7 +76,7 @@ public class TrackerData
 		best.SetCurrent(index);
 		foreach (ScoreSet scoreSet in comparisons)
 		{
-			scoreSet.SetCurrent(index); 
+			scoreSet.SetCurrent(index);
 		}
 	}
 
