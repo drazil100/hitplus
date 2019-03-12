@@ -363,6 +363,18 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 		}
 	}
 
+	public IEnumerable<KeyValuePair<string, T>> GetSectionEnumerator(string section) {
+		lock (content)
+		{
+			foreach (var entry in this) {
+				if (entry.Section == section) {
+					yield return new KeyValuePair<string, T>(entry.Key, entry.Value);
+				}
+			}
+			yield break;
+		}
+	}
+
 	public abstract T StringToValue(string val);
 	public abstract string ValueToString(T val);
 }
