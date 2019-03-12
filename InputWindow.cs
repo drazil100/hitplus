@@ -307,13 +307,17 @@ public class InputWindow : Form
 				SwapControls(submit);
 			}
 
-			inputBox.Focus();
 			display.UpdateContent();
 
 			if (tracker.IsFinished())
 			{
 				SwapControls(save);
+				save.Focus();
 				return;
+			}
+			else
+			{
+				inputBox.Focus();
 			}
 		}
 		catch (Exception)
@@ -456,6 +460,7 @@ public class InputWindow : Form
 	
 	public void OpenOptions(object sender, EventArgs e)
 	{
+		SaveBounds();
 		inputBox.Enabled = false;
 		submit.Enabled = false;
 		undo.Enabled = false;
