@@ -236,6 +236,9 @@ public class ScorePanel : Panel
 			case "Area 6":
 			n = "A6";
 			break;
+			case "Bolse":
+			n = "BO";
+			break;
 			case "Venom 1":
 			case "Venom 2":
 			n = "VE";

@@ -54,6 +54,11 @@ public class ScoreSet : IEnumerable<ScoreEntry>
 		get { return scores.Count; }
 	}
 
+	public string Name
+	{
+		get { return section; }
+	}
+
 	public void Refresh()
 	{
 		foreach (ScoreEntry entry in scores)

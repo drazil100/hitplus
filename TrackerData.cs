@@ -14,12 +14,24 @@ public class TrackerData
 	public TrackerData(FileReader file)
 	{
 		this.file = file;
-		scores = new ScoreSet(file, "Best Run");
+		file.AddNewItem("name", "Run");
+		
 		Validate(file, "Best Run");
+		scores = new ScoreSet(file, "Best Run");
+
 		Validate(file, "Best Scores");
-		file.Save();
 		best = new ScoreSet(file, "Best Scores");
 
+		foreach (string section in file.Sections)
+		{
+			if (section == "Best Run" || section == "Best Scores" || section == "General")
+				continue;
+
+			Validate(file, section);
+			comparisons.Add(new ScoreSet(file, section));
+		}
+
+		file.Save();
 	}
 
 	private void Validate(FileReader file, string section)
@@ -141,6 +153,16 @@ public class TrackerData
 		return GetScoreSet(index).GetCurrentPace();
 	}
 
+	public List<string> GetComparisonNames()
+	{
+		List<string> toReturn = new List<string>();
+		foreach (ScoreSet set in comparisons)
+		{
+			toReturn.Add(set.Name);
+		}
+		return toReturn;
+	}
+
 	public void UpdateBestScores()
 	{
 		bool updated = false;
@@ -152,7 +174,7 @@ public class TrackerData
 				entry.Comparison = entry.Score;
 				if (ScoreTracker.config.ContainsKey("generate_legacy_il_file") && ScoreTracker.config["generate_legacy_il_file"] == "1")
 				{
-					if (Int32.Parse(ScoreTracker.individualLevels[entry.Name]) < entry.Score)
+					if (!ScoreTracker.individualLevels.ContainsKey(entry.Name) || Int32.Parse(ScoreTracker.individualLevels[entry.Name]) < entry.Score)
 						ScoreTracker.individualLevels[entry.Name] = "" + entry.Score;
 				}
 				updated = true;

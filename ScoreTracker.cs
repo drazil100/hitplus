@@ -23,8 +23,19 @@ public class ScoreTracker : Form
 	const int SW_HIDE = 0;
 	const int SW_SHOW = 5;
 
-	public static TrackerCore tracker;
-	public static TrackerData data;
+	private static TrackerCore tracker;
+	private static TrackerData data;
+
+	public static TrackerCore Tracker
+	{
+		get { return tracker; }
+	}
+
+	public static TrackerData Data
+	{
+		get { return tracker.Data; }
+		set { tracker.Data = value; }
+	}
 
 	public static FileReader config;
 	public static FileReader pbEasy;
@@ -237,22 +248,30 @@ public class ScoreTracker : Form
 
 
 			pbEasy = new FileReader("pb_easy.ini", SortingStyle.Validate);
-			pbEasy.AddNewItem("Best Run", "Corneria", "0");
-			pbEasy.AddNewItem("Best Run", "Meteo",    "0");
-			pbEasy.AddNewItem("Best Run", "Katina",   "0");
-			pbEasy.AddNewItem("Best Run", "Sector X", "0");
-			pbEasy.AddNewItem("Best Run", "Macbeth",  "0");
-			pbEasy.AddNewItem("Best Run", "Area 6",   "0");
-			pbEasy.AddNewItem("Best Run", "Venom 2",    "0");
+			if (!File.Exists("pb_easy.ini"))
+			{
+				pbEasy.AddNewItem("Best Run", "Corneria", "0");
+				pbEasy.AddNewItem("Best Run", "Meteo",    "0");
+				pbEasy.AddNewItem("Best Run", "Katina",   "0");
+				pbEasy.AddNewItem("Best Run", "Sector X", "0");
+				pbEasy.AddNewItem("Best Run", "Macbeth",  "0");
+				pbEasy.AddNewItem("Best Run", "Area 6",   "0");
+				pbEasy.AddNewItem("Best Run", "Venom 2",    "0");
+				pbEasy.Save();
+			}
 
 			pbHard = new FileReader("pb_hard.ini", SortingStyle.Validate);
-			pbHard.AddNewItem("Best Run", "Corneria", "0");
-			pbHard.AddNewItem("Best Run", "Sector Y", "0");
-			pbHard.AddNewItem("Best Run", "Aquas",    "0");
-			pbHard.AddNewItem("Best Run", "Zoness",   "0");
-			pbHard.AddNewItem("Best Run", "Macbeth",  "0");
-			pbHard.AddNewItem("Best Run", "Area 6",   "0");
-			pbHard.AddNewItem("Best Run", "Venom 2",    "0");
+			if (!File.Exists("pb_hard.ini"))
+			{
+				pbHard.AddNewItem("Best Run", "Corneria", "0");
+				pbHard.AddNewItem("Best Run", "Sector Y", "0");
+				pbHard.AddNewItem("Best Run", "Aquas",    "0");
+				pbHard.AddNewItem("Best Run", "Zoness",   "0");
+				pbHard.AddNewItem("Best Run", "Macbeth",  "0");
+				pbHard.AddNewItem("Best Run", "Area 6",   "0");
+				pbHard.AddNewItem("Best Run", "Venom 2",    "0");
+				pbHard.Save();
+			}
 
 			individualLevels = new FileReader(':', "pb_individuals.txt", SortingStyle.Unsort);
 
@@ -306,6 +325,7 @@ public class ScoreTracker : Form
 			FileReader easy = new FileReader("pb_easy.ini");
 			FileReader hard = new FileReader("pb_hard.ini");
 
+			easy.AddNewItem("name", "Easy Route");
 			foreach (SectionKeyValue<string> pair in convertEasy)
 			{
 				string k = (pair.Key != "Venom") ? pair.Key : "Venom 2";
@@ -315,6 +335,8 @@ public class ScoreTracker : Form
 				easy.AddNewItem("Best Scores", k, tmp);
 			}
 			easy.Save();
+
+			easy.AddNewItem("name", "Hard Route");
 			foreach (SectionKeyValue<string> pair in convertHard)
 			{
 				string k = (pair.Key != "Venom") ? pair.Key : "Venom 2";

@@ -50,7 +50,7 @@ public class InputWindow : Form
 	public InputWindow()
 	{
 		mainWindow = this;
-		tracker = ScoreTracker.tracker;
+		tracker = ScoreTracker.Tracker;
 		display = new DisplayWindow (new DisplayWindowContent());
 
 		config = ScoreTracker.config;
@@ -409,11 +409,11 @@ public class InputWindow : Form
 
 			if (config["hard_route"] == "0")
 			{
-				tracker.Data = new TrackerData(pbEasy);
+				ScoreTracker.Data = new TrackerData(pbEasy);
 			}
 			else
 			{
-				tracker.Data = new TrackerData(pbHard);
+				ScoreTracker.Data = new TrackerData(pbHard);
 			}
 
 			display.ResetContent();

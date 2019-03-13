@@ -203,7 +203,7 @@ public class DisplayWindowContent : Panel
 		panels.Clear();
 		Controls.Clear();
 
-		TrackerData run = ScoreTracker.tracker.Data;
+		TrackerData run = ScoreTracker.Data;
 		try
 		{
 			int total = run.GetScoreSet().GetComparisonTotal();

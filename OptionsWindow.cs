@@ -37,7 +37,7 @@ public class OptionsWindow : Form
 		Text = "Options";
 
 		config = ScoreTracker.config;
-		ils = ScoreTracker.tracker.Data.File;
+		ils = ScoreTracker.Data.File;
 		colorTheme = ScoreTracker.colors;
 
 		Controls.Add (tabs);
@@ -90,7 +90,7 @@ public class OptionsWindow : Form
 		}
 		ils.Save ();
 
-		ScoreTracker.tracker.Data.Refresh();
+		ScoreTracker.Data.Refresh();
 
 		config ["hard_route"]                = generalOptions[0].ToString();
 		config ["layout"]                    = generalOptions[1].ToString();
