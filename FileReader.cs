@@ -494,10 +494,12 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 		lock (content) {
 			var first = ((sorting != SortingStyle.Unsort) ? defaultValues : content).GetWithDefault(section, null);
 			var second = ((sorting != SortingStyle.Unsort) ? content : defaultValues).GetWithDefault(section, null);
-			List<string> result = new List<string>(first.Keys);
-			foreach (string key in second.Keys) {
-				if (!result.Contains(key)) {
-					result.Add(key);
+			List<string> result = first == null ? new List<string>() : new List<string>(first.Keys);
+			if (second != null) {
+				foreach (string key in second.Keys) {
+					if (!result.Contains(key)) {
+						result.Add(key);
+					}
 				}
 			}
 			return result;
