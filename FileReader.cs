@@ -425,7 +425,7 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 		}
 	}
 
-	public void LegacySave (string sectionName = null, string fileName = null)
+	public void Export (string fileName = null, string sectionName = null)
 	{
 		lock (content)
 		{

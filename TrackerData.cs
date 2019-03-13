@@ -151,7 +151,10 @@ public class TrackerData
 			{
 				entry.Comparison = entry.Score;
 				if (ScoreTracker.config.ContainsKey("generate_legacy_il_file") && ScoreTracker.config["generate_legacy_il_file"] == "1")
-					ScoreTracker.individualLevels[entry.Name] = "" + entry.Score;
+				{
+					if (Int32.Parse(ScoreTracker.individualLevels[entry.Name]) < entry.Score)
+						ScoreTracker.individualLevels[entry.Name] = "" + entry.Score;
+				}
 				updated = true;
 			}
 		}
@@ -160,7 +163,7 @@ public class TrackerData
 		{
 			best.SaveComparisons();
 			if (ScoreTracker.config.ContainsKey("generate_legacy_il_file") && ScoreTracker.config["generate_legacy_il_file"] == "1")
-				ScoreTracker.individualLevels.LegacySave();
+				ScoreTracker.individualLevels.Export();
 		}
 	}
 
