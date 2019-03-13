@@ -424,6 +424,7 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 						lastSection = entry.Section;
 						sectionSpacer = "\r\n";
 					}
+					//Console.WriteLine(String.Format("section: {0}, key: {1}, value {2}, separator {3}", lastSection, entry.Key, entry.Value, KeySeparator));
 					sw.Write(String.Format("{0} {2} {1}\r\n", entry.Key, ValueToString(entry.Value), KeySeparator));
 				}
 			}

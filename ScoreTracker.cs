@@ -79,7 +79,7 @@ public class ScoreTracker : Form
 
 		try
 		{
-			Test();
+			//Test();
 			ConvertFiles();
 		}
 		catch (Exception e)
@@ -243,12 +243,6 @@ public class ScoreTracker : Form
 			pbEasy.AddNewItem("Best Run", "Macbeth",  "0");
 			pbEasy.AddNewItem("Best Run", "Area 6",   "0");
 			pbEasy.AddNewItem("Best Run", "Venom 2",    "0");
-			if (pbEasy.ContainsKey("Venom"))
-			{
-				pbEasy["Venom 2"] = pbEasy["Venom"];
-				pbEasy.RemoveKey("Venom");
-			}
-			pbEasy.Save();
 
 			pbHard = new FileReader("pb_hard.ini", SortingStyle.Validate);
 			pbHard.AddNewItem("Best Run", "Corneria", "0");
@@ -258,12 +252,6 @@ public class ScoreTracker : Form
 			pbHard.AddNewItem("Best Run", "Macbeth",  "0");
 			pbHard.AddNewItem("Best Run", "Area 6",   "0");
 			pbHard.AddNewItem("Best Run", "Venom 2",    "0");
-			if (pbHard.ContainsKey("Venom"))
-			{
-				pbHard["Venom 2"] = pbHard["Venom"];
-				pbHard.RemoveKey("Venom");
-			}
-			pbHard.Save();
 
 
 			if (config["hard_route"] == "0")
@@ -315,19 +303,21 @@ public class ScoreTracker : Form
 
 			foreach (SectionKeyValue<string> pair in convertEasy)
 			{
-				easy.AddNewItem("Best Run", pair.Key, convertEasy[pair.Key]);
+				string k = (pair.Key != "Venom") ? pair.Key : "Venom 2";
+				easy.AddNewItem("Best Run", k, convertEasy[pair.Key]);
 				string tmp = "0";
 				if (convertIL.ContainsKey(pair.Key)) tmp = convertIL["General", pair.Key];
-				easy.AddNewItem("Best Scores", pair.Key, tmp);
-			}
-			foreach (SectionKeyValue<string> pair in convertHard)
-			{
-				hard.AddNewItem("Best Run", pair.Key, convertHard[pair.Key]);
-				string tmp = "0";
-				if (convertIL.ContainsKey(pair.Key)) tmp = convertIL["General", pair.Key];
-				hard.AddNewItem("Best Scores", pair.Key, tmp);
+				easy.AddNewItem("Best Scores", k, tmp);
 			}
 			easy.Save();
+			foreach (SectionKeyValue<string> pair in convertHard)
+			{
+				string k = (pair.Key != "Venom") ? pair.Key : "Venom 2";
+				hard.AddNewItem("Best Run", k, convertHard[pair.Key]);
+				string tmp = "0";
+				if (convertIL.ContainsKey(pair.Key)) tmp = convertIL["General", pair.Key];
+				hard.AddNewItem("Best Scores", k, tmp);
+			}
 			hard.Save();
 
 
