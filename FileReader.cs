@@ -256,9 +256,9 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 				section[parts[0]] = parts[1];
 			}
 		}
-		catch (Exception e)
+		catch (Exception)
 		{
-			Console.WriteLine("Error: " + e.Message);
+			//Console.WriteLine("Error: " + e.Message);
 		}
 
 	}
@@ -338,6 +338,19 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 			if (!defaultValues.ContainsKey(section)) {
 				defaultValues[section] = new OrderedDictionary<string, string>();
 			}
+
+
+			if (content.ContainsKey(section)) 
+			{
+				if (!content[section].ContainsKey(key))
+					content[section][key] = value;
+			} 
+			else 
+			{
+				content[section] = new OrderedDictionary<string, string>();
+				content[section][key] = value;
+			}
+			
 			defaultValues[section][key] = value;
 			WriteDebug("ADD: " + MakeModifyMessage(section, key, value));
 		}
