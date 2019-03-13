@@ -54,6 +54,19 @@ public class ScoreSet : IEnumerable<ScoreEntry>
 		get { return scores.Count; }
 	}
 
+	public void Refresh()
+	{
+		foreach (ScoreEntry entry in scores)
+		{
+			entry.Score = -1;
+			entry.Pace = 0;
+			entry.Status = PaceStatus.Default;
+			entry.IsCurrent = false;
+			entry.Comparison = Int32.Parse(file[section, entry.Name]);
+		}
+		scores[0].IsCurrent = true;
+	}
+
 	public void SetCurrent(int index)
 	{
 		foreach (ScoreEntry score in scores)

@@ -56,7 +56,6 @@ public class InputWindow : Form
 		config = ScoreTracker.config;
 		pbEasy = ScoreTracker.pbEasy;
 		pbHard = ScoreTracker.pbHard;
-		individualLevels = ScoreTracker.individualLevels;
 		colors = ScoreTracker.colors;
 
 		Text = "Input";

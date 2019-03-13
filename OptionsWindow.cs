@@ -37,7 +37,7 @@ public class OptionsWindow : Form
 		Text = "Options";
 
 		config = ScoreTracker.config;
-		ils = ScoreTracker.individualLevels;
+		ils = ScoreTracker.tracker.Data.File;
 		colorTheme = ScoreTracker.colors;
 
 		Controls.Add (tabs);
@@ -86,9 +86,11 @@ public class OptionsWindow : Form
 	{
 		foreach (NumericField s in scores)
 		{
-			ils [s.Name] = s.Number;
+			ils ["Best Scores", s.Name] = s.Number;
 		}
 		ils.Save ();
+
+		ScoreTracker.tracker.Data.Refresh();
 
 		config ["hard_route"]                = generalOptions[0].ToString();
 		config ["layout"]                    = generalOptions[1].ToString();
@@ -211,7 +213,7 @@ public class OptionsWindow : Form
 	private void ConfigureScoreTab ()
 	{
 		scoreTab.Controls.Clear ();
-		foreach (KeyValuePair<string, string> il in ils.GetSection("General"))
+		foreach (KeyValuePair<string, string> il in ils.GetSection("Best Scores"))
 		{
 			if (il.Key != "Easy Route" && il.Key != "Hard Route")
 			{

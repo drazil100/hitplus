@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 public class TrackerData
 {
+	private FileReader file;
 	private ScoreSet scores;
 	private ScoreSet best;
 	private List<ScoreSet> comparisons = new List<ScoreSet>();
@@ -12,6 +13,7 @@ public class TrackerData
 
 	public TrackerData(FileReader file)
 	{
+		this.file = file;
 		scores = new ScoreSet(file, "Best Run");
 		Validate(file, "Best Run");
 		Validate(file, "Best Scores");
@@ -41,9 +43,25 @@ public class TrackerData
 		}
 	}
 
+	public FileReader File
+	{
+		get { return file; }
+	}
+
 	public int Count
 	{
 		get { return scores.Count; }
+	}
+	
+	public void Refresh()
+	{
+		scores.Refresh();
+		best.Refresh();
+		foreach (ScoreSet scoreSet in comparisons)
+		{
+			scoreSet.Refresh();
+		}
+
 	}
 
 	private void SetScore(ScoreSet scoreSet, int index, int value)
@@ -139,7 +157,6 @@ public class TrackerData
 
 		if (updated)
 		{
-			ScoreTracker.individualLevels.Save();
 			best.SaveComparisons();
 		}
 	}

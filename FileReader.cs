@@ -415,11 +415,13 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 
 			using (var sw = new StreamWriter(FileName)) {
 				string lastSection = null;
+				string sectionSpacer = "";
 				foreach (var entry in this)
 				{
 					if (lastSection != entry.Section) {
-						sw.Write(String.Format("[{0}]\r\n", entry.Section));
+						sw.Write(String.Format("{1}[{0}]\r\n", entry.Section, sectionSpacer));
 						lastSection = entry.Section;
+						sectionSpacer = "\r\n";
 					}
 					sw.Write(String.Format("{0} {2} {1}\r\n", entry.Key, ValueToString(entry.Value), KeySeparator));
 				}
@@ -485,6 +487,7 @@ public class FileReader<T> : BaseFileReader<T> where T:class
 public class FileReader : BaseFileReader<string>
 {
 	public FileReader(string file, SortingStyle sorting = SortingStyle.Sort) : base(file, sorting) {}
+	public FileReader(char separator, string file, SortingStyle sorting = SortingStyle.Sort) : base(separator, file, sorting) {}
 
 	public override string StringToValue(string val)
 	{

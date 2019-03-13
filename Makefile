@@ -16,7 +16,7 @@ SF64ScoreTracker.exe: $(wildcard *.cs)
 clean:
 	$(RM) *.exe *.mdb 
 cleanall:
-	$(RM) *.exe *.mdb *.zip *.txt
+	$(RM) *.exe *.mdb *.zip *.txt *.ini
 
 icon.resources: icon.resx
 	resgen.exe /compile icon.resx /r:System.Drawing

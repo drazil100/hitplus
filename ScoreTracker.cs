@@ -29,7 +29,6 @@ public class ScoreTracker : Form
 	public static FileReader config;
 	public static FileReader pbEasy;
 	public static FileReader pbHard;
-	public static FileReader individualLevels;
 	public static ColorFileReader colors;
 
 	public ScoreTracker()
@@ -80,8 +79,17 @@ public class ScoreTracker : Form
 
 		try
 		{
+			ConvertFiles();
+		}
+		catch (Exception e)
+		{
+			Console.WriteLine("Conversion Error: " + e.Message + "\n" + e.StackTrace);
+		}
 
-			config = new FileReader("config.txt", SortingStyle.Sort);
+		try
+		{
+
+			config = new FileReader("config.ini", SortingStyle.Sort);
 			config.AddNewItem("version",                               "");
 			config.AddNewItem("hard_route",                            "0");
 			config.AddNewItem("casual_mode",                           "0");
@@ -163,7 +171,7 @@ public class ScoreTracker : Form
 
 			config.Save();
 
-			colors = new ColorFileReader("color_theme.txt", SortingStyle.Validate);
+			colors = new ColorFileReader("color_theme.ini", SortingStyle.Validate);
 			colors.AddNewItem("text_color",                            "#FFFFFF");
 			colors.AddNewItem("text_color_total",                      "#FFFFFF");
 			colors.AddNewItem("text_color_highlighted",                "#FFFFFF");
@@ -226,7 +234,7 @@ public class ScoreTracker : Form
 			config.Save();
 
 
-			pbEasy = new FileReader("pb_easy.txt", SortingStyle.Validate);
+			pbEasy = new FileReader("pb_easy.ini", SortingStyle.Validate);
 			pbEasy.AddNewItem("Best Run", "Corneria", "0");
 			pbEasy.AddNewItem("Best Run", "Meteo",    "0");
 			pbEasy.AddNewItem("Best Run", "Katina",   "0");
@@ -241,7 +249,7 @@ public class ScoreTracker : Form
 			}
 			pbEasy.Save();
 
-			pbHard = new FileReader("pb_hard.txt", SortingStyle.Validate);
+			pbHard = new FileReader("pb_hard.ini", SortingStyle.Validate);
 			pbHard.AddNewItem("Best Run", "Corneria", "0");
 			pbHard.AddNewItem("Best Run", "Sector Y", "0");
 			pbHard.AddNewItem("Best Run", "Aquas",    "0");
@@ -256,42 +264,6 @@ public class ScoreTracker : Form
 			}
 			pbHard.Save();
 
-			individualLevels = new FileReader("pb_individuals.txt", SortingStyle.Unsort);
-			individualLevels.RemoveKey("Easy Route");
-			individualLevels.RemoveKey("Hard Route");
-
-			if (config["include_route_pbs_in_individuals_file"] == "1")
-			{
-				int total = 0;
-				foreach (KeyValuePair<string, string> pair in pbEasy.GetSection("General"))
-				{
-					total += Int32.Parse(pair.Value);
-				}
-				if (total > 0)
-				{
-					individualLevels.AddNewItem("Easy Route", "" + total);
-					individualLevels["Easy Route"] = "" + total;
-				}
-				total = 0;
-				foreach (KeyValuePair<string, string> pair in pbHard.GetSection("General"))
-				{
-					total += Int32.Parse(pair.Value);
-				}
-				if (total > 0)
-				{
-					individualLevels.AddNewItem("Hard Route", "" + total);
-					individualLevels["Hard Route"] = "" + total;
-				}
-			}
-
-
-			if (individualLevels.ContainsKey("Venom"))
-			{
-				individualLevels["Venom 2"] = individualLevels["Venom"];
-				individualLevels.RemoveKey("Venom");
-			}
-
-			individualLevels.Save();
 
 			if (config["hard_route"] == "0")
 			{
@@ -320,6 +292,48 @@ public class ScoreTracker : Form
 
 		if (config.ContainsKey("debug") && config["debug"] == "1")
 			Console.Read();
+	}
+
+	public static void ConvertFiles()
+	{
+		if (File.Exists("config.txt"))
+		{
+			FileReader convertConfig = new FileReader(':', "config.txt", SortingStyle.Sort);
+			convertConfig.KeySeparator = '=';
+			convertConfig.FileName = "config.ini";
+			convertConfig.Save();
+
+			FileReader convertEasy = new FileReader(':', "pb_easy.txt");
+
+			FileReader convertHard = new FileReader(':', "pb_hard.txt");
+
+			FileReader convertIL = new FileReader(':', "pb_individuals.txt");
+
+			FileReader easy = new FileReader("pb_easy.ini");
+			FileReader hard = new FileReader("pb_hard.ini");
+
+			foreach (SectionKeyValue<string> pair in convertEasy)
+			{
+				easy.AddNewItem("Best Run", pair.Key, convertEasy[pair.Key]);
+				string tmp = "0";
+				if (convertIL.ContainsKey(pair.Key)) tmp = convertIL["General", pair.Key];
+				easy.AddNewItem("Best Scores", pair.Key, tmp);
+			}
+			foreach (SectionKeyValue<string> pair in convertHard)
+			{
+				hard.AddNewItem("Best Run", pair.Key, convertHard[pair.Key]);
+				string tmp = "0";
+				if (convertIL.ContainsKey(pair.Key)) tmp = convertIL["General", pair.Key];
+				hard.AddNewItem("Best Scores", pair.Key, tmp);
+			}
+			easy.Save();
+			hard.Save();
+
+
+			File.Delete("config.txt");
+			File.Delete("pb_easy.txt");
+			File.Delete("pb_hard.txt");
+		}
 	}
 }
 
