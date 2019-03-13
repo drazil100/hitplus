@@ -88,7 +88,7 @@ public class ScoreTracker : Form
 			Console.WriteLine("Conversion Error: " + e.Message + "\n" + e.StackTrace);
 		}
 
-		try
+		//try
 		{
 
 			config = new FileReader("config.ini", SortingStyle.Sort);
@@ -267,10 +267,12 @@ public class ScoreTracker : Form
 			}
 			tracker = new TrackerCore(data);
 		}
+    /*
 		catch (Exception e)
 		{
-			Console.WriteLine("Error: " + e.Message);
+			Console.WriteLine("Startup Error: " + e.Message);
 		}
+    */
 
 		try
 		{

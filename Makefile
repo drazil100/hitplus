@@ -5,13 +5,13 @@ ifeq ($(OS),Windows_NT)
 else
 	CSC = mcs
 	RM = rm -f
-	REFERENCES = -r:System.Windows.Forms,System.Drawing
+	REFERENCES = -r:System.Windows.Forms,System.Drawing,System.Core
 endif
 
 all: SF64ScoreTracker.exe
 
 SF64ScoreTracker.exe: $(wildcard *.cs)
-	$(CSC) /out:SF64ScoreTracker.exe /win32icon:medal.ico $(REFERENCES) *.cs
+	$(CSC) /debug+ /out:SF64ScoreTracker.exe /win32icon:medal.ico $(REFERENCES) *.cs
 
 clean:
 	$(RM) *.exe *.mdb 

@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 
 public enum SortingStyle
 {
@@ -139,39 +140,22 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 
 	private IEnumerator<SectionKeyValue<T>> GetEnumeratorInternal()
 	{
+		OrderedDictionary<string, string> whitelist = null;
 		lock (content)
 		{
-			var first = (sorting != SortingStyle.Unsort) ? defaultValues : content;
-			var second = (sorting != SortingStyle.Unsort) ? content : defaultValues;
-			foreach (var firstSectionPair in first) {
-				var section = firstSectionPair.Key;
-				var firstSection = firstSectionPair.Value;
-				var secondSection = second.GetWithDefault(section, null);
-				foreach (var pair in firstSection) {
-					yield return new SectionKeyValue<T>(section, pair.Key, this[section, pair.Key]);
-				}
-				if (secondSection == null || sorting == SortingStyle.Validate) {
+			var sectionList = (sorting == SortingStyle.Unsort) ? content.Union(defaultValues) : defaultValues.Union(content);
+			foreach (var sectionPair in sectionList) {
+				string sectionName = sectionPair.Key;
+				if (sorting == SortingStyle.Validate && !defaultValues.TryGetValue(sectionName, out whitelist)) {
+					// This section isn't whitelisted.
 					continue;
 				}
-				foreach (var pair in secondSection) {
-					if (firstSection.ContainsKey(pair.Key)) {
-						// if it's in the first section then it's already been output
+				foreach (var pair in sectionPair.Value) {
+					if (whitelist != null && !whitelist.ContainsKey(pair.Key)) {
+						// This key isn't whitelisted.
 						continue;
 					}
-					yield return new SectionKeyValue<T>(section, pair.Key, this[section, pair.Key]);
-				}
-			}
-			if (sorting == SortingStyle.Validate) {
-				yield break;
-			}
-			foreach (var secondSectionPair in second) {
-				var section = secondSectionPair.Key;
-				if (first.ContainsKey(section)) {
-					// if it's in the first container then it's already been output
-					continue;
-				}
-				foreach (var pair in secondSectionPair.Value) {
-					yield return new SectionKeyValue<T>(section, pair.Key, this[section, pair.Key]);
+					yield return new SectionKeyValue<T>(sectionName, pair.Key, this[sectionName, pair.Key]);
 				}
 			}
 			yield break;
@@ -433,10 +417,7 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 				foreach (var entry in this)
 				{
 					if (lastSection != entry.Section) {
-						if (lastSection != null) {
-							sw.Write("\r\n");
-						}
-						sw.Write(String.Format("[{0}]\r\n", entry.Section));
+						sw.Write(String.Format("{1}[{0}]\r\n", entry.Section, lastSection == null ? "" : "\r\n"));
 						lastSection = entry.Section;
 					}
 					//Console.WriteLine(String.Format("section: {0}, key: {1}, value {2}, separator {3}", lastSection, entry.Key, entry.Value, KeySeparator));
@@ -475,17 +456,8 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 	public IEnumerable<string> Sections {
 		get {
 			lock (content) {
-				var first = (sorting != SortingStyle.Unsort) ? defaultValues : content;
-				var second = (sorting != SortingStyle.Unsort) ? content : defaultValues;
-				foreach (var firstSectionPair in first) {
-					yield return firstSectionPair.Key;
-				}
-				foreach (var secondSectionPair in second) {
-					if (!first.ContainsKey(secondSectionPair.Key)) {
-						yield return secondSectionPair.Key;
-					}
-				}
-				yield break;
+				var sectionList = (sorting == SortingStyle.Unsort) ? content.Union(defaultValues) : defaultValues.Union(content);
+				return sectionList.Select(section => section.Key);
 			}
 		}
 	}
@@ -494,15 +466,9 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 		lock (content) {
 			var first = ((sorting != SortingStyle.Unsort) ? defaultValues : content).GetWithDefault(section, null);
 			var second = ((sorting != SortingStyle.Unsort) ? content : defaultValues).GetWithDefault(section, null);
-			List<string> result = first == null ? new List<string>() : new List<string>(first.Keys);
-			if (second != null) {
-				foreach (string key in second.Keys) {
-					if (!result.Contains(key)) {
-						result.Add(key);
-					}
-				}
-			}
-			return result;
+			var firstList = first == null ? new List<string>() : first.Keys;
+			var secondList = second == null ? new List<string>() : second.Keys;
+			return new List<string>(firstList.Union(secondList));
 		}
 	}
 
