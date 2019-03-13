@@ -143,6 +143,7 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 		OrderedDictionary<string, string> whitelist = null;
 		lock (content)
 		{
+			// Linq's Union() function returns two lists combined together with duplicates removed.
 			var sectionList = (sorting == SortingStyle.Unsort) ? content.Union(defaultValues) : defaultValues.Union(content);
 			foreach (var sectionPair in sectionList) {
 				string sectionName = sectionPair.Key;
@@ -151,10 +152,8 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 					continue;
 				}
 				foreach (var pair in sectionPair.Value) {
-					if (whitelist != null && !whitelist.ContainsKey(pair.Key)) {
-						// This key isn't whitelisted.
-						continue;
-					}
+					// There's no need to check the whitelist for individual keys because in Validate mode this
+					// will be the defaultValues dictionary already. Just use this[] to read the current value.
 					yield return new SectionKeyValue<T>(sectionName, pair.Key, this[sectionName, pair.Key]);
 				}
 			}
@@ -456,7 +455,9 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 	public IEnumerable<string> Sections {
 		get {
 			lock (content) {
+				// Linq's Union() function returns two lists combined together with duplicates removed.
 				var sectionList = (sorting == SortingStyle.Unsort) ? content.Union(defaultValues) : defaultValues.Union(content);
+				// Linq's Select() function runs each result in an enumerator through a function.
 				return sectionList.Select(section => section.Key);
 			}
 		}
@@ -466,6 +467,7 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 		lock (content) {
 			var first = ((sorting != SortingStyle.Unsort) ? defaultValues : content).GetWithDefault(section, null);
 			var second = ((sorting != SortingStyle.Unsort) ? content : defaultValues).GetWithDefault(section, null);
+			// Make sure that both are valid lists, then return their union
 			var firstList = first == null ? new List<string>() : first.Keys;
 			var secondList = second == null ? new List<string>() : second.Keys;
 			return new List<string>(firstList.Union(secondList));
