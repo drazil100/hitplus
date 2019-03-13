@@ -359,7 +359,13 @@ public class ScoreTracker : Form
 			File.Delete("pb_easy.txt");
 			File.Delete("pb_hard.txt");
 			
-			MessageBox.Show("Your files have been converted to a new format. Going forward \"pb_individuals.txt\" will no longer be used to track your individual level PBs.\r\n\r\nInstead level pbs are now saved in the same file as your run pb and are unique to that run with no crossover between routes.\r\n\r\nYour \"pb_individuals.txt\" will be left intact and if you wish to continue storing your ILs in this file you can do so by adding \"generate_legacy_il_file = 1\" to \"config.ini\" while the program is closed.\r\n\r\nDo note that enabling this option WILL NOT change where this program reads these scores from. These scores will still be output to and read from the file that stores your best run.", "Your files have been converted!");
+			MessageBox.Show("Your files have been converted to a new format."+
+			                " Going forward \"pb_individuals.txt\" will no longer be used to track your individual level PBs.\r\n\r\n"+
+					"Instead level pbs are now saved in the same file as your run pb and are unique to that run with no crossover between routes.\r\n\r\n"+
+					"Your \"pb_individuals.txt\" will be left intact and if you wish to continue storing your ILs in this file you can do so by adding \"generate_legacy_il_file = 1\" to \"config.ini\" while the program is closed.\r\n\r\n"+
+					"Do note that enabling this option WILL NOT change where this program reads these scores from."+
+					" These scores will still be output to and read from the file that stores your best run.", 
+					"Your tracker files have been converted!");
 		}
 	}
 

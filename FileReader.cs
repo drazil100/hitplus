@@ -457,7 +457,15 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 		get {
 			lock (content) {
 				// Linq's Union() function returns two lists combined together with duplicates removed.
-				return (sorting == SortingStyle.Unsort) ? content.Keys.Union(defaultValues.Keys) : defaultValues.Keys.Union(content.Keys);
+				List<string> defaultList = new List<string>();
+				if (content.ContainsKey(DefaultSection) || defaultValues.ContainsKey(DefaultSection)) {
+					defaultList.Add(DefaultSection);
+				}
+				if (sorting == SortingStyle.Unsort) {
+					return defaultList.Union(content.Keys).Union(defaultValues.Keys);
+				} else {
+					return defaultList.Union(defaultValues.Keys).Union(content.Keys);
+				}
 			}
 		}
 	}
