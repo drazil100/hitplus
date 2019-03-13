@@ -220,47 +220,61 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 		Load(file);
 	}
 
-	public void Load(string file)
+	public bool Load(string file)
 	{
-		FileName = file;
+		lock (content) {
+			FileName = file;
 
-		string sectionName = DefaultSection;
-		var section = content[sectionName];
+			string sectionName = DefaultSection;
+			var section = content[sectionName];
+			string fileContent;
 
-		try
-		{
-			string fileContent = File.ReadAllText(file, Encoding.UTF8);
-
-			string[] lines = fileContent.Split(lineSeparator, StringSplitOptions.None);
-
-			foreach (string line in lines)
+			try
 			{
-				string[] parts = line.Split(keySeparator, 2);
-				parts[0] = parts[0].Trim();
-				if (parts.Length == 1) {
-					if (parts[0].Length >= 2 && parts[0][0] == '[') {
-						int end = parts[0].IndexOf(']');
-						sectionName = parts[0].Substring(1, end - 1);
-						if (content.ContainsKey(sectionName)) {
-							section = content[sectionName];
-						} else {
-							section = content[sectionName] = new OrderedDictionary<string, string>();
-						}
-					}
-					continue;
-				}
-				parts[1] = parts[1].Trim();
-
-				WriteDebug(MakeModifyMessage(sectionName, parts[0], parts[1]), true);
-
-				section[parts[0]] = parts[1];
+				fileContent = File.ReadAllText(file, Encoding.UTF8);
+			} 
+			catch 
+			{
+				// If the file doesn't exist or is otherwise unreadable, stop here.
+				return false;
 			}
-		}
-		catch (Exception)
-		{
-			//Console.WriteLine("Error: " + e.Message);
-		}
 
+			try
+			{
+				string[] lines = fileContent.Split(lineSeparator, StringSplitOptions.None);
+
+				foreach (string line in lines)
+				{
+					string[] parts = line.Split(keySeparator, 2);
+					parts[0] = parts[0].Trim();
+					if (parts.Length == 1) {
+						if (parts[0].Length >= 2 && parts[0][0] == '[') {
+							int end = parts[0].IndexOf(']');
+							sectionName = parts[0].Substring(1, end - 1);
+							if (content.ContainsKey(sectionName)) {
+								section = content[sectionName];
+							} else {
+								section = content[sectionName] = new OrderedDictionary<string, string>();
+							}
+						}
+						continue;
+					}
+					parts[1] = parts[1].Trim();
+
+					WriteDebug(MakeModifyMessage(sectionName, parts[0], parts[1]), true);
+
+					section[parts[0]] = parts[1];
+				}
+			}
+			catch (Exception e)
+			{
+				// If there's an error while loading, log it to the console. 
+				Console.WriteLine(String.Format("Error reading {0}: {1} ", file, e.Message));
+				return false;
+			}
+
+			return true;
+		}
 	}
 
 	public T this[string key]
@@ -338,19 +352,6 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 			if (!defaultValues.ContainsKey(section)) {
 				defaultValues[section] = new OrderedDictionary<string, string>();
 			}
-
-
-			if (content.ContainsKey(section)) 
-			{
-				if (!content[section].ContainsKey(key))
-					content[section][key] = value;
-			} 
-			else 
-			{
-				content[section] = new OrderedDictionary<string, string>();
-				content[section][key] = value;
-			}
-			
 			defaultValues[section][key] = value;
 			WriteDebug("ADD: " + MakeModifyMessage(section, key, value));
 		}
@@ -429,13 +430,14 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 
 			using (var sw = new StreamWriter(FileName)) {
 				string lastSection = null;
-				string sectionSpacer = "";
 				foreach (var entry in this)
 				{
 					if (lastSection != entry.Section) {
-						sw.Write(String.Format("{1}[{0}]\r\n", entry.Section, sectionSpacer));
+						if (lastSection != null) {
+							sw.Write("\r\n");
+						}
+						sw.Write(String.Format("[{0}]\r\n", entry.Section));
 						lastSection = entry.Section;
-						sectionSpacer = "\r\n";
 					}
 					//Console.WriteLine(String.Format("section: {0}, key: {1}, value {2}, separator {3}", lastSection, entry.Key, entry.Value, KeySeparator));
 					sw.Write(String.Format("{0} {2} {1}\r\n", entry.Key, ValueToString(entry.Value), KeySeparator));
@@ -443,20 +445,26 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 			}
 		}
 	}
-	public void LegacySave()
+
+	public void LegacySave(string fileName = null, string sectionName = null)
 	{
 		lock (content)
 		{
-			Console.WriteLine(" Writing to " + FileName);
+			if (fileName == null) {
+				fileName = FileName;
+			}
+			Console.WriteLine(" Writing to " + fileName);
 			Console.WriteLine();
 			DebugVariables.lastCaller = "";
 			DebugVariables.lastFileName = "";
 
-			using (var sw = new StreamWriter(FileName)) {
+			using (var sw = new StreamWriter(fileName)) {
 				foreach (var entry in this)
 				{
-					//if (entry.Section == "General")
+					if (sectionName == null || entry.Section == sectionName)
+					{
 						sw.Write(String.Format("{0}: {1}\r\n", entry.Key, ValueToString(entry.Value)));
+					}
 				}
 			}
 		}
@@ -488,10 +496,12 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 		lock (content) {
 			var first = ((sorting != SortingStyle.Unsort) ? defaultValues : content).GetWithDefault(section, null);
 			var second = ((sorting != SortingStyle.Unsort) ? content : defaultValues).GetWithDefault(section, null);
-			List<string> result = new List<string>(first.Keys);
-			foreach (string key in second.Keys) {
-				if (!result.Contains(key)) {
-					result.Add(key);
+			List<string> result = first == null ? new List<string>() : new List<string>(first.Keys);
+			if (second != null) {
+				foreach (string key in second.Keys) {
+					if (!result.Contains(key)) {
+						result.Add(key);
+					}
 				}
 			}
 			return result;
