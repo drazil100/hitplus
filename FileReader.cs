@@ -151,10 +151,12 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 					// This section isn't whitelisted.
 					continue;
 				}
-				foreach (var pair in sectionPair.Value) {
-					// There's no need to check the whitelist for individual keys because in Validate mode this
-					// will be the defaultValues dictionary already. Just use this[] to read the current value.
-					yield return new SectionKeyValue<T>(sectionName, pair.Key, this[sectionName, pair.Key]);
+				foreach (var key in GetKeys(sectionName)) {
+					if (sorting == SortingStyle.Validate && !whitelist.ContainsKey(key)) {
+						// This key isn't whitelisted.
+						continue;
+					}
+					yield return new SectionKeyValue<T>(sectionName, key, this[sectionName, key]);
 				}
 			}
 			yield break;
