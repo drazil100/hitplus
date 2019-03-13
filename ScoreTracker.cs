@@ -29,6 +29,7 @@ public class ScoreTracker : Form
 	public static FileReader config;
 	public static FileReader pbEasy;
 	public static FileReader pbHard;
+	public static FileReader individualLevels;
 	public static ColorFileReader colors;
 
 	public ScoreTracker()
@@ -252,6 +253,8 @@ public class ScoreTracker : Form
 			pbHard.AddNewItem("Best Run", "Macbeth",  "0");
 			pbHard.AddNewItem("Best Run", "Area 6",   "0");
 			pbHard.AddNewItem("Best Run", "Venom 2",    "0");
+
+			individualLevels = new FileReader(':', "pb_individuals.txt", SortingStyle.Unsort);
 
 
 			if (config["hard_route"] == "0")

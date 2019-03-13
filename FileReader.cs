@@ -430,6 +430,24 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 			}
 		}
 	}
+	public void LegacySave()
+	{
+		lock (content)
+		{
+			Console.WriteLine(" Writing to " + FileName);
+			Console.WriteLine();
+			DebugVariables.lastCaller = "";
+			DebugVariables.lastFileName = "";
+
+			using (var sw = new StreamWriter(FileName)) {
+				foreach (var entry in this)
+				{
+					//if (entry.Section == "General")
+						sw.Write(String.Format("{0}: {1}\r\n", entry.Key, ValueToString(entry.Value)));
+				}
+			}
+		}
+	}
 
 	public Section GetSection(string section) {
 		return new Section(this, section);
