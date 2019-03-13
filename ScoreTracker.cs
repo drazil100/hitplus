@@ -332,7 +332,7 @@ public class ScoreTracker : Form
 				easy.AddNewItem("Best Run", k, convertEasy[pair.Key]);
 				string tmp = "0";
 				if (convertIL.ContainsKey(pair.Key)) tmp = convertIL["General", pair.Key];
-				easy.AddNewItem("Best Scores", k, tmp);
+				easy.AddNewItem("Top Scores", k, tmp);
 			}
 			easy.Save();
 
@@ -343,7 +343,7 @@ public class ScoreTracker : Form
 				hard.AddNewItem("Best Run", k, convertHard[pair.Key]);
 				string tmp = "0";
 				if (convertIL.ContainsKey(pair.Key)) tmp = convertIL["General", pair.Key];
-				hard.AddNewItem("Best Scores", k, tmp);
+				hard.AddNewItem("Top Scores", k, tmp);
 			}
 			hard.Save();
 

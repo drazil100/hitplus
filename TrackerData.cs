@@ -14,27 +14,39 @@ public class TrackerData
 	public TrackerData(FileReader file)
 	{
 		this.file = file;
+		ValidateFile(file);
+		scores = new ScoreSet(file, "Best Run");
+		best = new ScoreSet(file, "Top Scores");
+		foreach (string section in file.Sections)
+		{
+			if (section == "Best Run" || section == "Top Scores" || section == "General")
+				continue;
+
+			comparisons.Add(new ScoreSet(file, section));
+		}
+		file.Save();
+	}
+
+	public static void ValidateFile(FileReader file)
+	{
 		file.AddNewItem("name", "Run");
 		
 		Validate(file, "Best Run");
-		scores = new ScoreSet(file, "Best Run");
 
-		Validate(file, "Best Scores");
-		best = new ScoreSet(file, "Best Scores");
+		Validate(file, "Top Scores");
 
 		foreach (string section in file.Sections)
 		{
-			if (section == "Best Run" || section == "Best Scores" || section == "General")
+			if (section == "Best Run" || section == "Top Scores" || section == "General")
 				continue;
 
 			Validate(file, section);
-			comparisons.Add(new ScoreSet(file, section));
 		}
 
 		file.Save();
 	}
 
-	private void Validate(FileReader file, string section)
+	private static void Validate(FileReader file, string section)
 	{
 		foreach(string key in file.GetSection("Best Run").Keys)
 		{

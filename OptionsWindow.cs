@@ -21,6 +21,7 @@ public class OptionsWindow : Form
 	private Button saveClose = new Button();
 
 	private TabPage scoreTab = new TabPage();
+	private ScoreTab scoreTabContent;
 	private List<NumericField> scores = new List<NumericField>();
 
 	private TabPage generalTab = new TabPage ();
@@ -44,7 +45,7 @@ public class OptionsWindow : Form
 		Controls.Add (save);
 		Controls.Add (saveClose);
 
-		scoreTab.Text = "Edit PBs";
+		scoreTab.Text = "Scores";
 		tabs.TabPages.Add (scoreTab);
 
 		generalTab.Text = "General";
@@ -153,11 +154,8 @@ public class OptionsWindow : Form
 
 	private void DoScoreLayout()
 	{
-		foreach (NumericField s in scores)
-		{
-			s.Width = scoreTab.Width;
-			//s.DoLayout ();
-		}
+		scoreTabContent.Width = scoreTab.Width;
+		scoreTabContent.Height = scoreTab.Height;
 
 
 	}
@@ -213,20 +211,8 @@ public class OptionsWindow : Form
 	private void ConfigureScoreTab ()
 	{
 		scoreTab.Controls.Clear ();
-		foreach (KeyValuePair<string, string> il in ils.GetSection("Best Scores"))
-		{
-			if (il.Key != "Easy Route" && il.Key != "Hard Route")
-			{
-				NumericField newScore = new NumericField (il.Key, il.Value);
-				scoreTab.Controls.Add (newScore);
-				if (scores.Count > 0)
-				{
-					newScore.Top = scores [scores.Count - 1].Top + scores [scores.Count - 1].Height;
-				}
-				newScore.Width = Width;
-				scores.Add (newScore);
-			}
-		}
+		scoreTabContent = new ScoreTab(ScoreTracker.Data.File);
+		scoreTab.Controls.Add(scoreTabContent);
 	}
 
 	private void ConfigColors()
