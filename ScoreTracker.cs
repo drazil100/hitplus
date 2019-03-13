@@ -353,7 +353,7 @@ public class ScoreTracker : Form
 		sort["Section", "set 2"] = "value";
 		sort.Save();
 
-		FileReader validate = new FileReader("validate.ini", SortingStyle.Sort);
+		FileReader validate = new FileReader("validate.ini", SortingStyle.Validate);
 		validate.AddNewItem("add 1", "value");
 		validate.AddNewItem("Section", "add 2", "value");
 		validate["set 1"] = "value";

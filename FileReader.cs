@@ -154,10 +154,11 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 					continue;
 				}
 				foreach (var pair in secondSection) {
-					if (!firstSection.ContainsKey(pair.Key)) {
+					if (firstSection.ContainsKey(pair.Key)) {
 						// if it's in the first section then it's already been output
 						continue;
 					}
+					yield return new SectionKeyValue<T>(section, pair.Key, this[section, pair.Key]);
 				}
 			}
 			if (sorting == SortingStyle.Validate) {
