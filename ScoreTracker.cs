@@ -325,6 +325,13 @@ public class ScoreTracker : Form
 			}
 			hard.Save();
 
+			if (convertIL.ContainsKey("Venom"))
+			{
+				convertIL["Venom 2"] = convertIL["Venom"];
+				convertIL.RemoveKey("Venom");
+			}
+			convertIL.LegacySave();
+
 
 			File.Delete("config.txt");
 			File.Delete("pb_easy.txt");

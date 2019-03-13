@@ -143,10 +143,7 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 		OrderedDictionary<string, string> whitelist = null;
 		lock (content)
 		{
-			// Linq's Union() function returns two lists combined together with duplicates removed.
-			var sectionList = (sorting == SortingStyle.Unsort) ? content.Union(defaultValues) : defaultValues.Union(content);
-			foreach (var sectionPair in sectionList) {
-				string sectionName = sectionPair.Key;
+			foreach (string sectionName in Sections) {
 				if (sorting == SortingStyle.Validate && !defaultValues.TryGetValue(sectionName, out whitelist)) {
 					// This section isn't whitelisted.
 					continue;
@@ -428,7 +425,7 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 		}
 	}
 
-	public void LegacySave(string fileName = null, string sectionName = null)
+	public void LegacySave (string sectionName = null, string fileName = null)
 	{
 		lock (content)
 		{
@@ -460,9 +457,7 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 		get {
 			lock (content) {
 				// Linq's Union() function returns two lists combined together with duplicates removed.
-				var sectionList = (sorting == SortingStyle.Unsort) ? content.Union(defaultValues) : defaultValues.Union(content);
-				// Linq's Select() function runs each result in an enumerator through a function.
-				return sectionList.Select(section => section.Key);
+				return (sorting == SortingStyle.Unsort) ? content.Keys.Union(defaultValues.Keys) : defaultValues.Keys.Union(content.Keys);
 			}
 		}
 	}
