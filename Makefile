@@ -1,10 +1,8 @@
 ifeq ($(OS),Windows_NT)
 	CSC = csc
-	RM = del
 	REFERENCES =
 else
 	CSC = mcs
-	RM = rm -f
 	REFERENCES = -r:System.Windows.Forms,System.Drawing,System.Core
 endif
 
@@ -14,10 +12,10 @@ SF64ScoreTracker.exe: $(wildcard *.cs)
 	$(CSC) /out:SF64ScoreTracker.exe /win32icon:medal.ico $(REFERENCES) *.cs
 
 clean:
-	$(RM) *.exe *.mdb 
+	rm -f *.exe *.mdb 
 
 cleanall:
-	$(RM) *.exe *.mdb *.zip *.txt *.ini
+	rm -f *.exe *.mdb *.zip *.txt *.ini
 
 run: SF64ScoreTracker.exe
 	mono SF64ScoreTracker.exe
