@@ -446,7 +446,7 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 		}
 	}
 
-	public void LegacySave(string fileName = null)
+	public void LegacySave(string fileName = null, string sectionName = null)
 	{
 		lock (content)
 		{
@@ -461,8 +461,10 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 			using (var sw = new StreamWriter(fileName)) {
 				foreach (var entry in this)
 				{
-					//if (entry.Section == "General")
+					if (sectionName == null || entry.Section == sectionName)
+					{
 						sw.Write(String.Format("{0}: {1}\r\n", entry.Key, ValueToString(entry.Value)));
+					}
 				}
 			}
 		}
