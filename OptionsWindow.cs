@@ -39,8 +39,12 @@ public class OptionsWindow : Form
 		colorTheme = ScoreTracker.colors;
 
 		Controls.Add (tabs);
-		Controls.Add (save);
-		Controls.Add (saveClose);
+		Panel p = new Panel();
+		p.Height = 20;
+		p.Controls.Add (save);
+		p.Controls.Add (saveClose);
+		p.Dock = DockStyle.Bottom;
+		Controls.Add(p);
 
 		scoreTab.Text = "Scores";
 		tabs.TabPages.Add (scoreTab);
@@ -52,16 +56,18 @@ public class OptionsWindow : Form
 		tabs.TabPages.Add (colorTab);
 
 		save.Text = "Save All Changes";
+		save.Dock = DockStyle.Left;
 		save.Click += new EventHandler(Save);
 
 		saveClose.Text = "Save and Close";
+		saveClose.Dock = DockStyle.Right;
 		saveClose.Click += new EventHandler(SaveClose);
 
 		Size = new Size (w, h);
 		MaximumSize = Size;
 		MinimumSize = Size;
 
-		Resize += delegate { DoLayout(); };
+		Layout += new LayoutEventHandler((object sender, LayoutEventArgs e) => DoLayout());
 
 		ConfigureScoreTab ();
 		ConfigureGeneralTab ();
@@ -166,8 +172,8 @@ public class OptionsWindow : Form
 		DoScoreLayout (scoreTabContent);
 		DoColorLayout();
 
-		save.Dock = DockStyle.Bottom;
-		saveClose.Dock = DockStyle.Bottom;
+		save.Width = ClientRectangle.Width/2;
+		saveClose.Width = ClientRectangle.Width/2;
 	}
 
 
@@ -308,7 +314,7 @@ public class ColorField : OptionField
 
 		this.Controls.Add(this.name);
 		this.Controls.Add(this.button);
-		Resize += delegate { DoLayout(); };
+		Layout += new LayoutEventHandler((object sender, LayoutEventArgs e) => DoLayout());
 	}
 
 	public override string GetOption()
@@ -336,12 +342,10 @@ public class ColorField : OptionField
 	{
 		Height = 20;
 
-		name.Height = 20;
-		button.Height = 20;
+		name.Dock = DockStyle.Fill;
+		button.Dock = DockStyle.Right;
 
 		button.Width = 60;
-		name.Width = ClientRectangle.Width - name.Width;
-		button.Left = ClientRectangle.Width - button.Width;
 	}
 }
 
@@ -375,18 +379,17 @@ public class NumericField : OptionField
 
 		Height = 20;
 
-		Resize += delegate { DoLayout(); };
+		Layout += new LayoutEventHandler((object sender, LayoutEventArgs e) => DoLayout());
 
 		DoLayout();
 	}
 
 	public void DoLayout()
 	{
+		score.Height = 20;
 		score.Width = 60;
-		score.Height = ClientRectangle.Height;
-		name.Width = ClientRectangle.Width - score.Width;
-		name.Height = ClientRectangle.Height;
-		score.Left = name.Width;
+		score.Dock = DockStyle.Right;
+		name.Dock = DockStyle.Fill;
 	}
 
 	public override string ToString()
@@ -410,7 +413,7 @@ public class DropdownField : OptionField
 		Controls.Add(this.name);
 		Controls.Add(this.options);
 
-		Resize += delegate { DoLayout(); };
+		Layout += new LayoutEventHandler((object sender, LayoutEventArgs e) => DoLayout());
 
 		DoLayout();
 	}
@@ -418,9 +421,8 @@ public class DropdownField : OptionField
 	{
 		Height = 20;
 
-		name.Height = 20;
-		options.Left = ClientRectangle.Width - options.Width;
-		name.Width = ClientRectangle.Width - options.Width;
+		options.Dock = DockStyle.Right;
+		name.Dock = DockStyle.Fill;
 	}
 	public override string ToString()
 	{
@@ -447,7 +449,7 @@ public class CheckField : OptionField
 		Controls.Add(this.name);
 		Controls.Add(this.option);
 
-		Resize += delegate { DoLayout(); };
+		Layout += new LayoutEventHandler((object sender, LayoutEventArgs e) => DoLayout());
 
 		DoLayout();
 	}
@@ -456,10 +458,8 @@ public class CheckField : OptionField
 	{
 		Height = 20;
 
-		option.Height = 20;
-		name.Height = 20;
-		option.Left = ClientRectangle.Width - option.Width;
-		name.Width = ClientRectangle.Width - option.Width;
+		option.Dock = DockStyle.Right;
+		name.Dock = DockStyle.Fill;
 	}
 
 	public override string ToString()
