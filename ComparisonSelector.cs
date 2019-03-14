@@ -10,7 +10,10 @@ public class ComparisonSelector : Panel
 {
 	private Button back = new Button();
 	private Button next = new Button();
-	public ComboBox options = new ComboBox();
+	private ComboBox options = new ComboBox();
+
+	private bool justComparisons = false;
+
 	public ComparisonSelector()
 	{
 		Height = 20;
@@ -34,25 +37,39 @@ public class ComparisonSelector : Panel
 		options.SelectedIndexChanged += delegate { DropdownChanged(); };
 
 	}
+	
+	public bool JustComparisons
+	{
+		get { return justComparisons; }
+		set { justComparisons = value; SetItems(); }
+	}
 
 	public void SetItems()
 	{
-		var items = ScoreTracker.Data.GetComparisonNames().ToArray();
-		items[1] = "Sum of Best";
+		List<string> items;
+		if (!JustComparisons)
+		{
+			items = ScoreTracker.Data.GetNames();
+			items[1] = "Sum of Best";
+		}
+		else
+		{
+			items = ScoreTracker.Data.GetComparisonNames();
+		}
 		options.Items.Clear();
-		this.options.Items.AddRange(items);
+		this.options.Items.AddRange(items.ToArray());
 	}
 
 	public void UpdateDropdown()
 	{
 		SetItems();
 		this.options.SelectedIndex = ScoreTracker.Data.GetComparisonIndex();
-		InputWindow.display.ResetContent(); 
+		InputWindow.display.UpdateScores(); 
 	}
 
 	public void DropdownChanged()
 	{
 		ScoreTracker.Data.SetComparisonIndex(this.options.SelectedIndex);
-		InputWindow.display.ResetContent(); 
+		InputWindow.display.UpdateScores(); 
 	}
 }

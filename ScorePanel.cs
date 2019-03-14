@@ -31,7 +31,7 @@ public class ScorePanel : Panel
 		this.entry = entry;
 		UpdatePanel();
 	}
-	
+
 	public void UpdatePanel()
 	{
 		displayName = entry.Name;

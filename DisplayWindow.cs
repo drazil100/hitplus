@@ -119,6 +119,12 @@ public class DisplayWindow : Form
 	{
 		dispContent.DoLayout();
 	}
+
+	public void UpdateScores()
+	{
+		dispContent.UpdateScores();
+	}
+
 	public void ResetContent()
 	{
 		BackColor = ScoreTracker.colors["background_color"];
@@ -292,6 +298,21 @@ public class DisplayWindowContent : Panel
 		}
 
 		//Refresh ();
+	}
+
+	public void UpdateScores()
+	{
+		ScoreSet set = ScoreTracker.Data.GetScoreSet();
+		for (int i = 0; i < panels.Count; i++)
+		{
+			panels[i].entry = set[i];
+			panels[i].UpdatePanel();
+		}
+		TrackerData run = ScoreTracker.Data;
+		int total = run.GetScoreSet().GetComparisonTotal();
+		int sob = run.GetScoreSet(1).GetComparisonTotal();
+		InputWindow.topScore.Text = "" + total;
+		InputWindow.sobScore.Text = "" + sob;
 	}
 
 	public void DoTotalsLayoutHorizontal()

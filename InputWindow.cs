@@ -438,7 +438,7 @@ public class InputWindow : Form
 			}
 
 			selector.UpdateDropdown();
-			display.ResetContent();
+			display.UpdateScores();
 
 			currentScore.ForeColor = colors["text_color"];
 			currentScoreName.ForeColor = colors["text_color"];
