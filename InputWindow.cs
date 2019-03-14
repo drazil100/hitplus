@@ -44,6 +44,8 @@ public class InputWindow : Form
 	private Button casualMode = new Button ();
 	private Button options = new Button ();
 
+	private ComparisonSelector selector = new ComparisonSelector();
+
 	private int w = 300;
 	private int h = 134;
 
@@ -237,9 +239,11 @@ public class InputWindow : Form
 		casualMode.Left = switchRoute.Left + switchRoute.Width;
 		casualMode.Height = submit.Height;
 		casualMode.Width = submit.Width;
-		options.Top = switchRoute.Top + switchRoute.Height;
-		options.Height = switchRoute.Height;
+		options.Top = casualMode.Top + casualMode.Height;
+		options.Height = casualMode.Height;
 		options.Width = GetWidth();
+
+		selector.Dock = DockStyle.Bottom;
 	}
 
 	public void SwapControls(Button b)
@@ -284,6 +288,7 @@ public class InputWindow : Form
 		Controls.Add(undo);
 		Controls.Add (switchRoute);
 		Controls.Add (casualMode);
+		Controls.Add (selector);
 		if (!tracker.IsRunning())
 			Controls.Add (options);
 

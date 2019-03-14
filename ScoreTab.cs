@@ -23,6 +23,7 @@ public class ScoreSubTab : TabPage
 		Text = section;
 		totalName.Text = "Total:";
 		BorderStyle = BorderStyle.None;
+
 		totalPanel.Height = 25;
 		Controls.Add(totalPanel);
 		totalPanel.Controls.Add(totalName);
@@ -77,6 +78,9 @@ public class ScoreTab : Panel
 
 	private TabControl tabs = new TabControl();
 	private List<ScoreSubTab> pages = new List<ScoreSubTab>();
+	private TabPage comparisons = new TabPage();
+	private TabControl comparisonsTabs = new TabControl();
+	private ComparisonSelector selector;
 
 	public ScoreTab(FileReader file)
 	{
@@ -92,14 +96,26 @@ public class ScoreTab : Panel
 		pages.Add(ConfigureTab("Top Scores"));
 		tabs.TabPages.Add(pages[0]);
 		tabs.TabPages.Add(pages[1]);
+		comparisons.Text = "Comparisons";
+		selector = new ComparisonSelector();
+		selector.Dock = DockStyle.Top;
+		comparisons.Controls.Add(selector);
+		comparisons.Controls.Add(comparisonsTabs);
+		comparisonsTabs.Dock = DockStyle.Fill;
+
 		foreach (string section in file.Sections)
 		{
 			if (section == "Best Run" || section == "Top Scores" || section == "General")
 				continue;
 
 			pages.Add(ConfigureTab(section));
-			tabs.TabPages.Add(pages[pages.Count - 1]);
+			comparisonsTabs.TabPages.Add(pages[pages.Count - 1]);
 		}
+		if (comparisonsTabs.TabPages.Count > 0 || true)
+			tabs.TabPages.Add(comparisons);
+
+
+
 		Layout += new LayoutEventHandler((object sender, LayoutEventArgs e) => DoLayout());
 
 		DoLayout();
