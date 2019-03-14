@@ -21,7 +21,7 @@ public class ComparisonSelector : Panel
 		back.Dock = DockStyle.Left;
 		next.Dock = DockStyle.Right;
 		options.Dock = DockStyle.Top;
-		this.options.Items.AddRange(ScoreTracker.Data.GetComparisonNames().ToArray());
+		SetItems();
 		this.options.SelectedIndex = ScoreTracker.Data.GetComparisonIndex();
 		this.options.DropDownStyle = ComboBoxStyle.DropDownList;
 		Controls.Add(options);
@@ -33,6 +33,14 @@ public class ComparisonSelector : Panel
 
 		options.SelectedIndexChanged += delegate { DropdownChanged(); };
 
+	}
+
+	public void SetItems()
+	{
+		var items = ScoreTracker.Data.GetComparisonNames().ToArray();
+		items[1] = "Sum of Best";
+		options.Items.Clear();
+		this.options.Items.AddRange(items);
 	}
 
 	public void UpdateDropdown()

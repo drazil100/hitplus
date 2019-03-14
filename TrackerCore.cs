@@ -37,9 +37,13 @@ public class TrackerCore
 	{
 		return scores.GetScoreSet().GetScoreTotal();
 	}
-	public int GetOldTotal()
+	public int GetComparisonTotal()
 	{
-		return scores.GetScoreSet(0).GetComparisonTotal();
+		return scores.GetScoreSet().GetComparisonTotal();
+	}
+	public int GetComparisonTotal(int index)
+	{
+		return scores.GetScoreSet(index).GetComparisonTotal();
 	}
 
 	public int GetSOB()

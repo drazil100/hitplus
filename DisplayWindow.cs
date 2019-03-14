@@ -125,17 +125,18 @@ public class DisplayWindow : Form
 		InputWindow.topScoreName.ForeColor = ScoreTracker.colors["text_color_total"];
 		InputWindow.sobScoreName.ForeColor = ScoreTracker.colors["text_color_total"];
 		DoResize();
-		DoLayout();
+		DoLayout(true);
 		dispContent.SetControls();
 	}
 
-	public void DoLayout()
+	public void DoLayout(bool skip = false)
 	{
 		if (dispContent != null)
 		{
 			dispContent.Width = Width;
 			dispContent.Height = Height;
-			dispContent.DoLayout();
+			if (!skip)
+				dispContent.DoLayout();
 		}
 	}
 

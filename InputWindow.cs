@@ -298,6 +298,7 @@ public class InputWindow : Form
 		switchRoute.Enabled = true;
 		b.Enabled = true;
 		casualMode.Enabled = true;
+		selector.Enabled = true;
 		AcceptButton = b;
 		Controls.Add(b);
 		Controls.Add(undo);
@@ -383,7 +384,7 @@ public class InputWindow : Form
 			currentScore.Text = "-";
 		}
 		SwapControls (submit);
-		topScore.Text = "" + tracker.GetOldTotal();
+		topScore.Text = "" + tracker.GetComparisonTotal();
 		sobScore.Text = "" + tracker.GetSOB();
 		inputBox.Focus();
 		display.UpdateContent();
@@ -487,6 +488,7 @@ public class InputWindow : Form
 		switchRoute.Enabled = false;
 		casualMode.Enabled = false;
 		options.Enabled = false;
+		selector.Enabled = false;
 		optionsWindow = new OptionsWindow ();
 		optionsWindow.FormClosing += new FormClosingEventHandler(CloseOptions);
 		optionsWindow.Show ();
@@ -507,6 +509,7 @@ public class InputWindow : Form
 			SwapControls (submit);
 		}
 		display.ResetContent();
+		selector.UpdateDropdown();
 	}
 
 	public void SaveBounds()
