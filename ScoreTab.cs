@@ -12,11 +12,17 @@ public class ScoreSubTab : TabPage
 	private string section;
 	private List<NumericField> scores = new List<NumericField>();
 
+	private Label totalName = new Label();
+	private Label total = new Label();
+
 	public ScoreSubTab(FileReader file, string section)
 	{
 		this.file = file;
 		this.section = section;
 		Text = section;
+		totalName.Text = "Total:";
+		Controls.Add(totalName);
+		Controls.Add(total);
 	}
 
 	public void Add(NumericField score)
@@ -30,13 +36,31 @@ public class ScoreSubTab : TabPage
 		Controls.Add(score);
 	}
 
+	public void SaveScores()
+	{
+		foreach (NumericField score in scores)
+		{
+			file [section, score.Name] = score.Number;
+		}
+	}
+
 	public void DoLayout()
 	{
-		foreach (NumericField s in scores)
+		int tot = 0;
+		foreach (NumericField score in scores)
 		{
-			s.Width = Width;
+			score.Width = ClientRectangle.Width;
+			tot += Int32.Parse(score.Number);
 			//s.DoLayout ();
 		}
+		totalName.Top = scores[scores.Count - 1].Top + scores[scores.Count -1].Height;
+		total.Top = totalName.Top;
+		totalName.Width = ClientRectangle.Width/2;
+		total.Width = totalName.Width;
+		total.Left = totalName.Width;
+		total.TextAlign = ContentAlignment.TopRight;
+
+		total.Text = "" + tot;
 	}
 }
 
@@ -73,14 +97,23 @@ public class ScoreTab : Panel
 		DoLayout();
 	}
 
-	public void DoLayout()
+	public void Save()
 	{
-		tabs.Width = Width;
-		tabs.Height = Height;
 		foreach (ScoreSubTab page in pages)
 		{
-			page.Width = tabs.Width;
-			page.Height = tabs.Height - 25;
+			page.SaveScores();
+		}
+		file.Save();
+	}
+
+	public void DoLayout()
+	{
+		tabs.Width = ClientRectangle.Width;
+		tabs.Height = ClientRectangle.Height;
+		foreach (ScoreSubTab page in pages)
+		{
+			page.Width = tabs.ClientRectangle.Width;
+			page.Height = tabs.ClientRectangle.Height - 25;
 			page.DoLayout();
 		}
 	}

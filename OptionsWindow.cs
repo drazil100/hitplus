@@ -12,7 +12,6 @@ public class OptionsWindow : Form
 {
 
 	private FileReader config;
-	private FileReader ils;
 	private ColorFileReader colorTheme;
 
 	private TabControl tabs = new TabControl();
@@ -22,7 +21,6 @@ public class OptionsWindow : Form
 
 	private TabPage scoreTab = new TabPage();
 	private ScoreTab scoreTabContent;
-	private List<NumericField> scores = new List<NumericField>();
 
 	private TabPage generalTab = new TabPage ();
 	private List<OptionField> generalOptions = new List<OptionField>();
@@ -38,7 +36,6 @@ public class OptionsWindow : Form
 		Text = "Options";
 
 		config = ScoreTracker.config;
-		ils = ScoreTracker.Data.File;
 		colorTheme = ScoreTracker.colors;
 
 		Controls.Add (tabs);
@@ -75,7 +72,7 @@ public class OptionsWindow : Form
 
 	public void SaveClose(object sender, EventArgs e)
 	{
-		Save();
+		Save(true);
 		this.Close();
 	}
 
@@ -83,15 +80,9 @@ public class OptionsWindow : Form
 	{
 		Save();
 	}
-	public void Save()
+	public void Save(bool closing = false)
 	{
-		foreach (NumericField s in scores)
-		{
-			ils ["Best Scores", s.Name] = s.Number;
-		}
-		ils.Save ();
-
-		ScoreTracker.Data.Refresh();
+		scoreTabContent.Save();
 
 		config ["hard_route"]                = generalOptions[0].ToString();
 		config ["layout"]                    = generalOptions[1].ToString();
@@ -110,6 +101,20 @@ public class OptionsWindow : Form
 		}
 
 		colorTheme.Save();
+
+		TrackerData data;
+
+		if (config["hard_route"] == "0")
+		{
+			data = new TrackerData(new FileReader("pb_easy.ini"));
+		}
+		else
+		{
+			data = new TrackerData(new FileReader("pb_hard.ini"));
+		}
+		ScoreTracker.Data = data;
+		if (!closing)
+			ConfigureScoreTab();
 	}
 
 	private int GetWidth()
@@ -134,11 +139,11 @@ public class OptionsWindow : Form
 
 		foreach (TabPage page in tabs.TabPages)
 		{
-			page.Width = tabs.Width;
-			page.Height = tabs.Height - 25;
+			page.Width = tabs.ClientRectangle.Width;
+			page.Height = tabs.ClientRectangle.Height - 25;
 		}
 
-		DoScoreLayout ();
+		DoScoreLayout (scoreTabContent);
 		DoColorLayout();
 
 		save.Width = GetWidth()/2;
@@ -152,10 +157,10 @@ public class OptionsWindow : Form
 	}
 
 
-	private void DoScoreLayout()
+	private void DoScoreLayout(Control c)
 	{
-		scoreTabContent.Width = scoreTab.Width;
-		scoreTabContent.Height = scoreTab.Height;
+		c.Width = scoreTab.ClientRectangle.Width;
+		c.Height = scoreTab.ClientRectangle.Height;
 
 
 	}
@@ -212,6 +217,7 @@ public class OptionsWindow : Form
 	{
 		scoreTab.Controls.Clear ();
 		scoreTabContent = new ScoreTab(ScoreTracker.Data.File);
+		DoScoreLayout(scoreTabContent);
 		scoreTab.Controls.Add(scoreTabContent);
 	}
 
@@ -320,8 +326,8 @@ public class ColorField : OptionField
 		button.Height = 20;
 
 		button.Width = 60;
-		name.Width = Width - 60;
-		button.Left = Width - 60;
+		name.Width = ClientRectangle.Width - name.Width;
+		button.Left = ClientRectangle.Width - button.Width;
 	}
 }
 
@@ -363,9 +369,9 @@ public class NumericField : OptionField
 	public void DoLayout()
 	{
 		score.Width = 60;
-		score.Height = Height;
-		name.Width = Width - score.Width;
-		name.Height = Height;
+		score.Height = ClientRectangle.Height;
+		name.Width = ClientRectangle.Width - score.Width;
+		name.Height = ClientRectangle.Height;
 		score.Left = name.Width;
 	}
 
@@ -399,8 +405,8 @@ public class DropdownField : OptionField
 		Height = 20;
 
 		name.Height = 20;
-		options.Left = Width - options.Width - 21;
-		name.Width = Width - options.Width - 21;
+		options.Left = ClientRectangle.Width - options.Width;
+		name.Width = ClientRectangle.Width - options.Width;
 	}
 	public override string ToString()
 	{
@@ -438,8 +444,8 @@ public class CheckField : OptionField
 
 		option.Height = 20;
 		name.Height = 20;
-		option.Left = Width - option.Width;
-		name.Width = Width - option.Width - 21;
+		option.Left = ClientRectangle.Width - option.Width;
+		name.Width = ClientRectangle.Width - option.Width;
 	}
 
 	public override string ToString()
