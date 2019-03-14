@@ -289,7 +289,7 @@ public class DisplayWindowContent : Panel
 			DoLevelsLayoutVertical ();
 		}
 
-		Refresh ();
+		//Refresh ();
 	}
 
 	public void DoTotalsLayoutHorizontal()
