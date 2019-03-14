@@ -361,6 +361,24 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 		}
 	}
 
+	public void RemoveSection(string section)
+	{
+		if (content.ContainsKey(section)) {
+			content.Remove(section);
+		}
+		if (defaultValues.ContainsKey(section)) {
+			defaultValues.Remove(section);
+		}
+		var tuples = new List<Tuple<string, string>>(
+				cachedValues
+				.Where(pair => pair.Key.Item1 == section)
+				.Select(pair => pair.Key)
+				);
+		foreach (var tuple in tuples) {
+			cachedValues.Remove(tuple);
+		}
+	}
+
 	public bool ContainsKey(string key)
 	{
 		return ContainsKey(DefaultSection, key);
