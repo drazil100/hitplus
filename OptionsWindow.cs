@@ -173,7 +173,7 @@ public class OptionsWindow : Form
 			{
 				colors[i].Top = colors[i-1].Top + colors[i-1].Height;
 			}
-			colors[i].Width = Width;
+			colors[i].Width = ClientRectangle.Width;
 		}
 	}
 
@@ -208,7 +208,7 @@ public class OptionsWindow : Form
 			{
 				generalOptions[i].Top = generalOptions[i-1].Top + generalOptions[i-1].Height;
 			}
-			generalOptions[i].Width = Width;
+			generalOptions[i].Width = ClientRectangle.Width;
 			generalTab.Controls.Add(generalOptions[i]);
 		}
 	}

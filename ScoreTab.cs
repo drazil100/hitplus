@@ -31,7 +31,7 @@ public class ScoreSubTab : TabPage
 		{
 			score.Top = scores [scores.Count - 1].Top + scores [scores.Count - 1].Height;
 		}
-		score.Width = Width;
+		score.Width = ClientRectangle.Width;
 		scores.Add(score);
 		Controls.Add(score);
 	}
