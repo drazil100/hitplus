@@ -28,12 +28,6 @@ public class InputWindow : Form
 	public static FileReader individualLevels;
 	public static ColorFileReader colors;
 
-	public static Label topScore = new Label();
-	public static Label sobScore = new Label();
-	public static Label currentScore = new Label();
-	public static Label topScoreName = new Label();
-	public static Label sobScoreName = new Label();
-	public static Label currentScoreName = new Label();
 
 	//  Declare and initilize UI elements
 	private NumericTextBox inputBox = new NumericTextBox();
@@ -90,14 +84,6 @@ public class InputWindow : Form
 		
 
 
-		//  Set colors
-		topScore.ForeColor = colors["text_color_total"];
-		sobScore.ForeColor = colors["text_color_total"];
-		currentScore.ForeColor = colors["text_color"];
-		currentScoreName.ForeColor = colors["text_color"];
-
-
-
 		//SetControls();
 
 
@@ -108,7 +94,6 @@ public class InputWindow : Form
 		//  Draw the form
 		DoLayout();
 
-		UpdateCurrentScore();
 
 		int x = -10000;
 		int y = -10000;
@@ -140,41 +125,6 @@ public class InputWindow : Form
 			Console.WriteLine(e);
 		}
 	}
-
-	public void UpdateCurrentScore()
-	{
-		if (tracker == null) return;
-
-		currentScoreName.Text = "Total:";
-
-		if (!tracker.IsRunning() && config["layout"] == "0")
-		{
-			currentScore.Text = "";
-		}
-		else
-		{
-			currentScore.Text = "" + tracker.GetTotalScore();
-			if (tracker.GetTotalScore() == 0)
-				currentScore.Text = "-";
-		}
-		Color p = colors["text_color"];
-		if (tracker.IsRunning() && config["casual_mode"] == "0")
-			p = GetPaceColor(tracker.GetCurrentPace());
-		currentScore.ForeColor = p;
-		currentScoreName.Text = "Total:";
-	}
-
-	public Color GetPaceColor(PaceStatus status)
-	{
-		Color tmp = colors["text_color"];
-		switch (status)
-		{
-			case PaceStatus.Ahead:   tmp = colors["text_color_ahead"]; break;
-			case PaceStatus.Behind:  tmp = colors["text_color_behind"]; break;
-		}
-		return tmp;
-	}
-	
 
 	private void CheckVersion()
 	{
@@ -320,14 +270,13 @@ public class InputWindow : Form
 				return;
 			inputBox.Text = "";
 			tracker.Submit(s);
-			UpdateCurrentScore();
 
 			if (tracker.IsRunning())
 			{
 				SwapControls(submit);
 			}
 
-			display.UpdateContent();
+			display.UpdateScores();
 
 			if (tracker.IsFinished())
 			{
@@ -357,10 +306,9 @@ public class InputWindow : Form
 			}
 			inputBox.Text = "";
 
-			UpdateCurrentScore();
 
 			inputBox.Focus();
-			display.UpdateContent();
+			display.UpdateScores();
 		}
 		catch (Exception e2)
 		{
@@ -373,21 +321,9 @@ public class InputWindow : Form
 		tracker.SaveAndReset();
 		SwapControls(submit);
 		submit.Enabled = true;
-		currentScore.ForeColor = colors["text_color"];
-		currentScoreName.ForeColor = colors["text_color"];
-		if (config["layout"] == "0")
-		{
-			currentScore.Text = "";
-		}
-		else
-		{
-			currentScore.Text = "-";
-		}
 		SwapControls (submit);
-		topScore.Text = "" + tracker.GetComparisonTotal();
-		sobScore.Text = "" + tracker.GetSOB();
 		inputBox.Focus();
-		display.UpdateContent();
+		display.UpdateScores();
 	}
 
 	public void SwitchRoutes(object sender, EventArgs e)
@@ -440,23 +376,14 @@ public class InputWindow : Form
 			selector.UpdateDropdown();
 			display.UpdateScores();
 
-			currentScore.ForeColor = colors["text_color"];
-			currentScoreName.ForeColor = colors["text_color"];
-			if (config["layout"] == "0")
-			{
-				currentScore.Text = "";
-			}
-			else
-			{
-				currentScore.Text = "-";
-			}
 		}
 		catch (Exception ex)
 		{
 			Console.WriteLine(ex.Message);
 		}
 		inputBox.Focus();
-		display.UpdateContent();
+		display.UpdateScores();
+
 	}
 	
 	public void ToggleCasualMode(object sender, EventArgs e)
@@ -474,9 +401,8 @@ public class InputWindow : Form
 		config.Save();
 		
 		//ScorePanel.ToggleCasualMode();
-		UpdateCurrentScore();
 		inputBox.Focus();
-		display.UpdateContent();
+		display.UpdateScores();
 	}
 	
 	public void OpenOptions(object sender, EventArgs e)
@@ -501,12 +427,7 @@ public class InputWindow : Form
 	{
 		if (!closing)
 		{
-			topScore.ForeColor = colors["text_color_total"];
-			sobScore.ForeColor = colors["text_color_total"];
-			currentScore.ForeColor = colors["text_color"];
-			currentScoreName.ForeColor = colors["text_color"];
 			display.ResetContent();
-			UpdateCurrentScore();
 			SwapControls (submit);
 		}
 		display.ResetContent();
