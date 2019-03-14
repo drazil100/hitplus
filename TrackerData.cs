@@ -168,11 +168,22 @@ public class TrackerData
 	public List<string> GetComparisonNames()
 	{
 		List<string> toReturn = new List<string>();
+		toReturn.Add("Best Run");
+		toReturn.Add("Top Scores");
 		foreach (ScoreSet set in comparisons)
 		{
 			toReturn.Add(set.Name);
 		}
 		return toReturn;
+	}
+
+	public int GetComparisonIndex()
+	{
+		return comparisonIndex;
+	}
+	public void SetComparisonIndex(int index)
+	{
+		comparisonIndex = index;
 	}
 
 	public void UpdateBestScores()

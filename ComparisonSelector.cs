@@ -20,11 +20,30 @@ public class ComparisonSelector : Panel
 		next.Width = 40;
 		back.Dock = DockStyle.Left;
 		next.Dock = DockStyle.Right;
-		options.Dock = DockStyle.Fill;
+		options.Dock = DockStyle.Top;
+		this.options.Items.AddRange(ScoreTracker.Data.GetComparisonNames().ToArray());
+		this.options.SelectedIndex = ScoreTracker.Data.GetComparisonIndex();
 		this.options.DropDownStyle = ComboBoxStyle.DropDownList;
+		Controls.Add(options);
 		Controls.Add(back);
 		Controls.Add(next);
-		Controls.Add(options);
 
+		next.Click += delegate { ScoreTracker.Data.NextComparison(); UpdateDropdown(); };
+		back.Click += delegate { ScoreTracker.Data.PreviousComparison(); UpdateDropdown(); };
+
+		options.SelectedIndexChanged += delegate { DropdownChanged(); };
+
+	}
+
+	public void UpdateDropdown()
+	{
+		this.options.SelectedIndex = ScoreTracker.Data.GetComparisonIndex();
+		InputWindow.display.ResetContent(); 
+	}
+
+	public void DropdownChanged()
+	{
+		ScoreTracker.Data.SetComparisonIndex(this.options.SelectedIndex);
+		InputWindow.display.ResetContent(); 
 	}
 }

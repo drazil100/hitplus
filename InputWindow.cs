@@ -17,7 +17,7 @@ public class InputWindow : Form
 	private bool closing = false;
 	private bool reopening = false;
 
-	public DisplayWindow display;
+	public static DisplayWindow display;
 	public TrackerCore tracker;
 	public OptionsWindow optionsWindow;
 	public static InputWindow mainWindow;
@@ -218,6 +218,25 @@ public class InputWindow : Form
 		);
 	}
 
+	private void SetHeight()
+	{
+		if (!tracker.IsRunning())
+		{
+			MaximumSize = new Size (w, options.Top + options.Height + selector.Height + GetCaptionSize());
+			MinimumSize = new Size (w, options.Top + options.Height + selector.Height + GetCaptionSize());
+		}
+		else
+		{
+			MinimumSize  = new Size(w, options.Top  + selector.Height + GetCaptionSize());
+			MaximumSize = new Size(w, options.Top + selector.Height + GetCaptionSize());
+		}
+	}
+	
+	private int GetCaptionSize()
+	{
+		return (2 * SystemInformation.FrameBorderSize.Height + SystemInformation.CaptionHeight);
+	}
+
 	private void DoLayout()
 	{
 		inputBox.Height = 25;
@@ -244,6 +263,8 @@ public class InputWindow : Form
 		options.Width = GetWidth();
 
 		selector.Dock = DockStyle.Bottom;
+
+		SetHeight();
 	}
 
 	public void SwapControls(Button b)
@@ -259,15 +280,11 @@ public class InputWindow : Form
 			{
 				undo.Enabled = false;
 				options.Enabled = true;
-				MaximumSize = new Size (w, h);
-				MinimumSize = new Size (w, h);
 			}
 			else
 			{
 				undo.Enabled = true;
 				options.Enabled = false;
-				MinimumSize  = new Size(w, h - options.Height);
-				MaximumSize = new Size(w, h - options.Height);
 			}
 		}
 		else
@@ -275,8 +292,6 @@ public class InputWindow : Form
 			inputBox.Enabled = false;
 			undo.Enabled = true;
 			options.Enabled = false;
-			MinimumSize  = new Size(w, h - options.Height);
-			MaximumSize = new Size(w, h - options.Height);
 		}
 		submit.Enabled = false;
 		save.Enabled = false;
