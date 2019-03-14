@@ -29,6 +29,9 @@ public class ScoreSubTab : TabPage
 		table.Controls.Add(totalName);
 		table.Controls.Add(total);
 		Controls.Add(table);
+
+		//Resize += delegate { DoLayout(); };
+		Layout += new LayoutEventHandler((object sender, LayoutEventArgs e) => DoLayout());
 	}
 
 	public void Add(NumericField score)
@@ -52,6 +55,7 @@ public class ScoreSubTab : TabPage
 
 	public void DoLayout()
 	{
+		Dock = DockStyle.Fill;
 		int tot = 0;
 		foreach (NumericField score in scores)
 		{
@@ -62,6 +66,8 @@ public class ScoreSubTab : TabPage
 		table.Top = scores[scores.Count - 1].Top + scores[scores.Count -1].Height + 5;
 		table.Width = ClientRectangle.Width;
 		total.TextAlign = ContentAlignment.TopRight;
+
+		total.Dock = DockStyle.Right;
 
 		total.Text = "" + tot;
 	}
@@ -80,7 +86,7 @@ public class ScoreTab : Panel
 		TrackerData.ValidateFile(file);
 
 		Text = "Scores";
-		BorderStyle = BorderStyle.None;
+		Dock = DockStyle.Fill;
 
 		Controls.Add(tabs);
 
@@ -96,7 +102,7 @@ public class ScoreTab : Panel
 			pages.Add(ConfigureTab(section));
 			tabs.TabPages.Add(pages[pages.Count - 1]);
 		}
-		Resize += delegate { DoLayout(); };
+		Layout += new LayoutEventHandler((object sender, LayoutEventArgs e) => DoLayout());
 
 		DoLayout();
 	}
@@ -112,12 +118,9 @@ public class ScoreTab : Panel
 
 	public void DoLayout()
 	{
-		tabs.Width = ClientRectangle.Width;
-		tabs.Height = ClientRectangle.Height;
+		tabs.Dock = DockStyle.Fill;
 		foreach (ScoreSubTab page in pages)
 		{
-			page.Width = tabs.ClientRectangle.Width;
-			page.Height = tabs.ClientRectangle.Height - 25;
 			page.DoLayout();
 		}
 	}

@@ -120,19 +120,18 @@ public class OptionsWindow : Form
 	private int GetWidth()
 	{
 		return (
-			Width - (2 * SystemInformation.FrameBorderSize.Width)
+			ClientRectangle.Width
 		);
 	}
 
 	private int GetHeight()
 	{
 		return (
-			Height - (2 * SystemInformation.FrameBorderSize.Height +
-				SystemInformation.CaptionHeight)
+			ClientRectangle.Height
 		);
 	}
 
-	public void DoLayout()
+	/*public void DoLayout()
 	{
 		tabs.Width = GetWidth ();
 		tabs.Height = GetHeight () - 20;
@@ -155,6 +154,20 @@ public class OptionsWindow : Form
 		saveClose.Height = 20;
 		saveClose.Top = save.Top;
 		saveClose.Left = save.Width;
+	}*/
+	public void DoLayout()
+	{
+		tabs.Dock = DockStyle.Fill;
+		foreach (TabPage page in tabs.TabPages)
+		{
+			page.Dock = DockStyle.Fill;
+		}
+
+		DoScoreLayout (scoreTabContent);
+		DoColorLayout();
+
+		save.Dock = DockStyle.Bottom;
+		saveClose.Dock = DockStyle.Bottom;
 	}
 
 
