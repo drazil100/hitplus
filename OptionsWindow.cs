@@ -141,6 +141,7 @@ public class OptionsWindow : Form
 		{
 			page.Width = tabs.ClientRectangle.Width;
 			page.Height = tabs.ClientRectangle.Height - 25;
+			page.BorderStyle = BorderStyle.None;
 		}
 
 		DoScoreLayout (scoreTabContent);

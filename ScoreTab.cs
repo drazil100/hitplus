@@ -14,6 +14,7 @@ public class ScoreSubTab : TabPage
 
 	private Label totalName = new Label();
 	private Label total = new Label();
+	private TableLayoutPanel table = new TableLayoutPanel();
 
 	public ScoreSubTab(FileReader file, string section)
 	{
@@ -21,8 +22,13 @@ public class ScoreSubTab : TabPage
 		this.section = section;
 		Text = section;
 		totalName.Text = "Total:";
-		Controls.Add(totalName);
-		Controls.Add(total);
+		BorderStyle = BorderStyle.None;
+		table.ColumnCount = 2;
+
+
+		table.Controls.Add(totalName);
+		table.Controls.Add(total);
+		Controls.Add(table);
 	}
 
 	public void Add(NumericField score)
@@ -53,11 +59,8 @@ public class ScoreSubTab : TabPage
 			tot += Int32.Parse(score.Number);
 			//s.DoLayout ();
 		}
-		totalName.Top = scores[scores.Count - 1].Top + scores[scores.Count -1].Height;
-		total.Top = totalName.Top;
-		totalName.Width = ClientRectangle.Width/2;
-		total.Width = totalName.Width;
-		total.Left = totalName.Width;
+		table.Top = scores[scores.Count - 1].Top + scores[scores.Count -1].Height + 5;
+		table.Width = ClientRectangle.Width;
 		total.TextAlign = ContentAlignment.TopRight;
 
 		total.Text = "" + tot;
@@ -77,6 +80,7 @@ public class ScoreTab : Panel
 		TrackerData.ValidateFile(file);
 
 		Text = "Scores";
+		BorderStyle = BorderStyle.None;
 
 		Controls.Add(tabs);
 
