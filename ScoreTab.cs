@@ -14,7 +14,7 @@ public class ScoreSubTab : TabPage
 
 	private Label totalName = new Label();
 	private Label total = new Label();
-	private TableLayoutPanel table = new TableLayoutPanel();
+	private Panel totalPanel = new Panel();
 
 	public ScoreSubTab(FileReader file, string section)
 	{
@@ -23,12 +23,12 @@ public class ScoreSubTab : TabPage
 		Text = section;
 		totalName.Text = "Total:";
 		BorderStyle = BorderStyle.None;
-		table.ColumnCount = 2;
-
-
-		table.Controls.Add(totalName);
-		table.Controls.Add(total);
-		Controls.Add(table);
+		totalPanel.Height = 25;
+		Controls.Add(totalPanel);
+		totalPanel.Controls.Add(totalName);
+		totalPanel.Controls.Add(total);
+		totalName.Dock = DockStyle.Fill;
+		total.Dock = DockStyle.Right;
 
 		//Resize += delegate { DoLayout(); };
 		Layout += new LayoutEventHandler((object sender, LayoutEventArgs e) => DoLayout());
@@ -63,13 +63,11 @@ public class ScoreSubTab : TabPage
 			tot += Int32.Parse(score.Number);
 			//s.DoLayout ();
 		}
-		table.Top = scores[scores.Count - 1].Top + scores[scores.Count -1].Height + 5;
-		table.Width = ClientRectangle.Width;
-		total.TextAlign = ContentAlignment.TopRight;
-
-		total.Dock = DockStyle.Right;
+		totalPanel.Top = scores[scores.Count - 1].Top + scores[scores.Count -1].Height + 10;
+		totalPanel.Width = ClientRectangle.Width - 4;
 
 		total.Text = "" + tot;
+		total.TextAlign = ContentAlignment.TopRight;
 	}
 }
 
