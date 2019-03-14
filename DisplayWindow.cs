@@ -261,7 +261,9 @@ public class DisplayWindowContent : Panel
 		{
 			totals.Top = 0;
 			totals.Width = 310;
+			totals.Height = GetHeight();
 			levels.Width = GetWidth () - totals.Width;
+			levels.Height = GetHeight();
 			DoTotalsLayoutHorizontal ();
 			DoLevelsLayoutHorizontal ();
 

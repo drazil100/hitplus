@@ -437,6 +437,7 @@ public class InputWindow : Form
 				ScoreTracker.Data = new TrackerData(pbHard);
 			}
 
+			selector.UpdateDropdown();
 			display.ResetContent();
 
 			currentScore.ForeColor = colors["text_color"];

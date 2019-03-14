@@ -45,6 +45,7 @@ public class ComparisonSelector : Panel
 
 	public void UpdateDropdown()
 	{
+		SetItems();
 		this.options.SelectedIndex = ScoreTracker.Data.GetComparisonIndex();
 		InputWindow.display.ResetContent(); 
 	}
