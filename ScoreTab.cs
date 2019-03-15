@@ -100,7 +100,7 @@ public class ScoreTab : Panel
 		selector = new ComparisonSelector();
 		selector.Dock = DockStyle.Top;
 		comparisons.Controls.Add(comparisonsTabs);
-		//comparisons.Controls.Add(selector);
+		comparisons.Controls.Add(selector);
 		comparisonsTabs.Dock = DockStyle.Fill;
 
 		foreach (string section in file.Sections)

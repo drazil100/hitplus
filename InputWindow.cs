@@ -80,6 +80,10 @@ public class InputWindow : Form
 		casualMode.Click += new EventHandler (ToggleCasualMode);
 		options.Click += new EventHandler (OpenOptions);
 
+		selector.Next = OnNextComparison;
+		selector.Back = OnPreviousComparison;
+		selector.Changed = OnDropdownChanged;
+
 		SwapControls(submit);
 		
 
@@ -432,6 +436,24 @@ public class InputWindow : Form
 		}
 		display.ResetContent();
 		selector.UpdateDropdown();
+	}
+
+	public void OnNextComparison()
+	{
+		tracker.Data.NextComparison();
+		display.UpdateScores();
+	}
+
+	public void OnPreviousComparison()
+	{
+		tracker.Data.NextComparison();
+		display.UpdateScores();
+	}
+
+	public void OnDropdownChanged()
+	{
+		tracker.Data.SetComparisonIndex(selector.Index);
+		display.UpdateScores();
 	}
 
 	public void SaveBounds()

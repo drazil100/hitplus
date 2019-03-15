@@ -4,13 +4,17 @@ using System.IO;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Drawing;
-using System.Runtime.InteropServices;
+
+public delegate void Action();
 
 public class ComparisonSelector : Panel
 {
 	private Button back = new Button();
 	private Button next = new Button();
 	private ComboBox options = new ComboBox();
+
+	//private Action n;
+	//private Action b;
 
 	private bool justComparisons = false;
 
@@ -31,8 +35,10 @@ public class ComparisonSelector : Panel
 		Controls.Add(back);
 		Controls.Add(next);
 
-		next.Click += delegate { ScoreTracker.Data.NextComparison(); UpdateDropdown(); };
-		back.Click += delegate { ScoreTracker.Data.PreviousComparison(); UpdateDropdown(); };
+
+
+		next.Click += delegate { if (Next != null) Next(); UpdateDropdown(); };
+		back.Click += delegate { if (Back != null) Back(); UpdateDropdown(); };
 
 		options.SelectedIndexChanged += delegate { DropdownChanged(); };
 
@@ -42,6 +48,30 @@ public class ComparisonSelector : Panel
 	{
 		get { return justComparisons; }
 		set { justComparisons = value; SetItems(); }
+	}
+
+	public Action Next
+	{
+		get; 
+		set;
+	}
+
+	public Action Back
+	{
+		get; 
+		set;
+	}
+
+	public Action Changed
+	{
+		get; 
+		set;
+	}
+
+	public int Index
+	{
+		get { return this.options.SelectedIndex; }
+		set { this.options.SelectedIndex = value; }
 	}
 
 	public void SetItems()
@@ -64,12 +94,10 @@ public class ComparisonSelector : Panel
 	{
 		SetItems();
 		this.options.SelectedIndex = ScoreTracker.Data.GetComparisonIndex();
-		InputWindow.display.UpdateScores(); 
 	}
 
 	public void DropdownChanged()
 	{
-		ScoreTracker.Data.SetComparisonIndex(this.options.SelectedIndex);
-		InputWindow.display.UpdateScores(); 
+		if (Changed != null) Changed();
 	}
 }
