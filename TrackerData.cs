@@ -158,7 +158,7 @@ public class TrackerData
 
 	public void SetComparisonIndex(int index)
 	{
-		if (index < comparisons.Count + 2)
+		if (index != comparisonIndex && index < comparisons.Count + 2 && index >= 0)
 		{
 			comparisonIndex = index;
 			file["comparison_index"] = "" + comparisonIndex;

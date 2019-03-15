@@ -80,8 +80,6 @@ public class InputWindow : Form
 		casualMode.Click += new EventHandler (ToggleCasualMode);
 		options.Click += new EventHandler (OpenOptions);
 
-		selector.Next = OnNextComparison;
-		selector.Back = OnPreviousComparison;
 		selector.Changed = OnDropdownChanged;
 
 		SwapControls(submit);
@@ -377,7 +375,8 @@ public class InputWindow : Form
 				ScoreTracker.Data = new TrackerData(pbHard);
 			}
 
-			selector.UpdateDropdown();
+			selector.Reload();
+			selector.Index = tracker.Data.GetComparisonIndex();
 			display.UpdateScores();
 
 		}
@@ -435,19 +434,8 @@ public class InputWindow : Form
 			SwapControls (submit);
 		}
 		display.ResetContent();
-		selector.UpdateDropdown();
-	}
-
-	public void OnNextComparison()
-	{
-		tracker.Data.NextComparison();
-		display.UpdateScores();
-	}
-
-	public void OnPreviousComparison()
-	{
-		tracker.Data.NextComparison();
-		display.UpdateScores();
+		selector.Reload();
+		selector.Index = tracker.Data.GetComparisonIndex();
 	}
 
 	public void OnDropdownChanged()

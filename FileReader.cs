@@ -336,7 +336,7 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 				defaultValues[section] = new OrderedDictionary<string, string>();
 			}
 			defaultValues[section][key] = value;
-			WriteDebug("ADD: " + MakeModifyMessage(section, key, value));
+			WriteDebug("ADD: " + MakeModifyMessage(section, key, ValueToString(this[section, key])) + " (default = " + value + ")");
 		}
 	}
 
