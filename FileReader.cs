@@ -264,9 +264,10 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 		get {
 			return this[DefaultSection, key];
 		}
-
 		set {
-			this[DefaultSection, key] = value;
+			using (stackMonitor.Block) {
+				this[DefaultSection, key] = value;
+			}
 		}
 	}
 
