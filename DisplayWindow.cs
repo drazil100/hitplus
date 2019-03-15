@@ -328,7 +328,7 @@ public class DisplayWindowContent : Panel
 			}
 			else
 			{
-				topScoreName.Text = "Com:";
+				topScoreName.Text = "Cmp:";
 			}
 		}
 		else
