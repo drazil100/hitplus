@@ -17,8 +17,8 @@ public class ComparisonSelector : Panel
 	public ComparisonSelector()
 	{
 		Height = 20;
-		back.Text = "<-";
-		next.Text = "->";
+		back.Text = "\u2190";
+		next.Text = "\u2192";
 		back.Width = 40;
 		next.Width = 40;
 		back.Dock = DockStyle.Left;
