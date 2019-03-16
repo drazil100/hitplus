@@ -74,6 +74,12 @@ public class ComparisonSelector : Panel
 		set;
 	}
 
+	public Action Reloaded
+	{
+		get; 
+		set;
+	}
+
 	public int Index
 	{
 		get { return options.SelectedIndex; }
@@ -108,6 +114,7 @@ public class ComparisonSelector : Panel
 		reloading = true;
 		SetItems();
 		reloading = false;
+		if (Reloaded != null) Reloaded();
 	}
 
 	public void DropdownChanged()
