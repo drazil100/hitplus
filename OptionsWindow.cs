@@ -369,6 +369,11 @@ public class NumericField : OptionField
 		}
 	}
 
+	public NumericTextBox.OnChanged Changed
+	{
+		set { score.Changed = value; }
+	}
+
 	public NumericField(string name, string number)
 	{
 		this.name.Text = name;

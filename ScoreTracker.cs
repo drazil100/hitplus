@@ -397,6 +397,18 @@ public class ScoreTracker : Form
 
 public class NumericTextBox : TextBox
 {
+	public delegate void OnChanged();
+	public OnChanged Changed
+	{
+		get;
+		set;
+	}
+
+	public NumericTextBox() : base()
+	{
+		TextChanged += delegate { if (Changed != null) Changed(); };
+	}
+
 	protected override void OnKeyPress(KeyPressEventArgs e)
 	{
 		base.OnKeyPress(e);
