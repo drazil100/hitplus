@@ -6,81 +6,21 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Runtime.InteropServices;
 
-public class ScoreSubTab : TabPage
-{
-	private FileReader file;
-	private string section;
-	private List<NumericField> scores = new List<NumericField>();
-
-	private Label totalName = new Label();
-	private Label total = new Label();
-	private Panel totalPanel = new Panel();
-
-	public ScoreSubTab(FileReader file, string section)
-	{
-		this.file = file;
-		this.section = section;
-		Text = section;
-		totalName.Text = "Total:";
-		BorderStyle = BorderStyle.None;
-
-		totalPanel.Height = 25;
-		Controls.Add(totalPanel);
-		totalPanel.Controls.Add(totalName);
-		totalPanel.Controls.Add(total);
-		totalName.Dock = DockStyle.Fill;
-		total.Dock = DockStyle.Right;
-
-		//Resize += delegate { DoLayout(); };
-		Layout += new LayoutEventHandler((object sender, LayoutEventArgs e) => DoLayout());
-	}
-
-	public void Add(NumericField score)
-	{
-		if (scores.Count > 0)
-		{
-			score.Top = scores [scores.Count - 1].Top + scores [scores.Count - 1].Height;
-		}
-		score.Width = ClientRectangle.Width;
-		scores.Add(score);
-		Controls.Add(score);
-	}
-
-	public void SaveScores()
-	{
-		foreach (NumericField score in scores)
-		{
-			file [section, score.Name] = score.Number;
-		}
-	}
-
-	public void DoLayout()
-	{
-		Dock = DockStyle.Fill;
-		int tot = 0;
-		foreach (NumericField score in scores)
-		{
-			score.Width = ClientRectangle.Width;
-			tot += Int32.Parse(score.Number);
-			//s.DoLayout ();
-		}
-		totalPanel.Top = scores[scores.Count - 1].Top + scores[scores.Count -1].Height + 10;
-		totalPanel.Width = ClientRectangle.Width - 4;
-
-		total.Text = "" + tot;
-		total.TextAlign = ContentAlignment.TopRight;
-	}
-}
-
 public class ScoreTab : Panel
 {
 	private FileReader file;
 
 	private TabControl tabs = new TabControl();
-	private List<ScoreSubTab> pages = new List<ScoreSubTab>();
+	private Dictionary<string, ScorePage> pages = new Dictionary<string, ScorePage>();
 	private TabPage comparisons = new TabPage();
 	private TabControl comparisonsTabs = new TabControl();
 	private ComparisonSelector selector;
+	private Panel currentComparison = new Panel();
+	private Button addComparison = new Button();
+	private Button removeComparison = new Button();
+
+	private static int tabIndex = 0;
+	private static int selectorIndex = 0;
 
 	public ScoreTab(FileReader file)
 	{
@@ -91,41 +31,67 @@ public class ScoreTab : Panel
 		Dock = DockStyle.Fill;
 
 		Controls.Add(tabs);
+		
+		addComparison.Dock = DockStyle.Left;
+		addComparison.Text = "Add Comparison";
+		removeComparison.Dock = DockStyle.Right;
+		removeComparison.Text = "Remove Comparison";
 
-		pages.Add(ConfigureTab("Best Run"));
-		pages.Add(ConfigureTab("Top Scores"));
-		tabs.TabPages.Add(pages[0]);
-		tabs.TabPages.Add(pages[1]);
+		Panel p = new Panel();
+		p.Height = 20;
+		p.Controls.Add (addComparison);
+		p.Controls.Add (removeComparison);
+		p.Dock = DockStyle.Top;
+
+		pages.Add("Best Run", ConfigureTab("Best Run"));
+		pages.Add("Top Scores", ConfigureTab("Top Scores"));
+		tabs.TabPages.Add(ToTabPage(pages["Best Run"]));
+		tabs.TabPages.Add(ToTabPage(pages["Top Scores"]));
 		comparisons.Text = "Comparisons";
-		selector = new ComparisonSelector();
+		selector = new ComparisonSelector(file);
+		selector.JustComparisons = true;
+		selector.Reload();
 		selector.Dock = DockStyle.Top;
-		comparisons.Controls.Add(comparisonsTabs);
+		currentComparison.Dock = DockStyle.Fill;
+		comparisons.Controls.Add(currentComparison);
 		comparisons.Controls.Add(selector);
-		comparisonsTabs.Dock = DockStyle.Fill;
+		comparisons.Controls.Add(p);
 
-		foreach (string section in file.Sections)
-		{
-			if (section == "Best Run" || section == "Top Scores" || section == "General")
-				continue;
+		selector.Changed = ReloadComparisons;
+		selector.Reloaded = ReloadComparisons;
+		selector.Index = selectorIndex;
 
-			pages.Add(ConfigureTab(section));
-			comparisonsTabs.TabPages.Add(pages[pages.Count - 1]);
-		}
-		if (comparisonsTabs.TabPages.Count > 0 || true)
-			tabs.TabPages.Add(comparisons);
+		ReloadComparisons();
 
+		tabs.TabPages.Add(comparisons);
 
+		tabs.SelectedIndexChanged += delegate { CacheTabIndex(); };
+		addComparison.Click += delegate { AddComparison(); };
+		removeComparison.Click += delegate { ConfirmComparisonDeletion(); };
 
 		Layout += new LayoutEventHandler((object sender, LayoutEventArgs e) => DoLayout());
+
+		tabs.SelectedIndex = tabIndex;
 
 		DoLayout();
 	}
 
+	public void CacheTabIndex()
+	{
+		tabIndex = tabs.SelectedIndex;
+
+	}
+
+	public void CacheComparisonIndex()
+	{
+		selectorIndex = selector.Index;
+	}
+
 	public void Save()
 	{
-		foreach (ScoreSubTab page in pages)
+		foreach (KeyValuePair<string, ScorePage> pair in pages)
 		{
-			page.SaveScores();
+			pair.Value.SaveScores();
 		}
 		file.Save();
 	}
@@ -133,15 +99,48 @@ public class ScoreTab : Panel
 	public void DoLayout()
 	{
 		tabs.Dock = DockStyle.Fill;
-		foreach (ScoreSubTab page in pages)
+		foreach (KeyValuePair<string, ScorePage> pair in pages)
 		{
-			page.DoLayout();
+			pair.Value.DoLayout();
 		}
+		addComparison.Width = ClientRectangle.Width/2;
+		removeComparison.Width = addComparison.Width;
 	}
 
-	private ScoreSubTab ConfigureTab (string section)
+	private TabPage ToTabPage(ScorePage page)
 	{
-		ScoreSubTab page = new ScoreSubTab(file, section);
+		TabPage toReturn = new TabPage();
+		toReturn.Text = page.Text;
+		toReturn.Controls.Add(page);
+		return toReturn;
+	}
+
+	private void ReloadComparisons()
+	{
+		foreach (string section in file.Sections)
+		{
+			if (section == "Best Run" || section == "Top Scores" || section == "General" || section == "Sum of Best")
+				continue;
+
+			if (!pages.ContainsKey(section))
+				pages.Add(section, ConfigureTab(section));
+		}
+		currentComparison.Controls.Clear();
+		if (selector.Count > 0)
+		{
+			currentComparison.Controls.Add(pages[selector.Comparison]);
+			removeComparison.Enabled = true;
+		}
+		else
+		{
+			removeComparison.Enabled = false;
+		}
+		CacheComparisonIndex();
+	}
+
+	private ScorePage ConfigureTab (string section)
+	{
+		ScorePage page = new ScorePage(file, section);
 		foreach (KeyValuePair<string, string> score in file.GetSection(section))
 		{
 
@@ -149,5 +148,103 @@ public class ScoreTab : Panel
 
 		}
 		return page;
+	}
+	
+	public void RemoveComparison(string name)
+	{
+		if (name == "Best Run" || name == "Top Scores" || name == "Sum of Best" || name == "General")
+			return;
+
+		int compIndex = Int32.Parse(file["comparison_index"]);
+		if (compIndex >= (selector.Index + 2))
+		{
+			if (compIndex == selector.Index + 2)
+			{
+				file["comparison_index"] = "0";
+			}
+			else
+			{
+				file["comparison_index"] = "" + (compIndex - 1);
+			}
+		}
+		file.RemoveSection(name);
+		pages.Remove(name);
+		selector.Reload();
+		//ReloadComparisons();
+	}
+
+	public void AddComparison()
+	{
+		AskName popup = new AskName();
+		popup.ShowDialog();
+		string name = popup.Name;
+		if (name == "Best Run" || name == "Top Scores" || name == "Sum of Best" || name == "General")
+			return;
+
+		foreach (string key in file.GetSection("Best Run").Keys)
+		{
+			file.AddNewItem(name, key, "0");
+		}
+		selector.Reload();
+		selector.Index = selector.GetIndexOfComparison(name);
+	}
+
+	public void ConfirmComparisonDeletion()
+	{
+
+		var confirmResult = MessageBox.Show ("Are you sure you wish to delete your \"" + selector.Comparison +"\" comparison?",
+				"Continue removing \"" + selector.Comparison +"\"?",
+				MessageBoxButtons.YesNo);
+		if (confirmResult == DialogResult.Yes)
+		{
+			if (selector.Count > 0) 
+			RemoveComparison(selector.Comparison);
+		}
+	}
+}
+
+public class AskName : Form
+{
+	private class NameTextBox : TextBox
+	{
+		protected override void OnKeyPress(KeyPressEventArgs e)
+		{
+			base.OnKeyPress(e);
+			// Check if the pressed character was a backspace or numeric.
+			e.Handled = !(
+					e.KeyChar == (char)8 ||
+					Char.IsWhiteSpace(e.KeyChar) ||
+					Char.IsLetterOrDigit(e.KeyChar)
+				     );
+		}
+	}
+
+	public string Name 
+	{ 
+		get
+		{
+			return text.Text;
+		}
+	}
+	private Button submit = new Button();
+	private NameTextBox text = new NameTextBox();
+
+	public AskName()
+	{
+		Text = "New Comparison Name?";
+		text.Dock = DockStyle.Fill;
+		submit.Text = "Submit";
+		submit.Dock = DockStyle.Bottom;
+
+		Controls.Add(text);
+		Controls.Add(submit);
+
+		Height = GetCaptionSize() + text.Height + submit.Height;
+
+		submit.Click += delegate { Close(); };
+	}
+	private int GetCaptionSize()
+	{
+		return (2 * SystemInformation.FrameBorderSize.Height + SystemInformation.CaptionHeight);
 	}
 }

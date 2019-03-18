@@ -12,7 +12,7 @@ using System.Globalization;
 
 public class ScoreTracker : Form
 {
-	public static string version = "3/7/2019";
+	public static string version = "3/17/2019";
 
 	[DllImport("kernel32.dll")]
 	static extern IntPtr GetConsoleWindow();
@@ -397,6 +397,18 @@ public class ScoreTracker : Form
 
 public class NumericTextBox : TextBox
 {
+	public delegate void OnChanged();
+	public OnChanged Changed
+	{
+		get;
+		set;
+	}
+
+	public NumericTextBox() : base()
+	{
+		TextChanged += delegate { if (Changed != null) Changed(); };
+	}
+
 	protected override void OnKeyPress(KeyPressEventArgs e)
 	{
 		base.OnKeyPress(e);

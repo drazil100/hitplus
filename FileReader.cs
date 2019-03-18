@@ -264,9 +264,10 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 		get {
 			return this[DefaultSection, key];
 		}
-
 		set {
-			this[DefaultSection, key] = value;
+			using (stackMonitor.Block) {
+				this[DefaultSection, key] = value;
+			}
 		}
 	}
 
@@ -335,7 +336,7 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 				defaultValues[section] = new OrderedDictionary<string, string>();
 			}
 			defaultValues[section][key] = value;
-			WriteDebug("ADD: " + MakeModifyMessage(section, key, value));
+			WriteDebug("ADD: " + MakeModifyMessage(section, key, ValueToString(this[section, key])) + " (default = " + value + ")");
 		}
 	}
 
@@ -358,6 +359,24 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 			if (defaultValues.ContainsKey(section) && defaultValues[section].ContainsKey(key)) {
 				defaultValues[section].Remove(key);
 			}
+		}
+	}
+
+	public void RemoveSection(string section)
+	{
+		if (content.ContainsKey(section)) {
+			content.Remove(section);
+		}
+		if (defaultValues.ContainsKey(section)) {
+			defaultValues.Remove(section);
+		}
+		var tuples = new List<Tuple<string, string>>(
+				cachedValues
+				.Where(pair => pair.Key.Item1 == section)
+				.Select(pair => pair.Key)
+				);
+		foreach (var tuple in tuples) {
+			cachedValues.Remove(tuple);
 		}
 	}
 

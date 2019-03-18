@@ -15,11 +15,12 @@ public class TrackerData
 	{
 		this.file = file;
 		ValidateFile(file);
+		comparisonIndex = Int32.Parse(file["comparison_index"]);
 		scores = new ScoreSet(file, "Best Run");
 		best = new ScoreSet(file, "Top Scores");
 		foreach (string section in file.Sections)
 		{
-			if (section == "Best Run" || section == "Top Scores" || section == "General")
+			if (section == "Best Run" || section == "Top Scores" || section == "General" || section == "Sum of Best")
 				continue;
 
 			comparisons.Add(new ScoreSet(file, section));
@@ -30,17 +31,25 @@ public class TrackerData
 	public static void ValidateFile(FileReader file)
 	{
 		file.AddNewItem("name", "Run");
+		file.AddNewItem("comparison_index", "0");
 		
 		Validate(file, "Best Run");
 
 		Validate(file, "Top Scores");
 
+		int i = 2;
 		foreach (string section in file.Sections)
 		{
-			if (section == "Best Run" || section == "Top Scores" || section == "General")
+			if (section == "Best Run" || section == "Top Scores" || section == "General" || section == "Sum of Best")
 				continue;
 
 			Validate(file, section);
+			i++;
+		}
+
+		if (Int32.Parse(file["comparison_index"]) >= i)
+		{
+			file["comparison_index"] = "0";
 		}
 
 		file.Save();
@@ -127,6 +136,8 @@ public class TrackerData
 		comparisonIndex++;
 		if (comparisonIndex >= comparisons.Count + 2)
 			comparisonIndex = 0;
+		file["comparison_index"] = "" + comparisonIndex;
+		file.Save();
 		return GetScoreSet();
 	}
 
@@ -135,7 +146,46 @@ public class TrackerData
 		comparisonIndex--;
 		if (comparisonIndex < 0)
 			comparisonIndex = comparisons.Count + 1;
+		file["comparison_index"] = "" + comparisonIndex;
+		file.Save();
 		return GetScoreSet();
+	}
+
+	public int GetComparisonIndex()
+	{
+		return comparisonIndex;
+	}
+
+	public void SetComparisonIndex(int index)
+	{
+		if (index != comparisonIndex && index < comparisons.Count + 2 && index >= 0)
+		{
+			comparisonIndex = index;
+			file["comparison_index"] = "" + comparisonIndex;
+			file.Save();
+		}
+	}
+
+	public List<string> GetNames()
+	{
+		List<string> toReturn = new List<string>();
+		toReturn.Add("Best Run");
+		toReturn.Add("Top Scores");
+		foreach (ScoreSet set in comparisons)
+		{
+			toReturn.Add(set.Name);
+		}
+		return toReturn;
+	}
+
+	public List<string> GetComparisonNames()
+	{
+		List<string> toReturn = new List<string>();
+		foreach (ScoreSet set in comparisons)
+		{
+			toReturn.Add(set.Name);
+		}
+		return toReturn;
 	}
 
 	public ScoreSet GetScoreSet(int index)
@@ -165,26 +215,6 @@ public class TrackerData
 		return GetScoreSet(index).GetCurrentPace();
 	}
 
-	public List<string> GetComparisonNames()
-	{
-		List<string> toReturn = new List<string>();
-		toReturn.Add("Best Run");
-		toReturn.Add("Top Scores");
-		foreach (ScoreSet set in comparisons)
-		{
-			toReturn.Add(set.Name);
-		}
-		return toReturn;
-	}
-
-	public int GetComparisonIndex()
-	{
-		return comparisonIndex;
-	}
-	public void SetComparisonIndex(int index)
-	{
-		comparisonIndex = index;
-	}
 
 	public void UpdateBestScores()
 	{
