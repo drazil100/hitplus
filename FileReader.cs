@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 
 public enum SortingStyle
 {
@@ -19,229 +20,392 @@ public class DebugVariables
 	public static string lastFileName = "";
 }
 
-public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
+public struct SectionKeyValue<T>
 {
-	private string fileName = "";
-	private List<KeyValuePair<string, string>> content = new List<KeyValuePair<string, string>>();
-	private List<KeyValuePair<string, string>> defaultValues = new List<KeyValuePair<string, string>>();
-	private Dictionary<string, T> cachedValues = new Dictionary<string, T>();
-	private SortingStyle sorting = SortingStyle.Sort;
-	private int stackDepth = 3;
+	public string Section;
+	public string Key;
+	public T Value;
 
-	private IEnumerator<KeyValuePair<string, T>> GetEnumeratorInternal() {
-		lock (content)
+	public SectionKeyValue(string section, string key, T value)
+	{
+		Section = section;
+		Key = key;
+		Value = value;
+	}
+}
+
+public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
+{
+	public class Section: IEnumerable<KeyValuePair<string, T>>
+	{
+		private BaseFileReader<T> owner;
+		private string section;
+
+		public Section(BaseFileReader<T> owner, string section) : base()
 		{
-			var returnContent = new List<KeyValuePair<string, T>>();
-			foreach (var pair in content) {
-				returnContent.Add(new KeyValuePair<string, T>(pair.Key, this[pair.Key]));
+			this.owner = owner;
+			this.section = section;
+		}
+
+		private IEnumerator<KeyValuePair<string, T>> GetEnumeratorInternal()
+		{
+			lock (owner.content)
+			{
+				foreach (var entry in owner) {
+					if (entry.Section == section) {
+						yield return new KeyValuePair<string, T>(entry.Key, entry.Value);
+					}
+				}
+				yield break;
 			}
-			return returnContent.GetEnumerator();
+		}
+
+		public IEnumerator<KeyValuePair<string, T>> GetEnumerator()
+		{
+			return this.GetEnumeratorInternal();
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return this.GetEnumeratorInternal();
+		}
+
+		public T this[string key]
+		{
+			get {
+				return owner[section, key];
+			}
+
+			set {
+				owner[section, key] = value;
+			}
+		}
+
+		public IList<string> Keys
+		{
+			get {
+				return owner.GetKeys(section);
+			}
 		}
 	}
 
-	public IEnumerator<KeyValuePair<string, T>> GetEnumerator() {
-  	return this.GetEnumeratorInternal();
+	protected sealed class StackMonitor
+	{
+		private int depth;
+
+		private class StackMonitorBlock : IDisposable
+		{
+			private StackMonitor owner;
+
+			public StackMonitorBlock(StackMonitor owner) : base()
+			{
+				this.owner = owner;
+				owner.depth++;
+			}
+
+			public void Dispose()
+			{
+				owner.depth--;
+				GC.SuppressFinalize(this);
+			}
+		}
+
+		public StackMonitor(int baseDepth) : base()
+		{
+			depth = baseDepth;
+		}
+
+		public IDisposable Block
+		{
+			get {
+				return new StackMonitorBlock(this);
+			}
+		}
+
+		public int Depth
+		{
+			get {
+				return depth;
+			}
+		}
+	}
+	protected StackMonitor stackMonitor = new StackMonitor(3);
+
+	private char[] keySeparator = { '=' };
+	private static string[] lineSeparator = { "\n" };
+	protected OrderedDictionary<string, OrderedDictionary<string, string>> content = new OrderedDictionary<string, OrderedDictionary<string, string>>();
+	protected OrderedDictionary<string, OrderedDictionary<string, string>> defaultValues = new OrderedDictionary<string, OrderedDictionary<string, string>>();
+	protected Dictionary<Tuple<string, string>, T> cachedValues = new Dictionary<Tuple<string, string>, T>();
+	private SortingStyle sorting = SortingStyle.Sort;
+
+	private IEnumerator<SectionKeyValue<T>> GetEnumeratorInternal()
+	{
+		OrderedDictionary<string, string> whitelist = null;
+		lock (content)
+		{
+			foreach (string sectionName in Sections) {
+				if (sorting == SortingStyle.Validate && !defaultValues.TryGetValue(sectionName, out whitelist)) {
+					// This section isn't whitelisted.
+					continue;
+				}
+				foreach (var key in GetKeys(sectionName)) {
+					if (sorting == SortingStyle.Validate && !whitelist.ContainsKey(key)) {
+						// This key isn't whitelisted.
+						continue;
+					}
+					yield return new SectionKeyValue<T>(sectionName, key, this[sectionName, key]);
+				}
+			}
+			yield break;
+		}
+	}
+
+	public IEnumerator<SectionKeyValue<T>> GetEnumerator() {
+		return this.GetEnumeratorInternal();
 	}
 
 	IEnumerator IEnumerable.GetEnumerator() {
 		return this.GetEnumeratorInternal();
 	}
 
-	private BaseFileReader() : base() {}
-	public BaseFileReader(string file, SortingStyle sorting = SortingStyle.Sort) : base()
+	public string Name
+	{
+		get { return Path.GetFileNameWithoutExtension(FileName); }
+	}
+
+	public string FileName { get; set; }
+
+	public string DefaultSection { get; set; }
+
+	public char KeySeparator
+	{
+		get { return keySeparator[0]; }
+		set { keySeparator[0] = value; }
+	}
+
+	public BaseFileReader(SortingStyle sorting = SortingStyle.Sort) : base()
 	{
 		this.sorting = sorting;
-		fileName = file;
-		
-		try
-		{
-			string content = File.ReadAllText(file, Encoding.UTF8);
+		FileName = "";
+		DefaultSection = "General";
+		content.Add(DefaultSection, new OrderedDictionary<string, string>());
+	}
 
-			string[] lines = content.Split(new string[] { "\n" }, StringSplitOptions.None);
+	public BaseFileReader(string file, SortingStyle sorting = SortingStyle.Sort) : this(sorting)
+	{
+		Load(file);
+	}
 
-			foreach (string line in lines)
+	public BaseFileReader(char separator, string file, SortingStyle sorting = SortingStyle.Sort) : this(sorting)
+	{
+		KeySeparator = separator;
+		Load(file);
+	}
+
+	public bool Load(string file)
+	{
+		lock (content) {
+			FileName = file;
+
+			string sectionName = DefaultSection;
+			var section = content[sectionName];
+			string fileContent;
+
+			try
 			{
-				string[] parts = line.Split(new char[] { ':' }, 2);
-				if (parts.Length < 2) continue;
-				parts[0] = parts[0].Trim();
-				parts[1] = parts[1].Trim();
-
-				WriteDebug(MakeModifyMessage(parts[0], parts[1]));
-
-				bool contains = false;
-				for (int i = 0; i < this.content.Count; i++)
-				{
-					if (this.content[i].Key == parts[0])
-					{
-						this.content[i] = new KeyValuePair<string, string>(parts[0], parts[1]);
-						contains = true;
-						break;
-					}
-				}
-				if (!contains)
-				{
-					this.content.Add(new KeyValuePair<string, string>(parts[0], parts[1]));
-				}
+				fileContent = File.ReadAllText(file, Encoding.UTF8);
+			} 
+			catch 
+			{
+				// If the file doesn't exist or is otherwise unreadable, stop here.
+				return false;
 			}
 
-		}
-		catch (Exception e)
-		{
-			Console.WriteLine("Error: " + e.Message);
-		}
+			try
+			{
+				string[] lines = fileContent.Split(lineSeparator, StringSplitOptions.None);
 
+				foreach (string line in lines)
+				{
+					string[] parts = line.Split(keySeparator, 2);
+					parts[0] = parts[0].Trim();
+					if (parts.Length == 1) {
+						if (parts[0].Length >= 2 && parts[0][0] == '[') {
+							int end = parts[0].IndexOf(']');
+							sectionName = parts[0].Substring(1, end - 1);
+							if (content.ContainsKey(sectionName)) {
+								section = content[sectionName];
+							} else {
+								section = content[sectionName] = new OrderedDictionary<string, string>();
+							}
+						}
+						continue;
+					}
+					parts[1] = parts[1].Trim();
+
+					WriteDebug(MakeModifyMessage(sectionName, parts[0], parts[1]), true);
+
+					section[parts[0]] = parts[1];
+				}
+			}
+			catch (Exception e)
+			{
+				// If there's an error while loading, log it to the console. 
+				Console.WriteLine(String.Format("Error reading {0}: {1} ", file, e.Message));
+				return false;
+			}
+
+			return true;
+		}
 	}
 
 	public T this[string key]
 	{
 		get {
+			return this[DefaultSection, key];
+		}
+		set {
+			using (stackMonitor.Block) {
+				this[DefaultSection, key] = value;
+			}
+		}
+	}
+
+	public T this[string section, string key]
+	{
+		get {
+			var tuple = new Tuple<string, string>(section, key);
 			lock (content)
 			{
-				if (!cachedValues.ContainsKey(key)) {
-					int index = content.FindIndex(pair => pair.Key == key);
-					if (index >= 0) {
-						this.cachedValues[key] = StringToValue(content[index].Value);
-					} else {
-						index = defaultValues.FindIndex(pair => pair.Key == key);
-						if (index >= 0) {
-							this.cachedValues[key] = StringToValue(defaultValues[index].Value);
-						}
+				if (!cachedValues.ContainsKey(tuple)) {
+					string value;
+					try {
+						value = content[section][key];
+					} catch {
+						value = defaultValues[section][key];
 					}
+					cachedValues[tuple] = StringToValue(value);
 				}
-				return this.cachedValues[key];
+				return cachedValues[tuple];
 			}
 		}
 
 		set {
+			var tuple = new Tuple<string, string>(section, key);
 			lock (content)
 			{
 				string val = ValueToString(value);
-				WriteDebug(MakeModifyMessage(key, val), 3);
+				WriteDebug(MakeModifyMessage(section, key, val));
 
-				cachedValues[key] = value;
-				
-				for (int i = 0; i < content.Count; i++)
-				{
-					if (content[i].Key == key)
-					{
-						content[i] = new KeyValuePair<string, string>(key, val);
-						return;
-					}
+				if (!content.ContainsKey(section)) {
+					content[section] = new OrderedDictionary<string, string>();
 				}
-				content.Add(new KeyValuePair<string, string>(key, val));
+				content[section][key] = val;
+				cachedValues[tuple] = value;
 			}
 		}
 
 	}
-	
+
 	public void AddNewItem(string key, T value)
 	{
-		stackDepth = 4;
-		AddNewItem(key, ValueToString(value));
-		stackDepth = 3;
+		using (stackMonitor.Block) {
+			AddNewItem(DefaultSection, key, value);
+		}
+	}
+
+	public void AddNewItem(string section, string key, T value)
+	{
+		using (stackMonitor.Block) {
+			AddNewItem(section, key, ValueToString(value));
+		}
 	}
 
 	public void AddNewItem(string key, string value)
 	{
+		using (stackMonitor.Block) {
+			AddNewItem(DefaultSection, key, value);
+		}
+	}
+
+	public void AddNewItem(string section, string key, string value)
+	{
 		lock (content)
 		{
-			bool contains = false;
-			int j = 0;
-			for (int i = 0; i < defaultValues.Count; i++)
-			{
-				if (defaultValues[i].Key == key)
-				{
-					contains = true;
-					defaultValues[i] = new KeyValuePair<string, string>(key, value);
-					j = i;
-					break;
-				}
+			if (!defaultValues.ContainsKey(section)) {
+				defaultValues[section] = new OrderedDictionary<string, string>();
 			}
-			if (!contains)
-			{
-				defaultValues.Add(new KeyValuePair<string, string>(key, value));
-				j = defaultValues.Count - 1;
-			}
-			for (int i = 0; i < content.Count; i++)
-			{
-				if (content[i].Key == key)
-				{
-					if (i != j && sorting != SortingStyle.Unsort)
-					{
-						KeyValuePair<string, string> temp = content[j];
-						content[j] = content[i];
-						content[i] = temp;
-					}
-					return;
-				}
-			}
-			WriteDebug("ADD: " + MakeModifyMessage(key, value), stackDepth);
-			content.Add(new KeyValuePair<string, string>(key, value));
-			if (content.Count-1 != j && sorting != SortingStyle.Unsort)
-			{
-				KeyValuePair<string, string> temp = content[j];
-				content[j] = content[content.Count-1];
-				content[content.Count-1] = temp;
-			}
+			defaultValues[section][key] = value;
+			WriteDebug("ADD: " + MakeModifyMessage(section, key, ValueToString(this[section, key])) + " (default = " + value + ")");
 		}
 	}
 
 	public void RemoveKey(string key)
 	{
+		RemoveKey(DefaultSection, key);
+	}
+
+	public void RemoveKey(string section, string key)
+	{
 		lock (content)
 		{
-			for (int i = 0; i < content.Count; i++)
-			{
-				if (content[i].Key == key)
-				{
-					content.RemoveAt(i);
-					cachedValues.Remove(key);
-					WriteDebug(String.Format("DEL: {0}", key), 3);
-					break;
-				}
+			var tuple = new Tuple<string, string>(section, key);
+			if (cachedValues.ContainsKey(tuple)) {
+				cachedValues.Remove(tuple);
 			}
-			for (int i = 0; i < defaultValues.Count; i++)
-			{
-				if (defaultValues[i].Key == key)
-				{
-					defaultValues.RemoveAt(i);
-					break;
-				}
+			if (content.ContainsKey(section) && content[section].ContainsKey(key)) {
+				content[section].Remove(key);
 			}
+			if (defaultValues.ContainsKey(section) && defaultValues[section].ContainsKey(key)) {
+				defaultValues[section].Remove(key);
+			}
+		}
+	}
+
+	public void RemoveSection(string section)
+	{
+		if (content.ContainsKey(section)) {
+			content.Remove(section);
+		}
+		if (defaultValues.ContainsKey(section)) {
+			defaultValues.Remove(section);
+		}
+		var tuples = new List<Tuple<string, string>>(
+				cachedValues
+				.Where(pair => pair.Key.Item1 == section)
+				.Select(pair => pair.Key)
+				);
+		foreach (var tuple in tuples) {
+			cachedValues.Remove(tuple);
 		}
 	}
 
 	public bool ContainsKey(string key)
 	{
-		bool contains = false;
-		foreach (KeyValuePair<string, string> pair in content)
-		{
-			if (pair.Key == key)
-			{
-				contains = true;
-				break;
-			}
-		}
-		return contains;
+		return ContainsKey(DefaultSection, key);
 	}
 
-	private string MakeModifyMessage(string key, string value)
+	public bool ContainsKey(string section, string key)
 	{
-		return String.Format("{0} = {1}", key, value);
+		return (content.ContainsKey(section) && content[section].ContainsKey(key)) ||
+			(defaultValues.ContainsKey(section) && defaultValues[section].ContainsKey(key));
 	}
 
-	private void WriteDebug(string message, int frame = -1)
+	private string MakeModifyMessage(string section, string key, string value)
 	{
+		return String.Format("[{0}] {1} = {2}", section, key, value);
+	}
 
-		string caller = "FileReader(): " + fileName;
-		if (frame > -1) caller = GetStackTrace(frame) + " " + fileName;
-		//Console.WriteLine(String.Format("caller: {0}, lastCaller: {1}, fileName: {2}, lastFileName {3}", caller, lastCaller, fileName, lastFileName));
-		if (caller != DebugVariables.lastCaller || fileName != DebugVariables.lastFileName)
+	private void WriteDebug(string message, bool inConstructor = false)
+	{
+		string caller = (inConstructor ? "FileReader()" : GetStackTrace(stackMonitor.Depth)) + ": " + FileName;
+		//Console.WriteLine(String.Format("caller: {0}, lastCaller: {1}, FileName: {2}, lastFileName {3}", caller, lastCaller, FileName, lastFileName));
+		if (caller != DebugVariables.lastCaller || FileName != DebugVariables.lastFileName)
 		{
 			Console.WriteLine();
 			Console.WriteLine(caller);
 			DebugVariables.lastCaller = caller;
-			DebugVariables.lastFileName = fileName;
+			DebugVariables.lastFileName = FileName;
 		}
 		Console.WriteLine("  " + message);
 	}
@@ -260,28 +424,79 @@ public abstract class BaseFileReader<T> : IEnumerable<KeyValuePair<string, T>>
 	{
 		lock (content)
 		{
+			Console.WriteLine(" Writing to " + FileName);
+			Console.WriteLine();
+			DebugVariables.lastCaller = "";
+			DebugVariables.lastFileName = "";
+
+			using (var sw = new StreamWriter(FileName)) {
+				string lastSection = null;
+				foreach (var entry in this)
+				{
+					if (lastSection != entry.Section) {
+						sw.Write(String.Format("{1}[{0}]\r\n", entry.Section, lastSection == null ? "" : "\r\n"));
+						lastSection = entry.Section;
+					}
+					//Console.WriteLine(String.Format("section: {0}, key: {1}, value {2}, separator {3}", lastSection, entry.Key, entry.Value, KeySeparator));
+					sw.Write(String.Format("{0} {2} {1}\r\n", entry.Key, ValueToString(entry.Value), KeySeparator));
+				}
+			}
+		}
+	}
+
+	public void Export (string fileName = null, string sectionName = null)
+	{
+		lock (content)
+		{
+			if (fileName == null) {
+				fileName = FileName;
+			}
 			Console.WriteLine(" Writing to " + fileName);
 			Console.WriteLine();
 			DebugVariables.lastCaller = "";
 			DebugVariables.lastFileName = "";
-			if (sorting == SortingStyle.Validate)
-			{
-				while (defaultValues.Count < content.Count)
+
+			using (var sw = new StreamWriter(fileName)) {
+				foreach (var entry in this)
 				{
-					content.RemoveAt(defaultValues.Count);
+					if (sectionName == null || entry.Section == sectionName)
+					{
+						sw.Write(String.Format("{0}: {1}\r\n", entry.Key, ValueToString(entry.Value)));
+					}
 				}
 			}
-			var sw = new StreamWriter(fileName);
-			foreach(KeyValuePair<string, string> pair in content)
-			{	
-				string val = pair.Value;
-				if (cachedValues.ContainsKey(pair.Key))
-				{
-					val = ValueToString(cachedValues[pair.Key]);
+		}
+	}
+
+	public Section GetSection(string section) {
+		return new Section(this, section);
+	}
+
+	public IEnumerable<string> Sections {
+		get {
+			lock (content) {
+				// Linq's Union() function returns two lists combined together with duplicates removed.
+				List<string> defaultList = new List<string>();
+				if (content.ContainsKey(DefaultSection) || defaultValues.ContainsKey(DefaultSection)) {
+					defaultList.Add(DefaultSection);
 				}
-				sw.Write(String.Format("{0}: {1}\r\n", pair.Key, val));
+				if (sorting == SortingStyle.Unsort) {
+					return defaultList.Union(content.Keys).Union(defaultValues.Keys);
+				} else {
+					return defaultList.Union(defaultValues.Keys).Union(content.Keys);
+				}
 			}
-			sw.Close();
+		}
+	}
+
+	public IList<string> GetKeys(string section) {
+		lock (content) {
+			var first = ((sorting != SortingStyle.Unsort) ? defaultValues : content).GetWithDefault(section, null);
+			var second = ((sorting != SortingStyle.Unsort) ? content : defaultValues).GetWithDefault(section, null);
+			// Make sure that both are valid lists, then return their union
+			var firstList = first == null ? new List<string>() : first.Keys;
+			var secondList = second == null ? new List<string>() : second.Keys;
+			return new List<string>(firstList.Union(secondList));
 		}
 	}
 
@@ -307,6 +522,7 @@ public class FileReader<T> : BaseFileReader<T> where T:class
 public class FileReader : BaseFileReader<string>
 {
 	public FileReader(string file, SortingStyle sorting = SortingStyle.Sort) : base(file, sorting) {}
+	public FileReader(char separator, string file, SortingStyle sorting = SortingStyle.Sort) : base(separator, file, sorting) {}
 
 	public override string StringToValue(string val)
 	{

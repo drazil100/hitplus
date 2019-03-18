@@ -19,17 +19,15 @@ public class DisplayWindow : Form
 	{
 		//this.peanut_butter = peanut_butter;
 		//this.individual_levels = individual_levels;
-
-		Font = new Font(ScoreTracker.config["font"], Int32.Parse(ScoreTracker.config["font_size"]), FontStyle.Bold);
 		Text = "Star Fox 64 Score Tracker";
 
 
-		FormClosing += new FormClosingEventHandler(ScoreTracker.mainWindow.ConfirmClose);
+		FormClosing += new FormClosingEventHandler(InputWindow.mainWindow.ConfirmClose);
 
 		//  Set colors
 		BackColor = ScoreTracker.colors["background_color"];
-		ScoreTracker.topScoreName.ForeColor = ScoreTracker.colors["text_color_total"];
-		ScoreTracker.sobScoreName.ForeColor = ScoreTracker.colors["text_color_total"];
+
+
 
 		Initialize(cont);
 
@@ -69,16 +67,8 @@ public class DisplayWindow : Form
 		//FormClosing += delegate { CloseNetwork(); };
 	}
 
-	public void Initialize(DisplayWindowContent window)
+	public void DoResize()
 	{
-		BackColor = ScoreTracker.colors["background_color"];
-		ScoreTracker.topScoreName.ForeColor = ScoreTracker.colors["text_color_total"];
-		ScoreTracker.sobScoreName.ForeColor = ScoreTracker.colors["text_color_total"];
-
-		dispContent = window;
-		Controls.Clear();
-		Controls.Add(window);
-
 		MinimumSize  = new Size(0, 0);
 		if (ScoreTracker.config["layout"] == "0")
 		{
@@ -113,16 +103,46 @@ public class DisplayWindow : Form
 			Size = new Size(w2, h2);
 		}
 		MinimumSize  = new Size(w, h);
+	}
+
+	public void Initialize(DisplayWindowContent window)
+	{
+
+		dispContent = window;
+		Controls.Clear();
+		Controls.Add(window);
+
+		DoResize();
+
 		DoLayout();
 	}
 
-	public void DoLayout()
+	public void UpdateContent()
+	{
+		dispContent.DoLayout();
+	}
+
+	public void UpdateScores()
+	{
+		dispContent.UpdateScores();
+	}
+
+	public void ResetContent()
+	{
+		BackColor = ScoreTracker.colors["background_color"];
+		DoResize();
+		DoLayout(true);
+		dispContent.SetControls();
+	}
+
+	public void DoLayout(bool skip = false)
 	{
 		if (dispContent != null)
 		{
 			dispContent.Width = Width;
 			dispContent.Height = Height;
-			dispContent.DoLayout();
+			if (!skip)
+				dispContent.DoLayout();
 		}
 	}
 
@@ -148,11 +168,32 @@ public class DisplayWindowContent : Panel
 
 	private Panel totals = new Panel();
 	private Panel levels = new Panel();
+	private List<ScorePanel> panels = new List<ScorePanel>();
 
-
+	public Label topScore = new Label();
+	public Label sobScore = new Label();
+	public Label currentScore = new Label();
+	public Label topScoreName = new Label();
+	public Label sobScoreName = new Label();
+	public Label currentScoreName = new Label();
 
 	public DisplayWindowContent()
 	{
+		Font = new Font(ScoreTracker.config["font"], Int32.Parse(ScoreTracker.config["font_size"]), FontStyle.Bold);
+
+		BackColor = ScoreTracker.colors["background_color"];
+		topScoreName.ForeColor = ScoreTracker.colors["text_color_total"];
+		sobScoreName.ForeColor = ScoreTracker.colors["text_color_total"];
+
+		topScore.ForeColor = ScoreTracker.colors["text_color_total"];
+		sobScore.ForeColor = ScoreTracker.colors["text_color_total"];
+		currentScore.ForeColor = ScoreTracker.colors["text_color"];
+		currentScoreName.ForeColor = ScoreTracker.colors["text_color"];
+
+
+		currentScoreName.Text = "Total:";
+
+
 		SetControls();
 		DoLayout();
 	}
@@ -174,59 +215,35 @@ public class DisplayWindowContent : Panel
 
 	public void SetControls()
 	{
+		Font = new Font(ScoreTracker.config["font"], Int32.Parse(ScoreTracker.config["font_size"]), FontStyle.Bold);
+		BackColor = ScoreTracker.colors["background_color"];
+		topScoreName.ForeColor = ScoreTracker.colors["text_color_total"];
+		sobScoreName.ForeColor = ScoreTracker.colors["text_color_total"];
+		topScore.ForeColor = ScoreTracker.colors["text_color_total"];
+		sobScore.ForeColor = ScoreTracker.colors["text_color_total"];
+
 		totals.Controls.Clear();
 		levels.Controls.Clear();
+		panels.Clear();
 		Controls.Clear();
-		Score.ClearScores ();
 
-		FileReader run = ScoreTracker.pbEasy;
-		if (ScoreTracker.config["hard_route"] == "1")
-		{
-			run = ScoreTracker.pbHard;
-		}
+		TrackerData run = ScoreTracker.Data;
 		try
 		{
-			int total = 0;
-			int sob = 0;
-			foreach(KeyValuePair<string, string> level in run)
+			foreach(ScoreEntry entry in run.GetScoreSet())
 			{
-				int sc = Int32.Parse(level.Value);
-				total += sc;
-				Score newScore = new Score(level.Key, sc);
+				ScorePanel newScore = new ScorePanel(entry);
 				levels.Controls.Add(newScore);
-
+				panels.Add(newScore);
 			}
 
-			int i = 0;
-			foreach(KeyValuePair<string, string> level in ScoreTracker.individualLevels)
-			{
-				Score.SetBest(level.Key, Int32.Parse(level.Value), i);
-				i++;
-			}
-
-			foreach(Score s in Score.scoresList)
-			{
-				sob += s.best;
-			}
-			ScoreTracker.topScoreName.Text = "Top: ";
-			ScoreTracker.topScore.Text = "" + total;
 			if (ScoreTracker.config["layout"] == "1")
-				totals.Controls.Add(ScoreTracker.currentScoreName);
-			totals.Controls.Add(ScoreTracker.currentScore);
-			totals.Controls.Add(ScoreTracker.topScoreName);
-			totals.Controls.Add(ScoreTracker.topScore);
-			if (ScoreTracker.config["layout"] == "0")
-			{
-				ScoreTracker.sobScoreName.Text = "SoB:";
-				ScoreTracker.sobScore.Text = "" + sob;
-			}
-			else
-			{
-				ScoreTracker.sobScore.Text = "" + sob;
-				ScoreTracker.sobScoreName.Text = "Sum of Best:";
-			}
-			totals.Controls.Add(ScoreTracker.sobScoreName);
-			totals.Controls.Add(ScoreTracker.sobScore);
+				totals.Controls.Add(currentScoreName);
+			totals.Controls.Add(currentScore);
+			totals.Controls.Add(topScoreName);
+			totals.Controls.Add(topScore);
+			totals.Controls.Add(sobScoreName);
+			totals.Controls.Add(sobScore);
 
 			if (ScoreTracker.config["sums_horizontal_alignment"] == "1" && ScoreTracker.config["layout"] == "0")
 			{
@@ -238,6 +255,7 @@ public class DisplayWindowContent : Panel
 				Controls.Add(levels);
 				Controls.Add(totals);
 			}
+			UpdateScores();
 
 		}
 		catch (Exception e)
@@ -251,22 +269,29 @@ public class DisplayWindowContent : Panel
 	{
 		if (ScoreTracker.config ["layout"] == "0")
 		{
+			totals.Top = 0;
 			totals.Width = 310;
+			totals.Height = GetHeight();
 			levels.Width = GetWidth () - totals.Width;
+			levels.Height = GetHeight();
 			DoTotalsLayoutHorizontal ();
 			DoLevelsLayoutHorizontal ();
 
 			if (ScoreTracker.config ["sums_horizontal_alignment"] == "1")
 			{
+				totals.Left = 0;
 				levels.Left = totals.Width;
 			}
 			else
 			{
+				levels.Left = 0;
 				totals.Left = levels.Width;
 			}
 		}
 		else
 		{
+			//totals.Top = 0;
+			levels.Left = 0;
 			totals.Width = GetWidth ();
 			levels.Width = GetWidth ();
 			totals.Height = 90;
@@ -276,107 +301,178 @@ public class DisplayWindowContent : Panel
 			DoLevelsLayoutVertical ();
 		}
 
-		Refresh ();
+		//Refresh ();
 	}
+
+	public void UpdateScores()
+	{
+		ScoreSet set = ScoreTracker.Data.GetScoreSet();
+		for (int i = 0; i < panels.Count; i++)
+		{
+			panels[i].entry = set[i];
+			panels[i].UpdatePanel();
+		}
+		TrackerData run = ScoreTracker.Data;
+		int total = run.GetScoreSet(0).GetComparisonTotal();
+		if (ScoreTracker.config["casual_mode"] == "0")
+		{
+			total = run.GetScoreSet().GetComparisonTotal();
+		}
+		int sob = run.GetScoreSet(1).GetComparisonTotal();
+		if (ScoreTracker.config["layout"] == "0")
+		{
+			sobScoreName.Text = "SoB:";
+			if (ScoreTracker.Data.GetComparisonIndex() == 0 || ScoreTracker.config["casual_mode"] == "1")
+			{
+				topScoreName.Text = "Top:";
+			}
+			else
+			{
+				topScoreName.Text = "Cmp:";
+			}
+		}
+		else
+		{
+			sobScoreName.Text = "Sum of Best:";
+			if (ScoreTracker.Data.GetComparisonIndex() == 0 || ScoreTracker.config["casual_mode"] == "1")
+			{
+				topScoreName.Text = "Top:";
+			}
+			else
+			{
+				topScoreName.Text = "Comparison:";
+			}
+		}
+		topScore.Text = "" + total;
+		sobScore.Text = "" + sob;
+		sobScore.Text = "" + ScoreTracker.Tracker.GetSOB();
+
+
+		if (!ScoreTracker.Tracker.IsRunning() && ScoreTracker.config["layout"] == "0")
+		{
+			currentScore.Text = "";
+		}
+		else
+		{
+			currentScore.Text = "" + ScoreTracker.Tracker.GetTotalScore();
+			if (ScoreTracker.Tracker.GetTotalScore() == 0)
+				currentScore.Text = "-";
+		}
+		Color p = ScoreTracker.colors["text_color"];
+		if (ScoreTracker.Tracker.IsRunning() && ScoreTracker.config["casual_mode"] == "0")
+			p = GetPaceColor(ScoreTracker.Tracker.GetCurrentPace());
+		currentScore.ForeColor = p;
+		currentScoreName.Text = "Total:";
+	}
+
+	public Color GetPaceColor(PaceStatus status)
+	{
+		Color tmp = ScoreTracker.colors["text_color"];
+		switch (status)
+		{
+			case PaceStatus.Ahead:   tmp = ScoreTracker.colors["text_color_ahead"]; break;
+			case PaceStatus.Behind:  tmp = ScoreTracker.colors["text_color_behind"]; break;
+		}
+		return tmp;
+	}
+
 
 	public void DoTotalsLayoutHorizontal()
 	{
-		ScoreTracker.topScoreName.Top = 0;
-		ScoreTracker.topScore.Top = 0;
-		ScoreTracker.topScoreName.Left = 0;
-		ScoreTracker.topScore.Left = 0;
-		ScoreTracker.sobScoreName.Top = 0;
-		ScoreTracker.sobScore.Top = 0;
-		ScoreTracker.sobScoreName.Left = 0;
-		ScoreTracker.sobScore.Left = 0;
-		ScoreTracker.currentScore.Left = 0;
-		ScoreTracker.currentScore.Top = 0;
+		topScoreName.Top = 0;
+		topScore.Top = 0;
+		//topScoreName.Left = 0;
+		//topScore.Left = 0;
+		sobScoreName.Top = 0;
+		sobScore.Top = 0;
+		//currentScore.Left = 0;
+		//currentScore.Top = 0;
 
-		ScoreTracker.topScoreName.Width = 75;
-		ScoreTracker.topScore.Left = ScoreTracker.topScoreName.Width;
-		ScoreTracker.topScore.Width = 155 - ScoreTracker.topScoreName.Width;
-		ScoreTracker.topScoreName.Height = GetHeight() / 2;
-		ScoreTracker.topScore.Height = GetHeight() / 2;
-		ScoreTracker.sobScoreName.Left = ScoreTracker.topScore.Left + ScoreTracker.topScore.Width;
-		ScoreTracker.sobScore.Left = ScoreTracker.sobScoreName.Left + ScoreTracker.sobScoreName.Width;
-		ScoreTracker.sobScoreName.Width = 75;
-		ScoreTracker.sobScore.Width = 155 - ScoreTracker.sobScoreName.Width;
-		ScoreTracker.sobScoreName.Height = GetHeight() / 2;
-		ScoreTracker.sobScore.Height = GetHeight() / 2;
-		ScoreTracker.currentScore.Top = ScoreTracker.topScore.Top + ScoreTracker.topScore.Height;
-		ScoreTracker.currentScore.Left = ScoreTracker.topScore.Left;
-		ScoreTracker.currentScore.Height = GetHeight() / 2;
-		ScoreTracker.currentScore.Width = ScoreTracker.topScore.Width;
-		ScoreTracker.topScore.TextAlign = ContentAlignment.TopLeft;
-		ScoreTracker.sobScore.TextAlign = ContentAlignment.TopLeft;
-		ScoreTracker.currentScore.TextAlign = ContentAlignment.TopLeft;
+		topScoreName.Width = 75;
+		topScore.Left = topScoreName.Width;
+		topScore.Width = 155 - topScoreName.Width;
+		topScoreName.Height = GetHeight() / 2;
+		topScore.Height = GetHeight() / 2;
+		sobScoreName.Left = topScore.Left + topScore.Width;
+		sobScore.Left = sobScoreName.Left + sobScoreName.Width;
+		sobScoreName.Width = 75;
+		sobScore.Width = 155 - sobScoreName.Width;
+		sobScoreName.Height = GetHeight() / 2;
+		sobScore.Height = GetHeight() / 2;
+		currentScore.Top = topScore.Top + topScore.Height;
+		currentScore.Left = topScore.Left;
+		currentScore.Height = GetHeight() / 2;
+		currentScore.Width = topScore.Width;
+		topScore.TextAlign = ContentAlignment.TopLeft;
+		sobScore.TextAlign = ContentAlignment.TopLeft;
+		currentScore.TextAlign = ContentAlignment.TopLeft;
 
 	}
 
 	public void DoLevelsLayoutHorizontal()
 	{
-		List<Score> sList = Score.scoresList;
-		foreach (Score s in sList)
+		foreach (ScorePanel panel in panels)
 		{
-			s.Height = GetHeight();
-			s.Width = levels.Width / 7;
+			panel.Height = GetHeight();
+			panel.Width = levels.Width / 7;
+			panel.UpdatePanel();
 		}
 
-		for (int i = 1; i < sList.Count; i++)
+		for (int i = 1; i < panels.Count; i++)
 		{
-			sList[i].Left = sList[i-1].Left + levels.Width / 7;
+			panels[i].Left = panels[i-1].Left + levels.Width / 7;
 		}
 	}
 
 	public void DoTotalsLayoutVertical()
 	{
-		ScoreTracker.topScoreName.Top = 0;
-		ScoreTracker.topScore.Top = 0;
-		ScoreTracker.topScoreName.Left = 0;
-		ScoreTracker.topScore.Left = 0;
+		//topScoreName.Top = 0;
+		//topScore.Top = 0;
+		topScoreName.Left = 0;
+		//topScore.Left = 0;
 
-		ScoreTracker.sobScore.Top = 0;
-		ScoreTracker.sobScoreName.Left = 0;
-		ScoreTracker.sobScore.Left = 0;
-		ScoreTracker.currentScore.Left = 0;
-		ScoreTracker.currentScore.Top = 0;
+		//sobScore.Top = 0;
+		sobScoreName.Left = 0;
+		//sobScore.Left = 0;
+		//currentScore.Left = 0;
+		currentScore.Top = 0;
 
-		ScoreTracker.topScore.Top = 30;
-		ScoreTracker.topScoreName.Top = 30;
-		ScoreTracker.topScoreName.Width = 220;
-		ScoreTracker.topScore.Width = GetWidth() - ScoreTracker.topScoreName.Width;
-		ScoreTracker.topScore.Height = 30;
-		ScoreTracker.topScoreName.Height = ScoreTracker.topScore.Height;
-		ScoreTracker.topScore.Left = ScoreTracker.topScoreName.Width;
-		ScoreTracker.sobScoreName.Width = 220;
-		ScoreTracker.sobScoreName.Top = 60;
-		ScoreTracker.sobScore.Top = 60;
-		ScoreTracker.sobScore.Width = GetWidth() - ScoreTracker.sobScoreName.Width;
-		ScoreTracker.sobScore.Height = 30;
-		ScoreTracker.sobScore.Left = ScoreTracker.sobScoreName.Width;
-		ScoreTracker.sobScoreName.Height = ScoreTracker.sobScore.Height;
-		ScoreTracker.currentScoreName.Width = 220;
-		ScoreTracker.currentScore.Width = GetWidth() - ScoreTracker.currentScoreName.Width;
-		ScoreTracker.currentScore.Left = ScoreTracker.currentScoreName.Width;
-		ScoreTracker.currentScoreName.Height = 30;
-		ScoreTracker.currentScore.Height = 30;
-		ScoreTracker.topScore.TextAlign = ContentAlignment.TopRight;
-		ScoreTracker.sobScore.TextAlign = ContentAlignment.TopRight;
-		ScoreTracker.currentScore.TextAlign = ContentAlignment.TopRight;
+		topScore.Top = 30;
+		topScoreName.Top = 30;
+		topScoreName.Width = 220;
+		topScore.Width = GetWidth() - topScoreName.Width;
+		topScore.Height = 30;
+		topScoreName.Height = topScore.Height;
+		topScore.Left = topScoreName.Width;
+		sobScoreName.Width = 220;
+		sobScoreName.Top = 60;
+		sobScore.Top = 60;
+		sobScore.Width = GetWidth() - sobScoreName.Width;
+		sobScore.Height = 30;
+		sobScore.Left = sobScoreName.Width;
+		sobScoreName.Height = sobScore.Height;
+		currentScoreName.Width = 220;
+		currentScore.Width = GetWidth() - currentScoreName.Width;
+		currentScore.Left = currentScoreName.Width;
+		currentScoreName.Height = 30;
+		currentScore.Height = 30;
+		topScore.TextAlign = ContentAlignment.TopRight;
+		sobScore.TextAlign = ContentAlignment.TopRight;
+		currentScore.TextAlign = ContentAlignment.TopRight;
 	}
 
 	public void DoLevelsLayoutVertical()
 	{
-		List<Score> sList = Score.scoresList;
-		foreach (Score s in sList)
+		foreach (ScorePanel panel in panels)
 		{
-			s.Height = levels.Height / 7;
-			s.Width = GetWidth();
+			panel.Height = levels.Height / 7;
+			panel.Width = GetWidth();
+			panel.UpdatePanel();
 		}
 
-		for (int i = 1; i < sList.Count; i++)
+		for (int i = 1; i < panels.Count; i++)
 		{
-			sList[i].Top = sList[i-1].Top + sList[i-1].Height;
+			panels[i].Top = panels[i-1].Top + panels[i-1].Height;
 		}
 	}
 }

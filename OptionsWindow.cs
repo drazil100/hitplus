@@ -10,9 +10,8 @@ using System.Runtime.InteropServices;
 
 public class OptionsWindow : Form
 {
-	
+
 	private FileReader config;
-	private FileReader ils;
 	private ColorFileReader colorTheme;
 
 	private TabControl tabs = new TabControl();
@@ -21,13 +20,15 @@ public class OptionsWindow : Form
 	private Button saveClose = new Button();
 
 	private TabPage scoreTab = new TabPage();
-	private List<NumericField> scores = new List<NumericField>();
+	private ScoreTab scoreTabContent;
 
 	private TabPage generalTab = new TabPage ();
 	private List<OptionField> generalOptions = new List<OptionField>();
 
 	private TabPage colorTab = new TabPage();
 	private List<ColorField> colors = new List<ColorField>();
+
+	private static int tabIndex = 0;
 
 	private int w = 300;
 	private int h = 400;
@@ -37,44 +38,57 @@ public class OptionsWindow : Form
 		Text = "Options";
 
 		config = ScoreTracker.config;
-		ils = ScoreTracker.individualLevels;
 		colorTheme = ScoreTracker.colors;
 
 		Controls.Add (tabs);
-		Controls.Add (save);
-		Controls.Add (saveClose);
+		Panel p = new Panel();
+		p.Height = 20;
+		p.Controls.Add (save);
+		p.Controls.Add (saveClose);
+		p.Dock = DockStyle.Bottom;
+		Controls.Add(p);
 
-		scoreTab.Text = "Edit PBs";
+		scoreTab.Text = "Scores";
 		tabs.TabPages.Add (scoreTab);
 
 		generalTab.Text = "General";
 		tabs.TabPages.Add (generalTab);
-		
+
 		colorTab.Text = "Colors";
 		tabs.TabPages.Add (colorTab);
 
 		save.Text = "Save All Changes";
+		save.Dock = DockStyle.Left;
 		save.Click += new EventHandler(Save);
 
 		saveClose.Text = "Save and Close";
+		saveClose.Dock = DockStyle.Right;
 		saveClose.Click += new EventHandler(SaveClose);
 
 		Size = new Size (w, h);
 		MaximumSize = Size;
 		MinimumSize = Size;
 
-		Resize += delegate { DoLayout(); };
+		Layout += new LayoutEventHandler((object sender, LayoutEventArgs e) => DoLayout());
+		tabs.SelectedIndexChanged += delegate { CacheTabIndex(); };
 
 		ConfigureScoreTab ();
 		ConfigureGeneralTab ();
 		ConfigColors();
 
+		tabs.SelectedIndex = tabIndex;
+
 		DoLayout ();
+	}
+
+	public void CacheTabIndex()
+	{
+		tabIndex = tabs.SelectedIndex;
 	}
 
 	public void SaveClose(object sender, EventArgs e)
 	{
-		Save();
+		Save(true);
 		this.Close();
 	}
 
@@ -82,13 +96,9 @@ public class OptionsWindow : Form
 	{
 		Save();
 	}
-	public void Save()
+	public void Save(bool closing = false)
 	{
-		foreach (NumericField s in scores)
-		{
-			ils [s.Name] = s.Number;
-		}
-		ils.Save ();
+		scoreTabContent.Save();
 
 		config ["hard_route"]                = generalOptions[0].ToString();
 		config ["layout"]                    = generalOptions[1].ToString();
@@ -107,35 +117,49 @@ public class OptionsWindow : Form
 		}
 
 		colorTheme.Save();
+
+		TrackerData data;
+
+		if (config["hard_route"] == "0")
+		{
+			data = new TrackerData(new FileReader("pb_easy.ini"));
+		}
+		else
+		{
+			data = new TrackerData(new FileReader("pb_hard.ini"));
+		}
+		ScoreTracker.Data = data;
+		if (!closing)
+			ConfigureScoreTab();
 	}
 
 	private int GetWidth()
 	{
 		return (
-			Width - (2 * SystemInformation.FrameBorderSize.Width)
+			ClientRectangle.Width
 		);
 	}
 
 	private int GetHeight()
 	{
 		return (
-			Height - (2 * SystemInformation.FrameBorderSize.Height +
-				SystemInformation.CaptionHeight)
+			ClientRectangle.Height
 		);
 	}
 
-	public void DoLayout()
+	/*public void DoLayout()
 	{
 		tabs.Width = GetWidth ();
 		tabs.Height = GetHeight () - 20;
 
 		foreach (TabPage page in tabs.TabPages)
 		{
-			page.Width = tabs.Width;
-			page.Height = tabs.Height - 25;
+			page.Width = tabs.ClientRectangle.Width;
+			page.Height = tabs.ClientRectangle.Height - 25;
+			page.BorderStyle = BorderStyle.None;
 		}
 
-		DoScoreLayout ();
+		DoScoreLayout (scoreTabContent);
 		DoColorLayout();
 
 		save.Width = GetWidth()/2;
@@ -146,16 +170,27 @@ public class OptionsWindow : Form
 		saveClose.Height = 20;
 		saveClose.Top = save.Top;
 		saveClose.Left = save.Width;
+	}*/
+	public void DoLayout()
+	{
+		tabs.Dock = DockStyle.Fill;
+		foreach (TabPage page in tabs.TabPages)
+		{
+			page.Dock = DockStyle.Fill;
+		}
+
+		DoScoreLayout (scoreTabContent);
+		DoColorLayout();
+
+		save.Width = ClientRectangle.Width/2;
+		saveClose.Width = ClientRectangle.Width/2;
 	}
 
 
-	private void DoScoreLayout()
+	private void DoScoreLayout(Control c)
 	{
-		foreach (NumericField s in scores)
-		{
-			s.Width = scoreTab.Width;
-			//s.DoLayout ();
-		}
+		c.Width = scoreTab.ClientRectangle.Width;
+		c.Height = scoreTab.ClientRectangle.Height;
 
 
 	}
@@ -168,7 +203,7 @@ public class OptionsWindow : Form
 			{
 				colors[i].Top = colors[i-1].Top + colors[i-1].Height;
 			}
-			colors[i].Width = Width;
+			colors[i].Width = ClientRectangle.Width;
 		}
 	}
 
@@ -203,7 +238,7 @@ public class OptionsWindow : Form
 			{
 				generalOptions[i].Top = generalOptions[i-1].Top + generalOptions[i-1].Height;
 			}
-			generalOptions[i].Width = Width;
+			generalOptions[i].Width = ClientRectangle.Width;
 			generalTab.Controls.Add(generalOptions[i]);
 		}
 	}
@@ -211,25 +246,14 @@ public class OptionsWindow : Form
 	private void ConfigureScoreTab ()
 	{
 		scoreTab.Controls.Clear ();
-		foreach (KeyValuePair<string, string> il in ils)
-		{
-			if (il.Key != "Easy Route" && il.Key != "Hard Route")
-			{
-				NumericField newScore = new NumericField (il.Key, il.Value);
-				scoreTab.Controls.Add (newScore);
-				if (scores.Count > 0)
-				{
-					newScore.Top = scores [scores.Count - 1].Top + scores [scores.Count - 1].Height;
-				}
-				newScore.Width = Width;
-				scores.Add (newScore);
-			}
-		}
+		scoreTabContent = new ScoreTab(new FileReader(ScoreTracker.Data.File.FileName));
+		DoScoreLayout(scoreTabContent);
+		scoreTab.Controls.Add(scoreTabContent);
 	}
 
 	private void ConfigColors()
 	{
-		foreach (KeyValuePair<string, Color> pair in colorTheme)
+		foreach (KeyValuePair<string, Color> pair in colorTheme.GetSection("General"))
 		{
 			ColorField c = new ColorField(OptionNameToLabelName(pair.Key), pair.Value);
 			colors.Add(c);
@@ -300,7 +324,7 @@ public class ColorField : OptionField
 
 		this.Controls.Add(this.name);
 		this.Controls.Add(this.button);
-		Resize += delegate { DoLayout(); };
+		Layout += new LayoutEventHandler((object sender, LayoutEventArgs e) => DoLayout());
 	}
 
 	public override string GetOption()
@@ -317,7 +341,7 @@ public class ColorField : OptionField
 	{
 		return color.Color;
 	}
-	
+
 	public void OnClick(object sender, EventArgs e)
 	{
 		if (color.ShowDialog() == DialogResult.OK)
@@ -328,12 +352,10 @@ public class ColorField : OptionField
 	{
 		Height = 20;
 
-		name.Height = 20;
-		button.Height = 20;
+		name.Dock = DockStyle.Fill;
+		button.Dock = DockStyle.Right;
 
 		button.Width = 60;
-		name.Width = Width - 60;
-		button.Left = Width - 60;
 	}
 }
 
@@ -349,12 +371,17 @@ public class NumericField : OptionField
 
 	public string Number
 	{
-		get 
-		{ 
-			if (score.Text != "") 
-				return score.Text; 
+		get
+		{
+			if (score.Text != "")
+				return score.Text;
 			return "0";
 		}
+	}
+
+	public NumericTextBox.OnChanged Changed
+	{
+		set { score.Changed = value; }
 	}
 
 	public NumericField(string name, string number)
@@ -367,18 +394,17 @@ public class NumericField : OptionField
 
 		Height = 20;
 
-		Resize += delegate { DoLayout(); };
+		Layout += new LayoutEventHandler((object sender, LayoutEventArgs e) => DoLayout());
 
 		DoLayout();
 	}
 
 	public void DoLayout()
 	{
+		score.Height = 20;
 		score.Width = 60;
-		score.Height = Height;
-		name.Width = Width - score.Width;
-		name.Height = Height;
-		score.Left = name.Width;
+		score.Dock = DockStyle.Right;
+		name.Dock = DockStyle.Fill;
 	}
 
 	public override string ToString()
@@ -402,7 +428,7 @@ public class DropdownField : OptionField
 		Controls.Add(this.name);
 		Controls.Add(this.options);
 
-		Resize += delegate { DoLayout(); };
+		Layout += new LayoutEventHandler((object sender, LayoutEventArgs e) => DoLayout());
 
 		DoLayout();
 	}
@@ -410,9 +436,8 @@ public class DropdownField : OptionField
 	{
 		Height = 20;
 
-		name.Height = 20;
-		options.Left = Width - options.Width - 21;
-		name.Width = Width - options.Width - 21;
+		options.Dock = DockStyle.Right;
+		name.Dock = DockStyle.Fill;
 	}
 	public override string ToString()
 	{
@@ -429,7 +454,7 @@ public class DropdownField : OptionField
 public class CheckField : OptionField
 {
 	public Label name = new Label();
-	public CheckBox option = new CheckBox(); 
+	public CheckBox option = new CheckBox();
 
 	public CheckField(string name, string current)
 	{
@@ -439,7 +464,7 @@ public class CheckField : OptionField
 		Controls.Add(this.name);
 		Controls.Add(this.option);
 
-		Resize += delegate { DoLayout(); };
+		Layout += new LayoutEventHandler((object sender, LayoutEventArgs e) => DoLayout());
 
 		DoLayout();
 	}
@@ -448,10 +473,8 @@ public class CheckField : OptionField
 	{
 		Height = 20;
 
-		option.Height = 20;
-		name.Height = 20;
-		option.Left = Width - option.Width;
-		name.Width = Width - option.Width - 21;
+		option.Dock = DockStyle.Right;
+		name.Dock = DockStyle.Fill;
 	}
 
 	public override string ToString()
