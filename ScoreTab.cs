@@ -155,6 +155,18 @@ public class ScoreTab : Panel
 		if (name == "Best Run" || name == "Top Scores" || name == "Sum of Best" || name == "General")
 			return;
 
+		int compIndex = Int32.Parse(file["comparison_index"]);
+		if (compIndex >= (selector.Index + 2))
+		{
+			if (compIndex == selector.Index + 2)
+			{
+				file["comparison_index"] = "0";
+			}
+			else
+			{
+				file["comparison_index"] = "" + (compIndex - 1);
+			}
+		}
 		file.RemoveSection(name);
 		pages.Remove(name);
 		selector.Reload();
