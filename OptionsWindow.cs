@@ -28,6 +28,8 @@ public class OptionsWindow : Form
 	private TabPage colorTab = new TabPage();
 	private List<ColorField> colors = new List<ColorField>();
 
+	private static int tabIndex = 0;
+
 	private int w = 300;
 	private int h = 400;
 
@@ -68,12 +70,20 @@ public class OptionsWindow : Form
 		MinimumSize = Size;
 
 		Layout += new LayoutEventHandler((object sender, LayoutEventArgs e) => DoLayout());
+		tabs.SelectedIndexChanged += delegate { CacheTabIndex(); };
 
 		ConfigureScoreTab ();
 		ConfigureGeneralTab ();
 		ConfigColors();
 
+		tabs.SelectedIndex = tabIndex;
+
 		DoLayout ();
+	}
+
+	public void CacheTabIndex()
+	{
+		tabIndex = tabs.SelectedIndex;
 	}
 
 	public void SaveClose(object sender, EventArgs e)
@@ -236,7 +246,7 @@ public class OptionsWindow : Form
 	private void ConfigureScoreTab ()
 	{
 		scoreTab.Controls.Clear ();
-		scoreTabContent = new ScoreTab(ScoreTracker.Data.File);
+		scoreTabContent = new ScoreTab(new FileReader(ScoreTracker.Data.File.FileName));
 		DoScoreLayout(scoreTabContent);
 		scoreTab.Controls.Add(scoreTabContent);
 	}

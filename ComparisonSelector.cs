@@ -9,19 +9,28 @@ public delegate void Action();
 
 public class ComparisonSelector : Panel
 {
+	private FileReader file;
 	private Button back = new Button();
 	private Button next = new Button();
 	private ComboBox options = new ComboBox();
 
 	private bool reloading = false;
 
+	private bool getFromTrackerData = false;
+
 	//private Action n;
 	//private Action b;
 
 	private bool justComparisons = false;
 
-	public ComparisonSelector()
+	public ComparisonSelector() : this(ScoreTracker.Data.File)
 	{
+		getFromTrackerData = true;
+	}
+
+	public ComparisonSelector(FileReader file)
+	{
+		this.file = file;
 		Height = 20;
 		back.Text = "\u2190";
 		next.Text = "\u2192";
@@ -43,9 +52,22 @@ public class ComparisonSelector : Panel
 		back.Click += delegate { PreviousComparison(); SetItems(); };
 
 		options.SelectedIndexChanged += delegate { DropdownChanged(); };
-
 	}
-	
+
+	public FileReader File
+	{
+		get { 
+			if (getFromTrackerData) 
+			{
+				return ScoreTracker.Data.File;
+			}
+			else
+			{
+				return file; 
+			}
+		}
+	}
+
 	public bool JustComparisons
 	{
 		get { return justComparisons; }
@@ -59,11 +81,11 @@ public class ComparisonSelector : Panel
 			int count = 0;
 			if (JustComparisons)
 			{
-				count = ScoreTracker.Data.GetComparisonNames().Count;
+				count = GetComparisonNames().Count;
 			}
 			else
 			{
-				count = ScoreTracker.Data.GetNames().Count;
+				count = GetNames().Count;
 			}
 			return count;
 		}
@@ -79,6 +101,11 @@ public class ComparisonSelector : Panel
 		get; 
 		set;
 	}
+	public Action TextEdited
+	{
+		get; 
+		set;
+	}
 
 	public int Index
 	{
@@ -90,23 +117,41 @@ public class ComparisonSelector : Panel
 		}
 	}
 
+	public string Comparison
+	{
+		get { Console.WriteLine(options.Text); return ((options.Text == "Sum of Best") ? "Top Scores" : options.Text); }
+	}
+
 	public void SetItems()
 	{
 		List<string> items;
 		if (!JustComparisons)
 		{
-			items = ScoreTracker.Data.GetNames();
+			items = GetNames();
 			items[1] = "Sum of Best";
 		}
 		else
 		{
-			items = ScoreTracker.Data.GetComparisonNames();
+			items = GetComparisonNames();
 		}
 		int oldIndex = Index;
 		options.Items.Clear();
 		this.options.Items.AddRange(items.ToArray());
 		if (oldIndex >= items.Count) oldIndex = 0;
 		Index = oldIndex;
+	}
+
+	public int GetIndexOfComparison(string name)
+	{
+		for (int i = 0; i < options.Items.Count; i++)
+		{
+			string item = (options.Items[i] as string);
+			if (((item == "Sum of Best") ? "Top Scores" : item) == name)
+			{
+				return i;
+			}
+		}
+		return -1;
 	}
 
 	public void Reload()
@@ -138,5 +183,27 @@ public class ComparisonSelector : Panel
 			i = Count - 1;
 		Index = i;
 		return;
+	}
+	public List<string> GetNames()
+	{
+		List<string> toReturn = new List<string>();
+		foreach (string section in File.Sections)
+		{
+			if (section == "General" || section == "Sum of Best") continue;
+			toReturn.Add(section);
+		}
+		return toReturn;
+	}
+
+	public List<string> GetComparisonNames()
+	{
+		List<string> toReturn = new List<string>();
+		foreach (string section in File.Sections)
+		{
+			if (section == "Best Run" || section == "Top Scores" || section == "General" || section == "Sum of Best")
+				continue;
+			toReturn.Add(section);
+		}
+		return toReturn;
 	}
 }

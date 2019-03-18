@@ -20,7 +20,7 @@ public class TrackerData
 		best = new ScoreSet(file, "Top Scores");
 		foreach (string section in file.Sections)
 		{
-			if (section == "Best Run" || section == "Top Scores" || section == "General")
+			if (section == "Best Run" || section == "Top Scores" || section == "General" || section == "Sum of Best")
 				continue;
 
 			comparisons.Add(new ScoreSet(file, section));
@@ -40,7 +40,7 @@ public class TrackerData
 		int i = 2;
 		foreach (string section in file.Sections)
 		{
-			if (section == "Best Run" || section == "Top Scores" || section == "General")
+			if (section == "Best Run" || section == "Top Scores" || section == "General" || section == "Sum of Best")
 				continue;
 
 			Validate(file, section);
