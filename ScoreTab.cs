@@ -13,7 +13,6 @@ public class ScoreTab : Panel
 	private TabControl tabs = new TabControl();
 	private Dictionary<string, ScorePage> pages = new Dictionary<string, ScorePage>();
 	private TabPage comparisons = new TabPage();
-	private TabControl comparisonsTabs = new TabControl();
 	private ComparisonSelector selector;
 	private Panel currentComparison = new Panel();
 	private Button addComparison = new Button();
@@ -219,7 +218,7 @@ public class AskName : Form
 		}
 	}
 
-	public string Name 
+	public new string Name 
 	{ 
 		get
 		{
