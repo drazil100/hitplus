@@ -442,6 +442,7 @@ public class InputWindow : Form
 	{
 		tracker.Data.SetComparisonIndex(selector.Index);
 		display.UpdateScores();
+		inputBox.Focus();
 	}
 
 	public void SaveBounds()

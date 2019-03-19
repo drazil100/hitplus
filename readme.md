@@ -5,6 +5,10 @@ The Star Fox 64 Score Tracker is a tool I created for the Star Fox 64 score runn
 
 # Whats New?
 
+### Quick Fix: 3/18/2019
+
+- The text box regains focus after changing comparisons.
+
 ### Last Updated: 3/17/2019
 
 - Completely refactored the entire project to be completely data oriented.
