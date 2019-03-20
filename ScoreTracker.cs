@@ -12,7 +12,7 @@ using System.Globalization;
 
 public class ScoreTracker : Form
 {
-	public static string version = "3/18/2019";
+	public static string version = "3/19/2019";
 
 	[DllImport("kernel32.dll")]
 	static extern IntPtr GetConsoleWindow();
@@ -334,7 +334,7 @@ public class ScoreTracker : Form
 				if (convertIL.ContainsKey(pair.Key)) tmp = convertIL["General", pair.Key];
 				easy.AddNewItem("Top Scores", k, tmp);
 			}
-			easy.Save();
+			if (easy.GetSection("Best Run").Keys.Count > 0) easy.Save();
 
 			easy.AddNewItem("name", "Hard Route");
 			foreach (SectionKeyValue<string> pair in convertHard)
@@ -345,7 +345,7 @@ public class ScoreTracker : Form
 				if (convertIL.ContainsKey(pair.Key)) tmp = convertIL["General", pair.Key];
 				hard.AddNewItem("Top Scores", k, tmp);
 			}
-			hard.Save();
+			if (hard.GetSection("Best Run").Keys.Count > 0) hard.Save();
 
 			if (convertIL.ContainsKey("Venom"))
 			{

@@ -80,6 +80,7 @@ public class InputWindow : Form
 		casualMode.Click += new EventHandler (ToggleCasualMode);
 		options.Click += new EventHandler (OpenOptions);
 
+		selector.Index = tracker.Data.GetComparisonIndex();
 		selector.Changed = OnDropdownChanged;
 
 		SwapControls(submit);
