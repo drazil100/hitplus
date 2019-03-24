@@ -12,7 +12,7 @@ using System.Globalization;
 
 public class ScoreTracker : Form
 {
-	public static string version = "3/19/2019";
+	public static string version = "3/24/2019";
 
 	[DllImport("kernel32.dll")]
 	static extern IntPtr GetConsoleWindow();
@@ -248,7 +248,7 @@ public class ScoreTracker : Form
 
 
 			pbEasy = new FileReader("pb_easy.ini", SortingStyle.Validate);
-			if (!File.Exists("pb_easy.ini"))
+			if (!File.Exists("pb_easy.ini") || pbEasy.GetSection("Best Run").Keys.Count == 0)
 			{
 				pbEasy.AddNewItem("Best Run", "Corneria", "0");
 				pbEasy.AddNewItem("Best Run", "Meteo",    "0");
@@ -261,7 +261,7 @@ public class ScoreTracker : Form
 			}
 
 			pbHard = new FileReader("pb_hard.ini", SortingStyle.Validate);
-			if (!File.Exists("pb_hard.ini"))
+			if (!File.Exists("pb_hard.ini") || pbHard.GetSection("Best Run").Keys.Count == 0)
 			{
 				pbHard.AddNewItem("Best Run", "Corneria", "0");
 				pbHard.AddNewItem("Best Run", "Sector Y", "0");

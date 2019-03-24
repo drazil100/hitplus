@@ -270,7 +270,10 @@ public class InputWindow : Form
 		{
 			int s = Int32.Parse(inputBox.Text);
 			if (s < 0 || s > 999)
+			{
+				inputBox.Focus();
 				return;
+			}
 			inputBox.Text = "";
 			tracker.Submit(s);
 
@@ -294,7 +297,8 @@ public class InputWindow : Form
 		}
 		catch (Exception)
 		{
-
+			inputBox.Text = "";
+			inputBox.Focus();
 		}
 	}
 
