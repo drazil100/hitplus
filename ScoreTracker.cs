@@ -60,6 +60,7 @@ public class ScoreTracker : Form
 
 	public static void Main(string[] args)
 	{
+		Console.WriteLine("Running in: " + Directory.GetCurrentDirectory());
 		try
 		{
 			var handle = GetConsoleWindow();

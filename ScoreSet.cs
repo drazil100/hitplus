@@ -16,6 +16,11 @@ public class ScoreSet : IEnumerable<ScoreEntry>
 		int i = 0;
 		foreach (KeyValuePair<string, string> pair in file.GetSection(section))
 		{
+			if (pair.Key == "Scoreset Type" || pair.Key == "Show In Comparisons" || pair.Key == "Total Score")
+			{
+				continue;
+			}
+
 			ScoreEntry entry = new ScoreEntry(pair.Key, Int32.Parse(pair.Value));
 			entry.Position = i++;
 			scores.Add(entry);

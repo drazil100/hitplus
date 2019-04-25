@@ -189,7 +189,8 @@ public class ComparisonSelector : Panel
 		List<string> toReturn = new List<string>();
 		foreach (string section in File.Sections)
 		{
-			if (section == "General" || section == "Sum of Best") continue;
+			if (!File.ContainsKey(section, "Scoreset Type") || File[section, "Show In Comparisons"] == "no") 
+				continue;
 			toReturn.Add(section);
 		}
 		return toReturn;
@@ -200,7 +201,7 @@ public class ComparisonSelector : Panel
 		List<string> toReturn = new List<string>();
 		foreach (string section in File.Sections)
 		{
-			if (section == "Best Run" || section == "Top Scores" || section == "General" || section == "Sum of Best")
+			if (!File.ContainsKey(section, "Scoreset Type") || File[section, "Show In Comparisons"] == "no" || File[section, "Scoreset Type"] != "Comparison")
 				continue;
 			toReturn.Add(section);
 		}

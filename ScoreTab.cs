@@ -119,7 +119,7 @@ public class ScoreTab : Panel
 	{
 		foreach (string section in file.Sections)
 		{
-			if (section == "Best Run" || section == "Top Scores" || section == "General" || section == "Sum of Best")
+			if (!file.ContainsKey(section, "Scoreset Type") || file[section, "Scoreset Type"] != "Comparison")
 				continue;
 
 			if (!pages.ContainsKey(section))
@@ -143,6 +143,8 @@ public class ScoreTab : Panel
 		ScorePage page = new ScorePage(file, section);
 		foreach (KeyValuePair<string, string> score in file.GetSection(section))
 		{
+			if (score.Key == "Scoreset Type" || score.Key == "Show In Comparisons" || score.Key == "Total Score")
+				continue;
 
 			page.Add(new NumericField (score.Key, score.Value));
 
@@ -152,7 +154,7 @@ public class ScoreTab : Panel
 	
 	public void RemoveComparison(string name)
 	{
-		if (name == "Best Run" || name == "Top Scores" || name == "Sum of Best" || name == "General")
+		if (!file.ContainsKey(name, "Scoreset Type") || file[name, "Scoreset Type"] != "Comparison")
 			return;
 
 		int compIndex = Int32.Parse(file["comparison_index"]);
@@ -178,7 +180,7 @@ public class ScoreTab : Panel
 		AskName popup = new AskName();
 		popup.ShowDialog();
 		string name = popup.Name;
-		if (name == "Best Run" || name == "Top Scores" || name == "Sum of Best" || name == "General")
+		if (name == "Best Run" || name == "Top Scores" || name == "Sum of Best" || name == "General" || name == "File Sync")
 			return;
 
 		foreach (string key in file.GetSection("Best Run").Keys)
