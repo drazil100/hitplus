@@ -29,12 +29,13 @@ public class TrackerData
 
 		if (file["IL Syncing"] == "on")
 		{
+			bool updateComparisons = false;
 			foreach (string filename in ScoreTracker.files)
 			{
 				FileReader syncFile = new FileReader(filename, SortingStyle.Unsort);
 				if (file["game"] != syncFile["game"] || syncFile["IL Syncing"] != "on") 
 					continue;
-
+Console.WriteLine("Reached");
 				bool doAdd = false;
 				foreach (ScoreEntry score in best)
 				{
@@ -44,15 +45,21 @@ public class TrackerData
 						if (score.Comparison > Int32.Parse(syncFile["Top Scores", score.Name]))
 							syncFile["Top Scores", score.Name] = "" + score.Comparison;
 						if (score.Comparison < Int32.Parse(syncFile["Top Scores", score.Name]))
+						{
 							score.Comparison = Int32.Parse(syncFile["Top Scores", score.Name]);
+							updateComparisons = true;
+						}
 					}
 				}
 				if (doAdd)
 				{
-					syncFile.Save();
 					syncFiles.Add(syncFile);
-					best.SaveComparisons();
 				}
+				syncFile.Save();
+			}
+			if (updateComparisons)
+			{
+				best.SaveComparisons();
 			}
 		}
 
@@ -151,6 +158,16 @@ public class TrackerData
 	public FileReader File
 	{
 		get { return file; }
+	}
+
+	public string Name
+	{
+		get { return file["name"]; }
+	}
+
+	public string Game
+	{
+		get { return file["game"]; }
 	}
 
 	public int Count

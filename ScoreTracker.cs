@@ -37,6 +37,25 @@ public class ScoreTracker : Form
 		set { tracker.Data = value; }
 	}
 
+	private static int fileIndex = 0;
+	public static int FileIndex
+	{
+		get { return fileIndex; }
+		set 
+		{
+			fileIndex = value;
+			if (fileIndex >= files.Count)
+			{
+				fileIndex = 0;
+			}
+			if (fileIndex < 0)
+			{
+				fileIndex = files.Count - 1;
+			}
+		}
+
+	}
+
 	public static FileReader config;
 	public static List<string> files;
 	public static FileReader pbEasy;
@@ -106,7 +125,7 @@ public class ScoreTracker : Form
 
 			config = new FileReader("config.ini", SortingStyle.Sort);
 			config.AddNewItem("version",                               "");
-			config.AddNewItem("hard_route",                            "0");
+			config.AddNewItem("file_index",                            "0");
 			config.AddNewItem("casual_mode",                           "0");
 			config.AddNewItem("layout",                                "1");
 			config.AddNewItem("include_route_pbs_in_individuals_file", "0");
@@ -275,11 +294,6 @@ public class ScoreTracker : Form
 
 
 			pbEasy = new FileReader("pb_easy.ini", SortingStyle.Validate);
-			if (!pbEasy.ContainsKey("game")) 
-			{
-				pbEasy["game"] = "Star Fox 64";
-				pbEasy["IL Syncing"] = "on";
-			}
 			if (!File.Exists("pb_easy.ini"))
 			{
 				pbEasy.AddNewItem("Best Run", "Corneria", "0");
@@ -292,13 +306,16 @@ public class ScoreTracker : Form
 				pbEasy.Save();
 				files.Add("pb_easy.ini");
 			}
+			if (!pbEasy.ContainsKey("game")) 
+			{
+				pbEasy["name"] = "Easy Route";
+				pbEasy["game"] = "Star Fox 64";
+				pbEasy["IL Syncing"] = "on";
+			}
+
+			TrackerData.ValidateFile(pbEasy);
 
 			pbHard = new FileReader("pb_hard.ini", SortingStyle.Validate);
-			if (!pbHard.ContainsKey("game")) 
-			{
-				pbHard["game"] = "Star Fox 64";
-				pbHard["IL Syncing"] = "on";
-			}
 			if (!File.Exists("pb_hard.ini"))
 			{
 				pbHard.AddNewItem("Best Run", "Corneria", "0");
@@ -311,11 +328,28 @@ public class ScoreTracker : Form
 				pbHard.Save();
 				files.Add("pb_hard.ini");
 			}
+			if (!pbHard.ContainsKey("game")) 
+			{
+				pbHard["name"] = "Hard Route";
+				pbHard["game"] = "Star Fox 64";
+				pbHard["IL Syncing"] = "on";
+			}
+
+			TrackerData.ValidateFile(pbHard);
+
+				
 
 			individualLevels = new FileReader(':', "pb_individuals.txt", SortingStyle.Unsort);
 
+			fileIndex = Int32.Parse(config["file_index"]);
+			if (fileIndex >= files.Count || fileIndex < 0)
+			{
+				fileIndex = 0;
+				config["file_index"] = "0";
+				config.Save();
+			}
 
-			data = new TrackerData(new FileReader(files[0], SortingStyle.Validate));
+			data = new TrackerData(new FileReader(files[FileIndex], SortingStyle.Validate));
 			tracker = new TrackerCore(data);
 		}
     /*

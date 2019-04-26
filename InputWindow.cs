@@ -54,7 +54,7 @@ public class InputWindow : Form
 		pbHard = ScoreTracker.pbHard;
 		colors = ScoreTracker.colors;
 
-		Text = "Input";
+		Text = tracker.Data.Name;
 		FormClosing += new FormClosingEventHandler(ConfirmClose);
 
 		Size = new Size(w, h);
@@ -361,24 +361,13 @@ public class InputWindow : Form
 			if (tracker.IsRunning())
 				return;
 			
-			if (config ["hard_route"] == "0")
-			{
-				config ["hard_route"] = "1";
-			}
-			else
-			{
-				config ["hard_route"] = "0";
-			}
+			ScoreTracker.FileIndex += 1;
+			config["file_index"] = "" + ScoreTracker.FileIndex;
 			config.Save ();
 
-			if (config["hard_route"] == "0")
-			{
-				ScoreTracker.Data = new TrackerData(pbEasy);
-			}
-			else
-			{
-				ScoreTracker.Data = new TrackerData(pbHard);
-			}
+			ScoreTracker.Data = new TrackerData(new FileReader(ScoreTracker.files[ScoreTracker.FileIndex], SortingStyle.Validate));
+
+			Text = tracker.Data.Name;
 
 			selector.Reload();
 			selector.Index = tracker.Data.GetComparisonIndex();
