@@ -119,7 +119,7 @@ public class ComparisonSelector : Panel
 
 	public string Comparison
 	{
-		get { Console.WriteLine(options.Text); return ((options.Text == "Sum of Best") ? "Top Scores" : options.Text); }
+		get { return ((options.Text == "Sum of Best") ? "Top Scores" : options.Text); }
 	}
 
 	public void SetItems()
@@ -137,7 +137,7 @@ public class ComparisonSelector : Panel
 		int oldIndex = Index;
 		options.Items.Clear();
 		this.options.Items.AddRange(items.ToArray());
-		if (oldIndex >= items.Count) oldIndex = 0;
+		if (oldIndex >= items.Count || oldIndex == -1) oldIndex = 0;
 		Index = oldIndex;
 	}
 

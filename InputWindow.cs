@@ -80,6 +80,7 @@ public class InputWindow : Form
 		casualMode.Click += new EventHandler (ToggleCasualMode);
 		options.Click += new EventHandler (OpenOptions);
 
+		selector.Index = tracker.Data.GetComparisonIndex();
 		selector.Changed = OnDropdownChanged;
 
 		SwapControls(submit);
@@ -269,7 +270,10 @@ public class InputWindow : Form
 		{
 			int s = Int32.Parse(inputBox.Text);
 			if (s < 0 || s > 999)
+			{
+				inputBox.Focus();
 				return;
+			}
 			inputBox.Text = "";
 			tracker.Submit(s);
 
@@ -293,7 +297,8 @@ public class InputWindow : Form
 		}
 		catch (Exception)
 		{
-
+			inputBox.Text = "";
+			inputBox.Focus();
 		}
 	}
 
@@ -442,6 +447,7 @@ public class InputWindow : Form
 	{
 		tracker.Data.SetComparisonIndex(selector.Index);
 		display.UpdateScores();
+		inputBox.Focus();
 	}
 
 	public void SaveBounds()

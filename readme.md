@@ -1,9 +1,13 @@
 # Star Fox 64 Score Tracker
 The Star Fox 64 Score Tracker is a tool I created for the Star Fox 64 score running Discord community [HIT + 64](https://discord.gg/k2JnzC4). The program is heavily inspired by the speedrunning tool LiveSplit and is intended to not only be used for personal tracking but to be incorporated into streaming layouts to provide viewers with an indication of how well a run is going.
 
-### Download: [SF64ScoreTracker.zip](https://drazil100.bitbucket.io/SF64ScoreTracker.zip) 
+### Download: [SF64ScoreTracker.exe](https://drazil100.bitbucket.io/SF64ScoreTracker.exe) 
 
 # Whats New?
+
+### Quick Fix: 3/18/2019
+
+- The text box regains focus after changing comparisons.
 
 ### Last Updated: 3/17/2019
 
