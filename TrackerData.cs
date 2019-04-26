@@ -27,11 +27,14 @@ public class TrackerData
 			comparisons.Add(new ScoreSet(file, section));
 		}
 
-		if (file.ContainsKey("File Sync", "File_000"))
+		if (file["IL Syncing"] == "on")
 		{
-			foreach (string key in file.GetSection("File Sync").Keys)
+			foreach (string filename in ScoreTracker.files)
 			{
-				FileReader syncFile = new FileReader(file["File Sync", key], SortingStyle.Unsort);
+				FileReader syncFile = new FileReader(filename, SortingStyle.Unsort);
+				if (file["game"] != syncFile["game"] || syncFile["IL Syncing"] != "on") 
+					continue;
+
 				bool doAdd = false;
 				foreach (ScoreEntry score in best)
 				{
@@ -56,29 +59,14 @@ public class TrackerData
 		file.Save();
 	}
 
-	public static string FormatNumber(int i)
-	{
-		if (i < 10) return "00" + i;
-		if (i < 100) return "0" + i;
-		return "" + i;
-	}
+
 
 	public static void ValidateFile(FileReader file)
 	{
 		file.AddNewItem("name", "Run");
+		file.AddNewItem("game", "");
+		file.AddNewItem("IL Syncing", "off");
 		file.AddNewItem("comparison_index", "0");
-		if (file.ContainsKey("File Sync", "File_000"))
-		{
-			int fileIndex = 0;
-			foreach (string key in file.GetSection("File Sync").Keys)
-			{
-				if (!System.IO.File.Exists(file["File Sync", key]))
-				{
-					continue;
-				}
-				file.AddNewItem("File Sync", "File_" + FormatNumber(fileIndex++), "");
-			}
-		}
 		
 		file.AddNewItem("Best Run", "Scoreset Type", "PB");
 		Validate(file, "Best Run");
