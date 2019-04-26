@@ -391,6 +391,13 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 			(defaultValues.ContainsKey(section) && defaultValues[section].ContainsKey(key));
 	}
 
+	public bool ContainsSection(string section)
+	{
+		if (content.ContainsKey(section) || defaultValues.ContainsKey(section))
+			return true;
+		return false;
+	}
+
 	private string MakeModifyMessage(string section, string key, string value)
 	{
 		return String.Format("[{0}] {1} = {2}", section, key, value);
