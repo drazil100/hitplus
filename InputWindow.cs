@@ -23,8 +23,6 @@ public class InputWindow : Form
 	public static InputWindow mainWindow;
 	
 	public static FileReader config;
-	public static FileReader pbEasy;
-	public static FileReader pbHard;
 	public static FileReader individualLevels;
 	public static ColorFileReader colors;
 
@@ -50,8 +48,6 @@ public class InputWindow : Form
 		display = new DisplayWindow (new DisplayWindowContent());
 
 		config = ScoreTracker.config;
-		pbEasy = ScoreTracker.pbEasy;
-		pbHard = ScoreTracker.pbHard;
 		colors = ScoreTracker.colors;
 
 		Text = tracker.Data.Name;
@@ -430,6 +426,7 @@ public class InputWindow : Form
 		display.ResetContent();
 		selector.Reload();
 		selector.Index = tracker.Data.GetComparisonIndex();
+		Text = tracker.Data.Name;
 	}
 
 	public void OnDropdownChanged()

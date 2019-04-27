@@ -7,6 +7,14 @@ using System.Drawing;
 
 public delegate void Action();
 
+public enum ScoresetType
+{
+	All,
+	TopScores,
+	Comparison,
+	Record
+}
+
 public class ComparisonSelector : Panel
 {
 	private FileReader file;
@@ -21,7 +29,7 @@ public class ComparisonSelector : Panel
 	//private Action n;
 	//private Action b;
 
-	private bool justComparisons = false;
+	private ScoresetType justComparisons = ScoresetType.All;
 
 	public ComparisonSelector() : this(ScoreTracker.Data.File)
 	{
@@ -68,7 +76,7 @@ public class ComparisonSelector : Panel
 		}
 	}
 
-	public bool JustComparisons
+	public ScoresetType SetType
 	{
 		get { return justComparisons; }
 		set { justComparisons = value; SetItems(); }
@@ -79,17 +87,16 @@ public class ComparisonSelector : Panel
 		get 
 		{
 			int count = 0;
-			if (JustComparisons)
+			switch (SetType)
 			{
-				count = GetComparisonNames().Count;
-			}
-			else
-			{
-				count = GetNames().Count;
+				case ScoresetType.Comparison: count = GetComparisonNames().Count; break;
+				case ScoresetType.Record: count = GetRecordNames().Count; break;
+				default: count = GetNames().Count; break;
 			}
 			return count;
 		}
 	}
+
 	public Action Changed
 	{
 		get; 
@@ -125,14 +132,18 @@ public class ComparisonSelector : Panel
 	public void SetItems()
 	{
 		List<string> items;
-		if (!JustComparisons)
+		switch (SetType)
 		{
-			items = GetNames();
-			items[1] = "Sum of Best";
-		}
-		else
-		{
-			items = GetComparisonNames();
+			case ScoresetType.Comparison:
+				items = GetComparisonNames();
+				break;
+			case ScoresetType.Record:
+				items = GetRecordNames();
+				break;
+			default:
+				items = GetNames();
+				items[1] = "Sum of Best";
+				break;
 		}
 		int oldIndex = Index;
 		options.Items.Clear();
@@ -189,7 +200,7 @@ public class ComparisonSelector : Panel
 		List<string> toReturn = new List<string>();
 		foreach (string section in File.Sections)
 		{
-			if (!File.ContainsKey(section, "Scoreset Type") || File[section, "Show In Comparisons"] == "no") 
+			if (!File.ContainsKey(section, "Scoreset Type") || (File.ContainsKey(section, "Show In Comparisons") && File[section, "Show In Comparisons"] != "yes")) 
 				continue;
 			toReturn.Add(section);
 		}
@@ -201,7 +212,19 @@ public class ComparisonSelector : Panel
 		List<string> toReturn = new List<string>();
 		foreach (string section in File.Sections)
 		{
-			if (!File.ContainsKey(section, "Scoreset Type") || File[section, "Show In Comparisons"] == "no" || File[section, "Scoreset Type"] != "Comparison")
+			if (!File.ContainsKey(section, "Scoreset Type") || File[section, "Scoreset Type"] != "Comparison")
+				continue;
+			toReturn.Add(section);
+		}
+		return toReturn;
+	}
+
+	public List<string> GetRecordNames()
+	{
+		List<string> toReturn = new List<string>();
+		foreach (string section in File.Sections)
+		{
+			if (!File.ContainsKey(section, "Scoreset Type") || File[section, "Scoreset Type"] != "Record" || section == "Best Run")
 				continue;
 			toReturn.Add(section);
 		}

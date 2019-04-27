@@ -58,8 +58,6 @@ public class ScoreTracker : Form
 
 	public static FileReader config;
 	public static List<string> files;
-	public static FileReader pbEasy;
-	public static FileReader pbHard;
 	public static FileReader individualLevels;
 	public static ColorFileReader colors;
 
@@ -293,7 +291,7 @@ public class ScoreTracker : Form
 			config.Save();
 
 
-			pbEasy = new FileReader("pb_easy.ini", SortingStyle.Validate);
+			FileReader pbEasy = new FileReader("pb_easy.ini", SortingStyle.Validate);
 			if (!File.Exists("pb_easy.ini"))
 			{
 				pbEasy.AddNewItem("Best Run", "Corneria", "0");
@@ -310,12 +308,12 @@ public class ScoreTracker : Form
 			{
 				pbEasy["name"] = "Easy Route";
 				pbEasy["game"] = "Star Fox 64";
-				pbEasy["IL Syncing"] = "on";
+				//pbEasy["IL Syncing"] = "on";
 			}
 
 			TrackerData.ValidateFile(pbEasy);
 
-			pbHard = new FileReader("pb_hard.ini", SortingStyle.Validate);
+			FileReader pbHard = new FileReader("pb_hard.ini", SortingStyle.Validate);
 			if (!File.Exists("pb_hard.ini"))
 			{
 				pbHard.AddNewItem("Best Run", "Corneria", "0");
@@ -332,10 +330,12 @@ public class ScoreTracker : Form
 			{
 				pbHard["name"] = "Hard Route";
 				pbHard["game"] = "Star Fox 64";
-				pbHard["IL Syncing"] = "on";
+				//pbHard["IL Syncing"] = "on";
 			}
 
 			TrackerData.ValidateFile(pbHard);
+			
+			Console.WriteLine(pbEasy.ContainsSection("Best Run"));
 
 				
 
@@ -366,6 +366,7 @@ public class ScoreTracker : Form
 		catch (Exception e)
 		{
 			Console.WriteLine(e.Message);
+			Console.WriteLine(e.StackTrace);
 		}
 
 

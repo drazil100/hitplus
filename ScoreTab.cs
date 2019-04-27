@@ -48,7 +48,7 @@ public class ScoreTab : Panel
 		tabs.TabPages.Add(ToTabPage(pages["Top Scores"]));
 		comparisons.Text = "Comparisons";
 		selector = new ComparisonSelector(file);
-		selector.JustComparisons = true;
+		selector.SetType = ScoresetType.Comparison;
 		selector.Reload();
 		selector.Dock = DockStyle.Top;
 		currentComparison.Dock = DockStyle.Fill;

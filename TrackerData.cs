@@ -27,7 +27,7 @@ public class TrackerData
 			comparisons.Add(new ScoreSet(file, section));
 		}
 
-		if (file["IL Syncing"] == "on")
+		if (file.ContainsKey("IL Syncing") && file["IL Syncing"] == "on")
 		{
 			bool updateComparisons = false;
 			foreach (string filename in ScoreTracker.files)
@@ -72,19 +72,18 @@ Console.WriteLine("Reached");
 	{
 		file.AddNewItem("name", "Run");
 		file.AddNewItem("game", "");
-		file.AddNewItem("IL Syncing", "off");
+		//file.AddNewItem("IL Syncing", "off");
 		file.AddNewItem("comparison_index", "0");
 		
-		file.AddNewItem("Best Run", "Scoreset Type", "PB");
+		file.AddNewItem("Best Run", "Scoreset Type", "Record");
 		Validate(file, "Best Run");
 
-		file.AddNewItem("Top Scores", "Scoreset Type", "ILs");
+		file.AddNewItem("Top Scores", "Scoreset Type", "Top Scores");
 		Validate(file, "Top Scores");
 
 		foreach (string section in file.Sections)
 		{
 			if (section == "General" || 
-			    section == "File Sync" || 
 			    section == "Sum of Best" || 
 			    section == "Best Run" || 
 			    section == "Top Scores")
@@ -113,17 +112,14 @@ Console.WriteLine("Reached");
 	private static void Validate(FileReader file, string section)
 	{
 		file.AddNewItem(section, "Scoreset Type", "Comparison");
-		file.AddNewItem(section, "Show In Comparisons", "yes");
-		int total = 0;
+		//file.AddNewItem(section, "Show In Comparisons", "yes");
 		foreach(string key in file.GetSection("Best Run").Keys)
 		{
 			if (key == "Total Score" || key == "Scoreset Type" || key == "Show In Comparisons") 
 				continue;
 
 			file.AddNewItem(section, key, "0");
-			total += Int32.Parse(file[section, key]);
 		}
-		file.AddNewItem(section, "Total Score", "" + total);
 	}
 
 	public static bool IsScoreset(FileReader file, string section)
