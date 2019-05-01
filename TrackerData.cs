@@ -21,7 +21,7 @@ public class TrackerData
 		best = new ScoreSet(file, "Top Scores");
 		foreach (string section in file.Sections)
 		{
-			if (!IsScoreset(file, section))
+			if (!IsComparison(file, section))
 				continue;
 
 			comparisons.Add(new ScoreSet(file, section));
@@ -159,6 +159,11 @@ Console.WriteLine("Reached");
 	public string Name
 	{
 		get { return file["name"]; }
+	}
+
+	public string SetName
+	{
+		get { return GetScoreSet().Name; }
 	}
 
 	public string Game

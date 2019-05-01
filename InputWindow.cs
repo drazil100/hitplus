@@ -63,7 +63,7 @@ public class InputWindow : Form
 		undo.Enabled = false;
 		save.Text = "Save && Reset";
 		save.Enabled = false;
-		switchRoute.Text = "Switch Route";
+		switchRoute.Text = "Switch File";
 		casualMode.Text = (config["casual_mode"] == "0") ? "Casual Mode" : "Tracking Mode";
 		options.Text = "Options...";
 		//options.Enabled = false;

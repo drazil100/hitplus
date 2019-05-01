@@ -61,7 +61,7 @@ public class ScoreSet : IEnumerable<ScoreEntry>
 
 	public string Name
 	{
-		get { return section; }
+		get { Console.WriteLine(section); return section; }
 	}
 
 	public void Refresh()

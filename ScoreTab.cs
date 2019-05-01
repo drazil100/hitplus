@@ -241,6 +241,8 @@ public class AskName : Form
 		Controls.Add(submit);
 
 		Height = GetCaptionSize() + text.Height + submit.Height;
+		MaximumSize = new Size(Width, Height);
+		MinimumSize = new Size(Width, Height);
 
 		submit.Click += delegate { Close(); };
 	}
