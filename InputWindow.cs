@@ -116,8 +116,9 @@ public class InputWindow : Form
 		
 		try 
 		{
-			t = new Thread(new ThreadStart(delegate { CheckVersion(); }));
-			t.Start();
+			CheckVersion();
+			//t = new Thread(new ThreadStart(delegate { CheckVersion(); }));
+			//t.Start();
 		}
 		catch (Exception e)
 		{
@@ -139,7 +140,8 @@ public class InputWindow : Form
 					if (ScoreTracker.DateToNumber(ScoreTracker.version) < ScoreTracker.DateToNumber(parts[1]))
 					{
 						string whatsNew = client.DownloadString("http://greenmaw.com/drazil100.php?filename=tracker_whats_new.txt");
-						MessageBox.Show(whatsNew + "\r\n\r\n" + "https://bitbucket.org/drazil100/sf64scoretracker/", "Update Available: (" + parts[1] + ")");
+						var dialog = new WhatsNewDialog(parts[1], whatsNew);
+						dialog.ShowDialog();
 					}
 				}
 				Console.WriteLine(String.Format("This Version: {0}, Version Check: {1}", ScoreTracker.version, parts[1]));
