@@ -326,6 +326,10 @@ public class DisplayWindowContent : Panel
 			{
 				topScoreName.Text = "Top:";
 			}
+			else if (ScoreTracker.Data.GetComparisonIndex() == 1)
+			{
+				topScoreName.Text = "-";
+			}
 			else
 			{
 				topScoreName.Text = "Cmp:";
@@ -338,12 +342,24 @@ public class DisplayWindowContent : Panel
 			{
 				topScoreName.Text = "Top:";
 			}
+			else if (ScoreTracker.Data.GetComparisonIndex() == 1)
+			{
+				topScoreName.Text = "-";
+			}
 			else
 			{
 				topScoreName.Text = "Comparison:";
 			}
 		}
-		topScore.Text = "" + total;
+
+		if (ScoreTracker.Data.GetComparisonIndex() != 1)
+		{
+			topScore.Text = "" + total;
+		}
+		else
+		{
+			topScore.Text = "-";
+		}
 		sobScore.Text = "" + sob;
 		sobScore.Text = "" + ScoreTracker.Tracker.GetSOB();
 

@@ -12,7 +12,7 @@ using System.Globalization;
 
 public class ScoreTracker : Form
 {
-	public static string version = "3/24/2019";
+	public static string version = "5/3/2019";
 
 	[DllImport("kernel32.dll")]
 	static extern IntPtr GetConsoleWindow();
@@ -37,9 +37,27 @@ public class ScoreTracker : Form
 		set { tracker.Data = value; }
 	}
 
+	private static int fileIndex = 0;
+	public static int FileIndex
+	{
+		get { return fileIndex; }
+		set 
+		{
+			fileIndex = value;
+			if (fileIndex >= files.Count)
+			{
+				fileIndex = 0;
+			}
+			if (fileIndex < 0)
+			{
+				fileIndex = files.Count - 1;
+			}
+		}
+
+	}
+
 	public static FileReader config;
-	public static FileReader pbEasy;
-	public static FileReader pbHard;
+	public static List<string> files;
 	public static FileReader individualLevels;
 	public static ColorFileReader colors;
 
@@ -60,6 +78,7 @@ public class ScoreTracker : Form
 
 	public static void Main(string[] args)
 	{
+		Console.WriteLine("Running in: " + Directory.GetCurrentDirectory());
 		try
 		{
 			var handle = GetConsoleWindow();
@@ -89,6 +108,11 @@ public class ScoreTracker : Form
 			}*/
 		}
 
+		/*OpenFileDialog test = new OpenFileDialog();
+		test.Filter = ".ini|*.ini";
+		test.Title = "Test";
+		test.ShowDialog();*/
+
 		try
 		{
 			//Test();
@@ -104,7 +128,7 @@ public class ScoreTracker : Form
 
 			config = new FileReader("config.ini", SortingStyle.Sort);
 			config.AddNewItem("version",                               "");
-			config.AddNewItem("hard_route",                            "0");
+			config.AddNewItem("file_index",                            "0");
 			config.AddNewItem("casual_mode",                           "0");
 			config.AddNewItem("layout",                                "1");
 			config.AddNewItem("include_route_pbs_in_individuals_file", "0");
@@ -243,12 +267,54 @@ public class ScoreTracker : Form
 				colors["text_color_best"] = ColorTranslator.FromHtml(c);
 			}
 
+			files = new List<string>();
+			if (config.ContainsSection("Files"))
+			{
+				foreach (string key in config.GetSection("Files").Keys)
+				{
+					if (!System.IO.File.Exists(config["Files", key]))
+					{
+						config.RemoveKey("Files", key);
+						continue;
+					}
+					try
+					{
+						FileReader tmp = new FileReader(config["Files", key]);
+
+						if (!tmp.ContainsSection("Best Run"))
+						{
+							config.RemoveKey("Files", key);
+							continue;
+						}
+					}
+					catch (Exception)
+					{
+						config.RemoveKey("Files", key);
+						continue;
+					}
+					files.Add(config["Files", key]);
+					config.RemoveKey("Files", key);
+				}
+				int fileIndex = 0;
+				foreach (string file in files)
+				{
+					config.AddNewItem("Files", "File_" + FormatNumber(fileIndex++), file);
+				}
+			}
+			else
+			{
+				config["Files", "File_0000"] = "pb_easy.ini";
+				config["Files", "File_0001"] = "pb_hard.ini";
+				files.Add("pb_easy.ini");
+				files.Add("pb_hard.ini");
+			}
+
 			colors.Save();
 			config.Save();
 
 
-			pbEasy = new FileReader("pb_easy.ini", SortingStyle.Validate);
-			if (!File.Exists("pb_easy.ini") || pbEasy.GetSection("Best Run").Keys.Count == 0)
+			FileReader pbEasy = new FileReader("pb_easy.ini", SortingStyle.Validate);
+			if (!File.Exists("pb_easy.ini"))
 			{
 				pbEasy.AddNewItem("Best Run", "Corneria", "0");
 				pbEasy.AddNewItem("Best Run", "Meteo",    "0");
@@ -259,9 +325,17 @@ public class ScoreTracker : Form
 				pbEasy.AddNewItem("Best Run", "Venom 2",    "0");
 				pbEasy.Save();
 			}
+			if (!pbEasy.ContainsKey("game")) 
+			{
+				pbEasy["name"] = "Easy Route";
+				pbEasy["game"] = "Star Fox 64";
+				//pbEasy["IL Syncing"] = "on";
+			}
 
-			pbHard = new FileReader("pb_hard.ini", SortingStyle.Validate);
-			if (!File.Exists("pb_hard.ini") || pbHard.GetSection("Best Run").Keys.Count == 0)
+			TrackerData.ValidateFile(pbEasy);
+
+			FileReader pbHard = new FileReader("pb_hard.ini", SortingStyle.Validate);
+			if (!File.Exists("pb_hard.ini"))
 			{
 				pbHard.AddNewItem("Best Run", "Corneria", "0");
 				pbHard.AddNewItem("Best Run", "Sector Y", "0");
@@ -272,18 +346,27 @@ public class ScoreTracker : Form
 				pbHard.AddNewItem("Best Run", "Venom 2",    "0");
 				pbHard.Save();
 			}
+			if (!pbHard.ContainsKey("game")) 
+			{
+				pbHard["name"] = "Hard Route";
+				pbHard["game"] = "Star Fox 64";
+				//pbHard["IL Syncing"] = "on";
+			}
+
+			TrackerData.ValidateFile(pbHard);
+			
 
 			individualLevels = new FileReader(':', "pb_individuals.txt", SortingStyle.Unsort);
 
+			fileIndex = Int32.Parse(config["file_index"]);
+			if (fileIndex >= files.Count || fileIndex < 0)
+			{
+				fileIndex = 0;
+				config["file_index"] = "0";
+				config.Save();
+			}
 
-			if (config["hard_route"] == "0")
-			{
-				data = new TrackerData(pbEasy);
-			}
-			else
-			{
-				data = new TrackerData(pbHard);
-			}
+			data = new TrackerData(new FileReader(files[FileIndex], SortingStyle.Validate));
 			tracker = new TrackerCore(data);
 		}
     /*
@@ -300,11 +383,20 @@ public class ScoreTracker : Form
 		catch (Exception e)
 		{
 			Console.WriteLine(e.Message);
+			Console.WriteLine(e.StackTrace);
 		}
 
 
 		if (config.ContainsKey("debug") && config["debug"] == "1")
 			Console.Read();
+	}
+
+	public static string FormatNumber(int i)
+	{
+		if (i < 10) return "000" + i;
+		if (i < 100) return "00" + i;
+		if (i < 1000) return "0" + i;
+		return "" + i;
 	}
 
 	public static void ConvertFiles()

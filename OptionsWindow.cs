@@ -100,7 +100,7 @@ public class OptionsWindow : Form
 	{
 		scoreTabContent.Save();
 
-		config ["hard_route"]                = generalOptions[0].ToString();
+		config ["file_index"]                = generalOptions[0].ToString();
 		config ["layout"]                    = generalOptions[1].ToString();
 		config ["highlight_current"]         = generalOptions[2].ToString();
 		config ["start_highlighted"]         = generalOptions[3].ToString();
@@ -118,16 +118,8 @@ public class OptionsWindow : Form
 
 		colorTheme.Save();
 
-		TrackerData data;
-
-		if (config["hard_route"] == "0")
-		{
-			data = new TrackerData(new FileReader("pb_easy.ini"));
-		}
-		else
-		{
-			data = new TrackerData(new FileReader("pb_hard.ini"));
-		}
+		ScoreTracker.FileIndex = Int32.Parse(config["file_index"]);
+		TrackerData data = new TrackerData(new FileReader(ScoreTracker.files[ScoreTracker.FileIndex], SortingStyle.Validate));
 		ScoreTracker.Data = data;
 		if (!closing)
 			ConfigureScoreTab();
@@ -209,7 +201,7 @@ public class OptionsWindow : Form
 
 	private void ConfigureGeneralTab()
 	{
-		generalOptions.Add(new DropdownField("Route:", config["hard_route"], "Easy", "Hard"));
+		generalOptions.Add(new DropdownField("Route:", config["file_index"], ScoreTracker.files.ToArray()));
 		generalOptions.Add(new DropdownField("Layout:", config["layout"], "Horizontal", "Vertical"));
 		generalOptions.Add(new CheckField("Highlight Current:", config["highlight_current"]));
 		generalOptions.Add(new CheckField("Start Highlighted:", config["start_highlighted"]));
