@@ -12,7 +12,7 @@ using System.Globalization;
 
 public class ScoreTracker : Form
 {
-	public static string version = "3/24/2016";
+	public static string version = "3/24/2019";
 
 	[DllImport("kernel32.dll")]
 	static extern IntPtr GetConsoleWindow();
@@ -107,6 +107,11 @@ public class ScoreTracker : Form
 				return;
 			}*/
 		}
+
+		/*OpenFileDialog test = new OpenFileDialog();
+		test.Filter = ".ini|*.ini";
+		test.Title = "Test";
+		test.ShowDialog();*/
 
 		try
 		{
@@ -263,7 +268,7 @@ public class ScoreTracker : Form
 			}
 
 			files = new List<string>();
-			if (config.ContainsKey("Files", "File_0000"))
+			if (config.ContainsSection("Files"))
 			{
 				foreach (string key in config.GetSection("Files").Keys)
 				{

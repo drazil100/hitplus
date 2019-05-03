@@ -10,6 +10,8 @@ using System.Threading;
 using System.Globalization;
 
 
+public delegate void ShowUpdateDialogCallback(string version, string whatsNew);
+
 public class InputWindow : Form
 {
 	private Thread t;
@@ -116,9 +118,9 @@ public class InputWindow : Form
 		
 		try 
 		{
-			CheckVersion();
-			//t = new Thread(new ThreadStart(delegate { CheckVersion(); }));
-			//t.Start();
+			//CheckVersion();
+			t = new Thread(new ThreadStart(delegate { CheckVersion(); }));
+			t.Start();
 		}
 		catch (Exception e)
 		{
@@ -137,11 +139,36 @@ public class InputWindow : Form
 				string[] parts = latestVersion.Split(':');
 				if (parts[0] == "CurrentTrackerVersion")
 				{
-					if (ScoreTracker.DateToNumber(ScoreTracker.version) < ScoreTracker.DateToNumber(parts[1]))
+					string checkVersion = ScoreTracker.version;
+					if (ScoreTracker.config.ContainsKey("skip_version") && ScoreTracker.config["skip_version"] != ScoreTracker.version)
+					{
+						try
+						{
+							string[] versionParts = ScoreTracker.config["skip_version"].Split('/');
+							if (versionParts.Length != 3) throw new System.Exception();
+							int m = Int32.Parse(versionParts[0]);
+							int d = Int32.Parse(versionParts[1]);
+							int y = Int32.Parse(versionParts[2]);
+
+							if (m < 1 || m > 12) throw new System.Exception();
+							if (d < 1 || d > 31) throw new System.Exception();
+							if (y < 1) throw new System.Exception();
+							
+							if (ScoreTracker.DateToNumber(ScoreTracker.config["skip_version"]) > ScoreTracker.DateToNumber(ScoreTracker.version))
+							{
+								checkVersion = ScoreTracker.config["skip_version"];
+								Console.WriteLine("Skip Version:" + checkVersion);
+							}
+						}
+						catch (Exception)
+						{
+							ScoreTracker.config.RemoveKey("skip_version");
+						}
+					}
+					if (ScoreTracker.DateToNumber(checkVersion) < ScoreTracker.DateToNumber(parts[1]))
 					{
 						string whatsNew = client.DownloadString("http://greenmaw.com/drazil100.php?filename=tracker_whats_new.txt");
-						var dialog = new WhatsNewDialog(parts[1], whatsNew);
-						dialog.ShowDialog();
+						ShowUpdateDialog(parts[1], whatsNew);
 					}
 				}
 				Console.WriteLine(String.Format("This Version: {0}, Version Check: {1}", ScoreTracker.version, parts[1]));
@@ -150,6 +177,25 @@ public class InputWindow : Form
 		catch (Exception e)
 		{
 			Console.WriteLine(e.Message);
+		}
+	}
+
+	public void ShowUpdateDialog(string version, string whatsNew)
+	{
+		if (this.InvokeRequired)
+		{
+			ShowUpdateDialogCallback d = new ShowUpdateDialogCallback(ShowUpdateDialog);
+			this.Invoke(d, new object[] { version, whatsNew });
+		}
+		else
+		{
+			whatsNew = whatsNew.Replace("\n-", "\n\u2022");
+			var dialog = new WhatsNewDialog(version, whatsNew);
+			dialog.ShowDialog();
+			if (dialog.close)
+			{
+				this.Close();
+			}
 		}
 	}
 
