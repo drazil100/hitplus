@@ -27,7 +27,7 @@ public class TrackerData
 			comparisons.Add(new ScoreSet(file, section));
 		}
 
-		if (file.ContainsKey("IL Syncing") && file["IL Syncing"] == "on")
+		/*if (file.ContainsKey("IL Syncing") && file["IL Syncing"] == "on")
 		{
 			bool updateComparisons = false;
 			foreach (string filename in ScoreTracker.files)
@@ -35,7 +35,6 @@ public class TrackerData
 				FileReader syncFile = new FileReader(filename, SortingStyle.Unsort);
 				if (file["game"] != syncFile["game"] || syncFile["IL Syncing"] != "on") 
 					continue;
-Console.WriteLine("Reached");
 				bool doAdd = false;
 				foreach (ScoreEntry score in best)
 				{
@@ -61,7 +60,7 @@ Console.WriteLine("Reached");
 			{
 				best.SaveComparisons();
 			}
-		}
+		}*/
 
 		file.Save();
 	}

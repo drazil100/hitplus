@@ -12,7 +12,7 @@ using System.Globalization;
 
 public class ScoreTracker : Form
 {
-	public static string version = "3/24/2019";
+	public static string version = "5/3/2019";
 
 	[DllImport("kernel32.dll")]
 	static extern IntPtr GetConsoleWindow();
@@ -277,6 +277,21 @@ public class ScoreTracker : Form
 						config.RemoveKey("Files", key);
 						continue;
 					}
+					try
+					{
+						FileReader tmp = new FileReader(config["Files", key]);
+
+						if (!tmp.ContainsSection("Best Run"))
+						{
+							config.RemoveKey("Files", key);
+							continue;
+						}
+					}
+					catch (Exception)
+					{
+						config.RemoveKey("Files", key);
+						continue;
+					}
 					files.Add(config["Files", key]);
 					config.RemoveKey("Files", key);
 				}
@@ -290,6 +305,8 @@ public class ScoreTracker : Form
 			{
 				config["Files", "File_0000"] = "pb_easy.ini";
 				config["Files", "File_0001"] = "pb_hard.ini";
+				files.Add("pb_easy.ini");
+				files.Add("pb_hard.ini");
 			}
 
 			colors.Save();
@@ -307,7 +324,6 @@ public class ScoreTracker : Form
 				pbEasy.AddNewItem("Best Run", "Area 6",   "0");
 				pbEasy.AddNewItem("Best Run", "Venom 2",    "0");
 				pbEasy.Save();
-				files.Add("pb_easy.ini");
 			}
 			if (!pbEasy.ContainsKey("game")) 
 			{
@@ -329,7 +345,6 @@ public class ScoreTracker : Form
 				pbHard.AddNewItem("Best Run", "Area 6",   "0");
 				pbHard.AddNewItem("Best Run", "Venom 2",    "0");
 				pbHard.Save();
-				files.Add("pb_hard.ini");
 			}
 			if (!pbHard.ContainsKey("game")) 
 			{
@@ -340,9 +355,6 @@ public class ScoreTracker : Form
 
 			TrackerData.ValidateFile(pbHard);
 			
-			Console.WriteLine(pbEasy.ContainsSection("Best Run"));
-
-				
 
 			individualLevels = new FileReader(':', "pb_individuals.txt", SortingStyle.Unsort);
 
