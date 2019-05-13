@@ -12,7 +12,7 @@ using System.Globalization;
 
 public class ScoreTracker : Form
 {
-	public static string version = "5/3/2019";
+	public static string version = "5/12/2019";
 
 	[DllImport("kernel32.dll")]
 	static extern IntPtr GetConsoleWindow();

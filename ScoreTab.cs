@@ -182,8 +182,14 @@ public class ScoreTab : Panel
 		if (name == "Best Run" || name == "Top Scores" || name == "Sum of Best" || name == "General" || name == "File Sync")
 			return;
 
+		file.AddNewItem(name, "Scoreset Type", "Comparison");
 		foreach (string key in file.GetSection("Best Run").Keys)
 		{
+			if (key == "Scoreset Type")
+			{
+				continue;
+			}
+
 			file.AddNewItem(name, key, "0");
 		}
 		selector.Reload();
@@ -243,6 +249,8 @@ public class AskName : Form
 		Height = GetCaptionSize() + text.Height + submit.Height;
 		MaximumSize = new Size(Width, Height);
 		MinimumSize = new Size(Width, Height);
+
+		AcceptButton = submit;
 
 		submit.Click += delegate { Close(); };
 	}
