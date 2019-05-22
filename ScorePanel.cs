@@ -233,6 +233,9 @@ public class ScorePanel : Panel
 			case "Macbeth":
 			n = "MA";
 			break;
+			case "Sector Z":
+			n = "SZ";
+			break;
 			case "Area 6":
 			n = "A6";
 			break;
