@@ -20,6 +20,6 @@ The tracker will always be backwards compatible with previous config and score t
 # Running on Linux
 This program is written in C# which is a Microsoft programming language and doesn't really port super well to other operating systems. This program is however tested and compatible with mono for linux. The package you need on Debian / Ubuntu based systems is mono-complete and the command to run the program assuming you cant just opening from your file browsing program is mono SF64ScoreTracker.exe
 
-[License](LICENSE)
+[License](LICENSE.md)
 
 
