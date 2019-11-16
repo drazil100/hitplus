@@ -27,6 +27,8 @@ public class OptionsWindow : Form
 
 	private TabPage colorTab = new TabPage();
 	private List<ColorField> colors = new List<ColorField>();
+	
+	private TabPage aboutTab = new TabPage();
 
 	private static int tabIndex = 0;
 
@@ -57,6 +59,9 @@ public class OptionsWindow : Form
 		colorTab.Text = "Colors";
 		tabs.TabPages.Add (colorTab);
 
+		aboutTab.Text = "About";
+		tabs.TabPages.Add (aboutTab);
+
 		save.Text = "Save All Changes";
 		save.Dock = DockStyle.Left;
 		save.Click += new EventHandler(Save);
@@ -75,6 +80,7 @@ public class OptionsWindow : Form
 		ConfigureScoreTab ();
 		ConfigureGeneralTab ();
 		ConfigColors();
+		ConfigAboutTab();
 
 		tabs.SelectedIndex = tabIndex;
 
@@ -253,6 +259,20 @@ public class OptionsWindow : Form
 		}
 
 		DoColorLayout();
+	}
+
+	private void ConfigAboutTab()
+	{
+		TextBox about = new TextBox();
+		about.ReadOnly = true;
+		about.Multiline = true;
+		about.WordWrap = true;
+		about.ScrollBars = ScrollBars.Vertical;
+		about.Dock = DockStyle.Fill;
+		about.SuspendLayout();
+		about.Text = "Star Fox 64 Score Tracker\nVersion: " + ScoreTracker.version + "\n\nLicense:\n" + ScoreTracker.license;
+		about.ResumeLayout();
+		aboutTab.Controls.Add(about);
 	}
 
 	public string OptionNameToLabelName(string name)

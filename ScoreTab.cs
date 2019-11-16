@@ -179,7 +179,7 @@ public class ScoreTab : Panel
 		AskName popup = new AskName();
 		popup.ShowDialog();
 		string name = popup.Name;
-		if (name == "Best Run" || name == "Top Scores" || name == "Sum of Best" || name == "General" || name == "File Sync")
+		if (name == "Best Run" || name == "Top Scores" || name == "Sum of Best" || name == "General" || name == "File Sync" || name == "" || popup.WasCanceled)
 			return;
 
 		file.AddNewItem(name, "Scoreset Type", "Comparison");
@@ -233,8 +233,18 @@ public class AskName : Form
 			return text.Text;
 		}
 	}
+
+	public bool WasCanceled
+	{
+		get
+		{
+			return wasCanceled;
+		}
+	}
+
 	private Button submit = new Button();
 	private NameTextBox text = new NameTextBox();
+	private bool wasCanceled = true;
 
 	public AskName()
 	{
@@ -252,7 +262,7 @@ public class AskName : Form
 
 		AcceptButton = submit;
 
-		submit.Click += delegate { Close(); };
+		submit.Click += delegate { wasCanceled = false; Close(); };
 	}
 	private int GetCaptionSize()
 	{
