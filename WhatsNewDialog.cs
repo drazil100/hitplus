@@ -23,7 +23,7 @@ public class WhatsNewDialog : Form
 		this.whatsNew = whatsNew;
 
 		download.Click += delegate { 
-			var result = MessageBox.Show("The download link to the new version will be opened in your browser and the score tracker will close itself. \nTo install the new score tracker simply replace the old score tracker with the new one. \n\nYour old configuration and score files will be compatible with the new tracker.", "How to install", MessageBoxButtons.OK); 
+			MessageBox.Show("The download link to the new version will be opened in your browser and the score tracker will close itself. \nTo install the new score tracker simply replace the old score tracker with the new one. \n\nYour old configuration and score files will be compatible with the new tracker.", "How to install", MessageBoxButtons.OK); 
 			Process.Start("https://drazil100.bitbucket.io/SF64ScoreTracker.exe"); 
 			close = true;
 			this.Close();

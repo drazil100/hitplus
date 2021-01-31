@@ -12,9 +12,9 @@ using System.Globalization;
 
 public class ScoreTracker : Form
 {
-	public static string version = "11/16/2019";
+	public static string version = "1/30/2021";
 
-	public static string license = @"Copyright (c) 2017-2019 Austin Allman
+	public static string license = @"Copyright (c) 2017-2021 Austin Allman
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ""Software""), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -87,6 +87,7 @@ THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 	public static void Main(string[] args)
 	{
 		Console.WriteLine("Running in: " + Directory.GetCurrentDirectory());
+		Directory.SetCurrentDirectory(Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location));
 		try
 		{
 			var handle = GetConsoleWindow();
