@@ -3,7 +3,7 @@ ifeq ($(OS),Windows_NT)
 	REFERENCES =
 else
 	CSC = mcs
-	REFERENCES = -r:System.Windows.Forms,System.Drawing,System.Core
+	REFERENCES = -sdk:4.5 -r:System.Windows.Forms,System.Drawing,System.Core
 endif
 
 all: SF64ScoreTracker.exe
