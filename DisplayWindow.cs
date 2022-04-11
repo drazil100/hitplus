@@ -430,13 +430,13 @@ public class DisplayWindowContent : Panel
 		foreach (ScorePanel panel in panels)
 		{
 			panel.Height = GetHeight();
-			panel.Width = levels.Width / 7;
+			panel.Width = levels.Width / ScoreTracker.Data.Count;
 			panel.UpdatePanel();
 		}
 
 		for (int i = 1; i < panels.Count; i++)
 		{
-			panels[i].Left = panels[i-1].Left + levels.Width / 7;
+			panels[i].Left = panels[i-1].Left + levels.Width / ScoreTracker.Data.Count;
 		}
 	}
 
@@ -481,7 +481,7 @@ public class DisplayWindowContent : Panel
 	{
 		foreach (ScorePanel panel in panels)
 		{
-			panel.Height = levels.Height / 7;
+			panel.Height = levels.Height / ScoreTracker.Data.Count;
 			panel.Width = GetWidth();
 			panel.UpdatePanel();
 		}
