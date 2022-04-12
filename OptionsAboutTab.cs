@@ -15,6 +15,7 @@ public class OptionsAboutTab : OptionsTab
 		about.ReadOnly = true;
 		about.Multiline = true;
 		about.WordWrap = true;
+		about.BackColor = Color.White;
 		about.ScrollBars = ScrollBars.Vertical;
 		about.Dock = DockStyle.Fill;
 		about.SuspendLayout();

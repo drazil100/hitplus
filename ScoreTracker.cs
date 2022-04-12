@@ -12,7 +12,7 @@ using System.Globalization;
 
 public class ScoreTracker : Form
 {
-	public static string version = "1/30/2021";
+	public static string version = "4/12/2022";
 
 	public static string license = @"Copyright (c) 2017-2022 Austin Allman
 

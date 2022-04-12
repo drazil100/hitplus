@@ -41,15 +41,6 @@ public class OptionsGeneralTab : OptionsTab
 		generalOptions.Add(new NumericField("Font Size:", config["font_size"]));
 		//generalOptions.Add(new DropdownField("Vertical Scaling Mode:", config["vertical_scale_mode"], "Space", "Split"));
 
-		for (int i = 0; i < generalOptions.Count; i++)
-		{
-			if (i > 0)
-			{
-				generalOptions[i].Top = generalOptions[i-1].Top + generalOptions[i-1].Height;
-			}
-			generalOptions[i].Width = ClientRectangle.Width;
-			Controls.Add(generalOptions[i]);
-		}
 	}
 
 	public override void Save()
@@ -68,5 +59,14 @@ public class OptionsGeneralTab : OptionsTab
 
 	public override void DoLayout()
 	{
+		for (int i = 0; i < generalOptions.Count; i++)
+		{
+			if (i > 0)
+			{
+				generalOptions[i].Top = generalOptions[i-1].Top + generalOptions[i-1].Height;
+			}
+			generalOptions[i].Width = ClientRectangle.Width;
+			Controls.Add(generalOptions[i]);
+		}
 	}
 }

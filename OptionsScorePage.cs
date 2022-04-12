@@ -58,10 +58,10 @@ public class OptionsScorePage : Panel
 
 	public void DoLayout()
 	{
+		Dock = DockStyle.Fill;
 		int scrollPadding = 0;
 		if (VerticalScroll.Visible) scrollPadding = SystemInformation.VerticalScrollBarWidth + 2;
 
-		Dock = DockStyle.Fill;
 		int tot = 0;
 		foreach (NumericField score in scores)
 		{

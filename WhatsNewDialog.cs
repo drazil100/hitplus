@@ -46,6 +46,7 @@ public class WhatsNewDialog : Form
 		text.ReadOnly = true;
 		text.Multiline = true;
 		text.WordWrap = true;
+		text.BackColor = Color.White;
 		text.ScrollBars = ScrollBars.Vertical;
 		text.Dock = DockStyle.Fill;
 		text.SuspendLayout();
