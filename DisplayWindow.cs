@@ -127,6 +127,11 @@ public class DisplayWindow : Form
 		dispContent.UpdateScores();
 	}
 
+	public void SetControls()
+	{
+		dispContent.SetControls();
+	}
+
 	public void ResetContent()
 	{
 		BackColor = ScoreTracker.colors["background_color"];
@@ -307,6 +312,8 @@ public class DisplayWindowContent : Panel
 	public void UpdateScores()
 	{
 		ScoreSet set = ScoreTracker.Data.GetScoreSet();
+		if (set.Count != panels.Count)
+			SetControls();
 		for (int i = 0; i < panels.Count; i++)
 		{
 			panels[i].entry = set[i];

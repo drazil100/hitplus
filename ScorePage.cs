@@ -23,6 +23,7 @@ public class ScorePage : Panel
 		Text = section;
 		totalName.Text = "Total:";
 		Dock = DockStyle.Fill;
+		AutoScroll = true;
 
 		totalPanel.Height = 25;
 		Controls.Add(totalPanel);
@@ -57,16 +58,19 @@ public class ScorePage : Panel
 
 	public void DoLayout()
 	{
+		int scrollPadding = 0;
+		if (VerticalScroll.Visible) scrollPadding = SystemInformation.VerticalScrollBarWidth + 2;
+
 		Dock = DockStyle.Fill;
 		int tot = 0;
 		foreach (NumericField score in scores)
 		{
-			score.Width = ClientRectangle.Width;
+			score.Width = ClientRectangle.Width - scrollPadding;
 			tot += Int32.Parse(score.Number);
 			//s.DoLayout ();
 		}
 		totalPanel.Top = scores[scores.Count - 1].Top + scores[scores.Count -1].Height + 10;
-		totalPanel.Width = ClientRectangle.Width - 4;
+		totalPanel.Width = ClientRectangle.Width - 4 - scrollPadding;
 
 		total.Text = "" + tot;
 		total.TextAlign = ContentAlignment.TopRight;

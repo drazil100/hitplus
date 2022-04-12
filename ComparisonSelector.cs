@@ -120,7 +120,9 @@ public class ComparisonSelector : Panel
 		set 
 		{ 
 			if (value >= 0 && value < Count)
-				options.SelectedIndex = value; 
+			{
+				options.SelectedIndex = value;
+			}
 		}
 	}
 
