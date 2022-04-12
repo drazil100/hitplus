@@ -20,7 +20,7 @@ public class OptionsWindow : Form
 	private Button save = new Button();
 	private Button saveClose = new Button();
 
-	private OptionsTab scoreTab = new ScoreTab();
+	private OptionsTab scoreTab = new OptionsScoreTab();
 	private OptionsTab generalTab = new OptionsGeneralTab ();
 	private OptionsTab colorTab = new OptionsColorsTab();
 	private OptionsTab aboutTab = new OptionsAboutTab();

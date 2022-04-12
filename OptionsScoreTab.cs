@@ -6,17 +6,17 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Runtime.InteropServices;
 
-public class ScoreTab : OptionsTab
+public class OptionsScoreTab : OptionsTab
 {
-	private ScoreTabContent content;
-	public ScoreTab()
+	private OptionsScoreTabContent content;
+	public OptionsScoreTab()
 	{
 		Text = "Scores";
 	}
 	public override void Configure(FileReader file)
 	{
 		Controls.Clear ();
-		content = new ScoreTabContent(file);
+		content = new OptionsScoreTabContent(file);
 		DoScoreLayout(content);
 		Controls.Add(content);
 	}
@@ -33,12 +33,12 @@ public class ScoreTab : OptionsTab
 	}
 }
 
-public class ScoreTabContent : Panel
+public class OptionsScoreTabContent : Panel
 {
 	private FileReader file;
 
 	private TabControl tabs = new TabControl();
-	private Dictionary<string, ScorePage> pages = new Dictionary<string, ScorePage>();
+	private Dictionary<string, OptionsScorePage> pages = new Dictionary<string, OptionsScorePage>();
 	private TabPage comparisons = new TabPage();
 	private ComparisonSelector selector;
 	private Panel currentComparison = new Panel();
@@ -48,7 +48,7 @@ public class ScoreTabContent : Panel
 	private static int tabIndex = 0;
 	private static int selectorIndex = 0;
 
-	public ScoreTabContent(FileReader file)
+	public OptionsScoreTabContent(FileReader file)
 	{
 		
 		this.file = file;
@@ -115,7 +115,7 @@ public class ScoreTabContent : Panel
 
 	public void Save()
 	{
-		foreach (KeyValuePair<string, ScorePage> pair in pages)
+		foreach (KeyValuePair<string, OptionsScorePage> pair in pages)
 		{
 			pair.Value.SaveScores();
 		}
@@ -125,7 +125,7 @@ public class ScoreTabContent : Panel
 	public void DoLayout()
 	{
 		tabs.Dock = DockStyle.Fill;
-		foreach (KeyValuePair<string, ScorePage> pair in pages)
+		foreach (KeyValuePair<string, OptionsScorePage> pair in pages)
 		{
 			pair.Value.DoLayout();
 		}
@@ -133,7 +133,7 @@ public class ScoreTabContent : Panel
 		removeComparison.Width = addComparison.Width;
 	}
 
-	private TabPage ToTabPage(ScorePage page)
+	private TabPage ToTabPage(OptionsScorePage page)
 	{
 		TabPage toReturn = new TabPage();
 		toReturn.Text = page.Text;
@@ -164,9 +164,9 @@ public class ScoreTabContent : Panel
 		CacheComparisonIndex();
 	}
 
-	private ScorePage ConfigureTab (string section)
+	private OptionsScorePage ConfigureTab (string section)
 	{
-		ScorePage page = new ScorePage(file, section);
+		OptionsScorePage page = new OptionsScorePage(file, section);
 		foreach (KeyValuePair<string, string> score in file.GetSection(section))
 		{
 			if (score.Key == "Scoreset Type" || score.Key == "Show In Comparisons" || score.Key == "Total Score")

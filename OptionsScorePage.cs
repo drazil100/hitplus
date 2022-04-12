@@ -6,7 +6,7 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Runtime.InteropServices;
 
-public class ScorePage : Panel
+public class OptionsScorePage : Panel
 {
 	private FileReader file;
 	private string section;
@@ -16,7 +16,7 @@ public class ScorePage : Panel
 	private Label total = new Label();
 	private Panel totalPanel = new Panel();
 
-	public ScorePage(FileReader file, string section)
+	public OptionsScorePage(FileReader file, string section)
 	{
 		this.file = file;
 		this.section = section;
