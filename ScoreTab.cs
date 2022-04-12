@@ -6,7 +6,34 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Runtime.InteropServices;
 
-public class ScoreTab : Panel
+public class ScoreTab : OptionsTab
+{
+	private ScoreTabContent content;
+	public ScoreTab()
+	{
+		Text = "Scores";
+	}
+	public override void Configure(FileReader file)
+	{
+		Controls.Clear ();
+		content = new ScoreTabContent(file);
+		DoScoreLayout(content);
+		Controls.Add(content);
+	}
+	private void DoScoreLayout(Control c)
+	{
+		c.Width = ClientRectangle.Width;
+		c.Height = ClientRectangle.Height;
+
+	}
+
+	public override void Save()
+	{
+		content.Save();
+	}
+}
+
+public class ScoreTabContent : Panel
 {
 	private FileReader file;
 
@@ -21,8 +48,9 @@ public class ScoreTab : Panel
 	private static int tabIndex = 0;
 	private static int selectorIndex = 0;
 
-	public ScoreTab(FileReader file)
+	public ScoreTabContent(FileReader file)
 	{
+		
 		this.file = file;
 		TrackerData.ValidateFile(file);
 
@@ -78,7 +106,6 @@ public class ScoreTab : Panel
 	public void CacheTabIndex()
 	{
 		tabIndex = tabs.SelectedIndex;
-
 	}
 
 	public void CacheComparisonIndex()
