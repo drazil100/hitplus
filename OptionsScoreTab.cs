@@ -206,7 +206,7 @@ public class OptionsScoreTabContent : Panel
 		AskName popup = new AskName();
 		popup.ShowDialog();
 		string name = popup.Name;
-		if (name == "Best Run" || name == "Top Scores" || name == "Sum of Best" || name == "General" || name == "File Sync" || name == "" || popup.WasCanceled)
+		if (name == "Aliases" || name == "Best Run" || name == "Top Scores" || name == "Sum of Best" || name == "General" || name == "File Sync" || name == "" || popup.WasCanceled)
 			return;
 
 		file.AddNewItem(name, "Scoreset Type", "Comparison");
@@ -239,19 +239,6 @@ public class OptionsScoreTabContent : Panel
 
 public class AskName : Form
 {
-	private class NameTextBox : TextBox
-	{
-		protected override void OnKeyPress(KeyPressEventArgs e)
-		{
-			base.OnKeyPress(e);
-			// Check if the pressed character was a backspace or numeric.
-			e.Handled = !(
-					e.KeyChar == (char)8 ||
-					Char.IsWhiteSpace(e.KeyChar) ||
-					Char.IsLetterOrDigit(e.KeyChar)
-				     );
-		}
-	}
 
 	public new string Name 
 	{ 

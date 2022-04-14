@@ -101,8 +101,8 @@ public class InputWindow : Form
 		
 		try
 		{
-			x = Int32.Parse(ScoreTracker.config["input_x"]);
-			y = Int32.Parse(ScoreTracker.config["input_y"]);
+			x = Int32.Parse(ScoreTracker.config["System", "input_x"]);
+			y = Int32.Parse(ScoreTracker.config["System", "input_y"]);
 		}
 		catch(Exception)
 		{
@@ -142,25 +142,17 @@ public class InputWindow : Form
 					string checkVersion = ScoreTracker.version;
 					if (ScoreTracker.config.ContainsKey("skip_version") && ScoreTracker.config["skip_version"] != ScoreTracker.version)
 					{
-						try
+						int skipVersion = ScoreTracker.DateToNumber(ScoreTracker.config["skip_version"]);
+						if (skipVersion != -1)
 						{
-							string[] versionParts = ScoreTracker.config["skip_version"].Split('/');
-							if (versionParts.Length != 3) throw new System.Exception();
-							int m = Int32.Parse(versionParts[0]);
-							int d = Int32.Parse(versionParts[1]);
-							int y = Int32.Parse(versionParts[2]);
-
-							if (m < 1 || m > 12) throw new System.Exception();
-							if (d < 1 || d > 31) throw new System.Exception();
-							if (y < 1) throw new System.Exception();
 							
-							if (ScoreTracker.DateToNumber(ScoreTracker.config["skip_version"]) > ScoreTracker.DateToNumber(ScoreTracker.version))
+							if (skipVersion > ScoreTracker.DateToNumber(ScoreTracker.version))
 							{
 								checkVersion = ScoreTracker.config["skip_version"];
 								Console.WriteLine("Skip Version:" + checkVersion);
 							}
 						}
-						catch (Exception)
+						else
 						{
 							ScoreTracker.config.RemoveKey("skip_version");
 						}
@@ -491,14 +483,14 @@ public class InputWindow : Form
 				(this.WindowState == FormWindowState.Maximized))
 		{
 			// Use the restored state values
-			ScoreTracker.config["input_x"] = "" + this.RestoreBounds.Left;
-			ScoreTracker.config["input_y"] = "" + this.RestoreBounds.Top;
+			ScoreTracker.config["System", "input_x"] = "" + this.RestoreBounds.Left;
+			ScoreTracker.config["System", "input_y"] = "" + this.RestoreBounds.Top;
 		}
 		else
 		{
 			// Use the normal state values
-			ScoreTracker.config["input_x"] = "" + this.Left;
-			ScoreTracker.config["input_y"] = "" + this.Top;
+			ScoreTracker.config["System", "input_x"] = "" + this.Left;
+			ScoreTracker.config["System", "input_y"] = "" + this.Top;
 		}
 		if (display != null)
 		{
@@ -506,33 +498,33 @@ public class InputWindow : Form
 					(display.WindowState == FormWindowState.Maximized))
 			{
 				// Use the restored state values
-				ScoreTracker.config["tracker_x"] = "" + display.RestoreBounds.Left;
-				ScoreTracker.config["tracker_y"] = "" + display.RestoreBounds.Top;
+				ScoreTracker.config["System", "tracker_x"] = "" + display.RestoreBounds.Left;
+				ScoreTracker.config["System", "tracker_y"] = "" + display.RestoreBounds.Top;
 				if (ScoreTracker.config ["layout"] == "0")
 				{
-					ScoreTracker.config ["horizontal_width"] = "" + display.RestoreBounds.Width;
-					ScoreTracker.config ["horizontal_height"] = "" + display.RestoreBounds.Height;
+					ScoreTracker.config ["System", "horizontal_width"] = "" + display.RestoreBounds.Width;
+					ScoreTracker.config ["System", "horizontal_height"] = "" + display.RestoreBounds.Height;
 				}
 				else
 				{
-					ScoreTracker.config ["vertical_width"] = "" + display.RestoreBounds.Width;
-					ScoreTracker.config ["vertical_height"] = "" + display.RestoreBounds.Height;			
+					ScoreTracker.config ["System", "vertical_width"] = "" + display.RestoreBounds.Width;
+					ScoreTracker.config ["System", "vertical_height"] = "" + display.RestoreBounds.Height;			
 				}
 			}
 			else
 			{
 				// Use the restored state values
-				ScoreTracker.config["tracker_x"] = "" + display.Left;
-				ScoreTracker.config["tracker_y"] = "" + display.Top;
+				ScoreTracker.config["System", "tracker_x"] = "" + display.Left;
+				ScoreTracker.config["System", "tracker_y"] = "" + display.Top;
 				if (ScoreTracker.config ["layout"] == "0")
 				{
-					ScoreTracker.config ["horizontal_width"] = "" + display.Width;
-					ScoreTracker.config ["horizontal_height"] = "" + display.Height;
+					ScoreTracker.config ["System", "horizontal_width"] = "" + display.Width;
+					ScoreTracker.config ["System", "horizontal_height"] = "" + display.Height;
 				}
 				else
 				{
-					ScoreTracker.config ["vertical_width"] = "" + display.Width;
-					ScoreTracker.config ["vertical_height"] = "" + display.Height;			
+					ScoreTracker.config ["System", "vertical_width"] = "" + display.Width;
+					ScoreTracker.config ["System", "vertical_height"] = "" + display.Height;			
 				}
 			}
 		}

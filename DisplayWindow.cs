@@ -44,8 +44,8 @@ public class DisplayWindow : Form
 		
 		try
 		{
-			x = Int32.Parse(ScoreTracker.config["tracker_x"]);
-			y = Int32.Parse(ScoreTracker.config["tracker_y"]);
+			x = Int32.Parse(ScoreTracker.config["System", "tracker_x"]);
+			y = Int32.Parse(ScoreTracker.config["System", "tracker_y"]);
 		}
 		catch(Exception)
 		{
@@ -76,8 +76,8 @@ public class DisplayWindow : Form
 			h = 99;
 			try
 			{
-				w2 = Int32.Parse (ScoreTracker.config ["horizontal_width"]);
-				h2 = Int32.Parse (ScoreTracker.config ["horizontal_height"]);
+				w2 = Int32.Parse (ScoreTracker.config["System", "horizontal_width"]);
+				h2 = Int32.Parse (ScoreTracker.config["System", "horizontal_height"]);
 			}
 			catch (Exception)
 			{
@@ -92,8 +92,8 @@ public class DisplayWindow : Form
 			h = 339;
 			try
 			{
-			w2 = Int32.Parse (ScoreTracker.config ["vertical_width"]);
-			h2 = Int32.Parse (ScoreTracker.config ["vertical_height"]);
+				w2 = Int32.Parse (ScoreTracker.config["System", "vertical_width"]);
+				h2 = Int32.Parse (ScoreTracker.config["System", "vertical_height"]);
 			}
 			catch (Exception)
 			{

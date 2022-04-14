@@ -73,6 +73,11 @@ public class TrackerData
 		file.AddNewItem("game", "");
 		//file.AddNewItem("IL Syncing", "off");
 		file.AddNewItem("comparison_index", "0");
+
+		foreach (string key in file.GetSection("Aliases").Keys)
+		{
+			file.AddNewItem("Aliases", key, "0");
+		}
 		
 		file.AddNewItem("Best Run", "Scoreset Type", "Record");
 		Validate(file, "Best Run");
@@ -83,6 +88,7 @@ public class TrackerData
 		foreach (string section in file.Sections)
 		{
 			if (section == "General" || 
+			    section == "Aliases" ||
 			    section == "Sum of Best" || 
 			    section == "Best Run" || 
 			    section == "Top Scores")
@@ -93,7 +99,7 @@ public class TrackerData
 		int i = 2;
 		foreach (string section in file.Sections)
 		{
-			if (section == "Sum of Best" || !file.ContainsKey(section, "Scoreset Type") || file[section, "Scoreset Type"] != "Comparison")
+			if (section == "Sum of Best" || section == "Aliases" || !file.ContainsKey(section, "Scoreset Type") || file[section, "Scoreset Type"] != "Comparison")
 				continue;
 
 			Validate(file, section);

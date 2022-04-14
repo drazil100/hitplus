@@ -76,8 +76,26 @@ THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 
 	public static int DateToNumber(string dt) {
 		string[] parts = dt.Split('/');
+		try
+		{
+			if (parts.Length != 3) throw new System.Exception();
+			int m = Int32.Parse(parts[0]);
+			int d = Int32.Parse(parts[1]);
+			int y = Int32.Parse(parts[2]);
+
+			if (m < 1 || m > 12) throw new System.Exception();
+			if (d < 1 || d > 31) throw new System.Exception();
+			if (y < 1) throw new System.Exception();
+
+		}
+		catch (Exception)
+		{
+			return -1;
+		}
 		return Int32.Parse(parts[2]) * 10000 + Int32.Parse(parts[0]) * 100 + Int32.Parse(parts[1]);
 	}
+
+
 
 
 
@@ -170,11 +188,6 @@ THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 			config.AddNewItem("font_size",                             "18");
 			config.AddNewItem("highlight_current",                     "0");
 			config.AddNewItem("start_highlighted",                     "1");
-			config.AddNewItem("horizontal_width",                      "1296");
-			config.AddNewItem("horizontal_height",                     "99");
-			config.AddNewItem("vertical_width",                        "316");
-			config.AddNewItem("vertical_height",                       "309");
-			config["version"] = version;
 
 			if (config.ContainsKey("debug") && config["debug"] == "1")
 			{
@@ -227,54 +240,9 @@ THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 			colors.AddNewItem("text_color_behind",                     "#CC1200");
 			colors.AddNewItem("text_color_best",                       "#D8AF1F");
 
-			if (config.ContainsKey("text_color"))
-			{
-				string c = config["text_color"];
-				config.RemoveKey("text_color");
-				colors["text_color"] = ColorTranslator.FromHtml(c);
-			}
-			if (config.ContainsKey("text_color_total"))
-			{
-				string c = config["text_color_total"];
-				config.RemoveKey("text_color_total");
-				colors["text_color_total"] = ColorTranslator.FromHtml(c);
-			}
-			if (config.ContainsKey("text_color_highlighted"))
-			{
-				string c = config["text_color_highlighted"];
-				config.RemoveKey("text_color_highlighted");
-				colors["text_color_highlighted"] = ColorTranslator.FromHtml(c);
-			}
-			if (config.ContainsKey("background_color"))
-			{
-				string c = config["background_color"];
-				config.RemoveKey("background_color");
-				colors["background_color"] = ColorTranslator.FromHtml(c);
-			}
-			if (config.ContainsKey("background_color_highlighted"))
-			{
-				string c = config["background_color_highlighted"];
-				config.RemoveKey("background_color_highlighted");
-				colors["background_color_highlighted"] = ColorTranslator.FromHtml(c);
-			}
-			if (config.ContainsKey("text_color_ahead"))
-			{
-				string c = config["text_color_ahead"];
-				config.RemoveKey("text_color_ahead");
-				colors["text_color_ahead"] = ColorTranslator.FromHtml(c);
-			}
-			if (config.ContainsKey("text_color_behind"))
-			{
-				string c = config["text_color_behind"];
-				config.RemoveKey("text_color_behind");
-				colors["text_color_behind"] = ColorTranslator.FromHtml(c);
-			}
-			if (config.ContainsKey("text_color_best"))
-			{
-				string c = config["text_color_best"];
-				config.RemoveKey("text_color_best");
-				colors["text_color_best"] = ColorTranslator.FromHtml(c);
-			}
+			colors.Save();
+
+
 
 			files = new List<string>();
 			if (config.ContainsSection("Files"))
@@ -318,11 +286,76 @@ THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 				files.Add("pb_hard.ini");
 			}
 
-			colors.Save();
+			config.AddNewItem("System", "horizontal_width",                      "1296");
+			config.AddNewItem("System", "horizontal_height",                     "99");
+			config.AddNewItem("System", "vertical_width",                        "316");
+			config.AddNewItem("System", "vertical_height",                       "309");
+
+			if (config.ContainsKey("horizontal_width"))
+			{
+				string t = config["horizontal_width"];
+				config.RemoveKey("horizontal_width");
+				config["System", "horizontal_width"] = t;
+			}
+			if (config.ContainsKey("horizontal_height"))
+			{
+				string t = config["horizontal_height"];
+				config.RemoveKey("horizontal_height");
+				config["System", "horizontal_height"] = t;
+			}
+			if (config.ContainsKey("vertical_width"))
+			{
+				string t = config["vertical_width"];
+				config.RemoveKey("vertical_width");
+				config["System", "vertical_width"] = t;
+			}
+			if (config.ContainsKey("vertical_height"))
+			{
+				string t = config["vertical_height"];
+				config.RemoveKey("vertical_height");
+				config["System", "vertical_height"] = t;
+			}
+			if (config.ContainsKey("input_x"))
+			{
+				string t = config["input_x"];
+				config.RemoveKey("input_x");
+				config["System", "input_x"] = t;
+			}
+			if (config.ContainsKey("input_y"))
+			{
+				string t = config["input_y"];
+				config.RemoveKey("input_y");
+				config["System", "input_y"] = t;
+			}
+			if (config.ContainsKey("tracker_x"))
+			{
+				string t = config["tracker_x"];
+				config.RemoveKey("tracker_x");
+				config["System", "tracker_x"] = t;
+			}
+			if (config.ContainsKey("tracker_y"))
+			{
+				string t = config["tracker_y"];
+				config.RemoveKey("tracker_y");
+				config["System", "tracker_y"] = t;
+			}
+
 			config.Save();
+
+			int configVersion = DateToNumber(config["version"]);
 
 
 			FileReader pbEasy = new FileReader("pb_easy.ini", SortingStyle.Validate);
+			if (configVersion <= 20210130)
+			{
+				pbEasy.AddNewItem("Aliases", "Corneria", "CO");
+				pbEasy.AddNewItem("Aliases", "Meteo", "ME");
+				pbEasy.AddNewItem("Aliases", "Katina", "KA");
+				pbEasy.AddNewItem("Aliases", "Sector X", "SX");
+				pbEasy.AddNewItem("Aliases", "Macbeth", "Ma");
+				pbEasy.AddNewItem("Aliases", "Area 6", "A6");
+				pbEasy.AddNewItem("Aliases", "Venom 2", "VE");
+			}
 			if (!File.Exists("pb_easy.ini"))
 			{
 				pbEasy.AddNewItem("Best Run", "Corneria", "0");
@@ -344,6 +377,16 @@ THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 			TrackerData.ValidateFile(pbEasy);
 
 			FileReader pbHard = new FileReader("pb_hard.ini", SortingStyle.Validate);
+			if (configVersion <= 20210130)
+			{
+				pbHard.AddNewItem("Aliases", "Corneria", "CO");
+				pbHard.AddNewItem("Aliases", "Sector Y", "SY");
+				pbHard.AddNewItem("Aliases", "Aquas", "AQ");
+				pbHard.AddNewItem("Aliases", "Zoness", "ZO");
+				pbHard.AddNewItem("Aliases", "Macbeth", "Ma");
+				pbHard.AddNewItem("Aliases", "Area 6", "A6");
+				pbHard.AddNewItem("Aliases", "Venom 2", "VE");
+			}
 			if (!File.Exists("pb_hard.ini"))
 			{
 				pbHard.AddNewItem("Best Run", "Corneria", "0");
@@ -385,6 +428,9 @@ THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 		}
     */
 
+
+		config["version"] = version;
+		config.Save();
 		try
 		{
 			Application.Run(new InputWindow());

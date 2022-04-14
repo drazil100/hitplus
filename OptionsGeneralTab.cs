@@ -39,6 +39,7 @@ public class OptionsGeneralTab : OptionsTab
 
 		generalOptions.Add(new DropdownField("Font:", "" + ind, fonts.ToArray()));
 		generalOptions.Add(new NumericField("Font Size:", config["font_size"]));
+		generalOptions.Add(new TextField("Foo:", "Bar"));
 		//generalOptions.Add(new DropdownField("Vertical Scaling Mode:", config["vertical_scale_mode"], "Space", "Split"));
 
 	}

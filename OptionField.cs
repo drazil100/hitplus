@@ -9,10 +9,23 @@ using System.Runtime.InteropServices;
 
 public class OptionField : Panel
 {
-	public string SettingName { get; set; }
 	public virtual string GetOption()
 	{
 		return "";
+	}
+}
+
+public class NameTextBox : TextBox
+{
+	protected override void OnKeyPress(KeyPressEventArgs e)
+	{
+		base.OnKeyPress(e);
+		// Check if the pressed character was a backspace or numeric.
+		e.Handled = !(
+				e.KeyChar == (char)8 ||
+				Char.IsWhiteSpace(e.KeyChar) ||
+				Char.IsLetterOrDigit(e.KeyChar)
+			     );
 	}
 }
 
@@ -188,5 +201,44 @@ public class CheckField : OptionField
 	public override string ToString()
 	{
 		return (option.Checked) ? "1" : "0";
+	}
+}
+
+public class TextField : OptionField
+{
+	public Label name = new Label();
+	public NameTextBox text = new NameTextBox();
+
+	public new string Name
+	{
+		get { return name.Text; }
+	}
+
+	public TextField(string name, string text)
+	{
+		this.name.Text = name;
+		this.text.Text = text;
+
+		Controls.Add(this.name);
+		Controls.Add(this.text);
+
+		Height = 20;
+
+		Layout += new LayoutEventHandler((object sender, LayoutEventArgs e) => DoLayout());
+
+		DoLayout();
+	}
+
+	public void DoLayout()
+	{
+		text.Height = 20;
+		text.Width = 120;
+		text.Dock = DockStyle.Right;
+		name.Dock = DockStyle.Fill;
+	}
+
+	public override string ToString()
+	{
+		return text.Text;
 	}
 }
