@@ -24,11 +24,27 @@ public class WhatsNewDialog : Form
 
 		download.Click += delegate { 
 			MessageBox.Show("The download link to the new version will be opened in your browser and the score tracker will close itself. \nTo install the new score tracker simply replace the old score tracker with the new one. \n\nYour old configuration and score files will be compatible with the new tracker.", "How to install", MessageBoxButtons.OK); 
-			Process.Start("https://drazil100.bitbucket.io/SF64ScoreTracker.exe"); 
+			try
+			{
+				Process.Start("https://drazil100.bitbucket.io/SF64ScoreTracker.exe"); 
+			}
+			catch (Exception) 
+			{
+				MessageBox.Show("Program could not open URL. Copy paste this into your browser to download.\n\nhttps://drazil100.bitbucket.io/SF64ScoreTracker.exe", "Error", MessageBoxButtons.OK); 
+			}
 			close = true;
 			this.Close();
 		};
-		openRepo.Click += delegate { Process.Start("https://bitbucket.org/drazil100/sf64scoretracker/"); };
+		openRepo.Click += delegate { 
+			try 
+			{ 
+				Process.Start("https://bitbucket.org/drazil100/sf64scoretracker/");
+			}
+			catch (Exception)
+			{
+				MessageBox.Show("Program could not open URL. Copy paste this into your browser.\n\nhttps://bitbucket.org/drazil100/sf64scoretracker/", "Error", MessageBoxButtons.OK); 
+			}
+		};
 		remind.Click += delegate { this.Close(); };
 		skip.Click += delegate { ScoreTracker.config["skip_version"] = version; this.Close(); };
 

@@ -105,7 +105,10 @@ THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 	public static void Main(string[] args)
 	{
 		Console.WriteLine("Running in: " + Directory.GetCurrentDirectory());
+		try {
 		Directory.SetCurrentDirectory(Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location));
+		} catch (Exception) {}
+
 		try
 		{
 			var handle = GetConsoleWindow();
