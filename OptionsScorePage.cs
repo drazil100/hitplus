@@ -23,7 +23,6 @@ public class OptionsScorePage : Panel
 		Text = section;
 		totalName.Text = "Total:";
 		Dock = DockStyle.Fill;
-		AutoScroll = true;
 
 		totalPanel.Height = 25;
 		Controls.Add(totalPanel);
@@ -60,7 +59,7 @@ public class OptionsScorePage : Panel
 	{
 		Dock = DockStyle.Fill;
 		int scrollPadding = 0;
-		if (VerticalScroll.Visible) scrollPadding = SystemInformation.VerticalScrollBarWidth + 2;
+		if (scores.Count*20+25 > ClientRectangle.Height) scrollPadding = SystemInformation.VerticalScrollBarWidth + 2;
 
 		int tot = 0;
 		foreach (NumericField score in scores)
@@ -74,6 +73,8 @@ public class OptionsScorePage : Panel
 
 		total.Text = "" + tot;
 		total.TextAlign = ContentAlignment.TopRight;
+		
+		AutoScroll = true;
 	}
 }
 
