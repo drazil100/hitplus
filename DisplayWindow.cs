@@ -295,7 +295,8 @@ public class DisplayWindowContent : Panel
 		}
 		else
 		{
-			//totals.Top = 0;
+			totals.Top = 0;
+			totals.Left = 0;
 			levels.Left = 0;
 			totals.Width = GetWidth ();
 			levels.Width = GetWidth ();
