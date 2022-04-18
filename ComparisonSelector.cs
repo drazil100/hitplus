@@ -182,6 +182,7 @@ public class ComparisonSelector : Panel
 
 	public void NextComparison()
 	{
+		SetItems();
 		int i = Index + 1;
 		if (i >= Count)
 			i = 0;
@@ -191,6 +192,7 @@ public class ComparisonSelector : Panel
 
 	public void PreviousComparison()
 	{
+		SetItems();
 		int i = Index - 1;
 		if (i < 0)
 			i = Count - 1;
@@ -202,10 +204,12 @@ public class ComparisonSelector : Panel
 		List<string> toReturn = new List<string>();
 		foreach (string section in File.Sections)
 		{
-			if (!File.ContainsKey(section, "Scoreset Type") || (File.ContainsKey(section, "Show In Comparisons") && File[section, "Show In Comparisons"] != "yes")) 
+			if (!File.ContainsKey(section, "Scoreset Type") || File[section, "Scoreset Type"] == "PB History") 
 				continue;
 			toReturn.Add(section);
 		}
+		if (File["pb_history_count"] != "0" && ScoreTracker.config["sum_of_worst_depth"] != "0")
+			toReturn.Insert(2, "Sum of Worst (Past " + ScoreTracker.config["sum_of_worst_depth"] + ")" );
 		return toReturn;
 	}
 

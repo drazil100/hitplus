@@ -206,7 +206,7 @@ public class OptionsScoreTabContent : Panel
 		AskName popup = new AskName();
 		popup.ShowDialog();
 		string name = popup.Name;
-		if (name == "Aliases" || name == "Best Run" || name == "Top Scores" || name == "Sum of Best" || name == "General" || name == "File Sync" || name == "" || popup.WasCanceled)
+		if (!name.StartsWith("PBH") || name == "Aliases" || name == "Best Run" || name == "Top Scores" || name == "Sum of Best" || name == "General" || name == "File Sync" || name == "" || popup.WasCanceled)
 			return;
 
 		file.AddNewItem(name, "Scoreset Type", "Comparison");

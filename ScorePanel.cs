@@ -207,48 +207,7 @@ public class ScorePanel : Panel
 	
 	public string GetAlias(string n)
 	{
-		switch (n)
-		{
-			case "Corneria":
-			n = "CO";
-			break;
-			case "Meteo":
-			n = "ME";
-			break;
-			case "Katina":
-			n = "KA";
-			break;
-			case "Sector X":
-			n = "SX";
-			break;
-			case "Sector Y":
-			n = "SY";
-			break;
-			case "Aquas":
-			n = "AQ";
-			break;
-			case "Zoness":
-			n = "ZO";
-			break;
-			case "Macbeth":
-			n = "MA";
-			break;
-			case "Sector Z":
-			n = "SZ";
-			break;
-			case "Area 6":
-			n = "A6";
-			break;
-			case "Bolse":
-			n = "BO";
-			break;
-			case "Venom 1":
-			case "Venom 2":
-			n = "VE";
-			break;
-		}
-		
-		return n;
+		return ScoreTracker.config["Aliases", n];
 	}
 	
 	private void DoLayout()

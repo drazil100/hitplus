@@ -16,7 +16,7 @@ public class ScoreSet : IEnumerable<ScoreEntry>
 		int i = 0;
 		foreach (KeyValuePair<string, string> pair in file.GetSection(section))
 		{
-			if (pair.Key == "Scoreset Type" || pair.Key == "Show In Comparisons" || pair.Key == "Total Score")
+			if (pair.Key == "Scoreset Type" || pair.Key == "Total Score")
 			{
 				continue;
 			}
@@ -25,6 +25,14 @@ public class ScoreSet : IEnumerable<ScoreEntry>
 			entry.Position = i++;
 			scores.Add(entry);
 		}
+		scores[0].IsCurrent = true;
+	}
+
+	public ScoreSet(FileReader file, string section, List<ScoreEntry> scores)
+	{
+		this.file = file;
+		this.section = section;
+		this.scores = scores;
 		scores[0].IsCurrent = true;
 	}
 
@@ -146,9 +154,12 @@ public class ScoreSet : IEnumerable<ScoreEntry>
 
 	public void SaveScores()
 	{
+		string pbh = "PBH " + GetScoreTotal();
+		file.AddNewItem(pbh, "Scoreset Type", "PB History");
 		foreach (ScoreEntry score in scores)
 		{
 			file[section, score.Name] = "" + score.Score;
+			file.AddNewItem(pbh, score.Name, "" + score.Score);
 		}
 		file.Save();
 	}

@@ -105,9 +105,11 @@ THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 	public static void Main(string[] args)
 	{
 		Console.WriteLine("Running in: " + Directory.GetCurrentDirectory());
-		try {
-		Directory.SetCurrentDirectory(Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location));
-		} catch (Exception) {}
+		try 
+		{
+			Directory.SetCurrentDirectory(Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location));
+		} 
+		catch (Exception) {}
 
 		try
 		{
@@ -117,40 +119,6 @@ THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 		catch (Exception)
 		{
 
-		}
-
-		for (int i = 0; i < args.Length; i++)
-		{
-			/*if (args[i] == "-s")
-			{
-				//  If -s is found in the arguments check if the port is specified
-				for (int j = 0; j < args.Length; j++)
-				{
-					if (args[j] == "-p" && j < args.Length - 1)
-					{
-						//  If -p is found set port to the next argument
-						port = Convert.ToInt32(args[j+1]);
-					}
-				}
-				//  Start server and return from Main() before client is started
-				StartServer(port);
-				return;
-			}*/
-		}
-
-		/*OpenFileDialog test = new OpenFileDialog();
-		test.Filter = ".ini|*.ini";
-		test.Title = "Test";
-		test.ShowDialog();*/
-
-		try
-		{
-			//Test();
-			ConvertFiles();
-		}
-		catch (Exception e)
-		{
-			Console.WriteLine("Conversion Error: " + e.Message + "\n" + e.StackTrace);
 		}
 
 		//try
@@ -191,6 +159,7 @@ THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 			config.AddNewItem("font_size",                             "18");
 			config.AddNewItem("highlight_current",                     "0");
 			config.AddNewItem("start_highlighted",                     "1");
+			config.AddNewItem("sum_of_worst_depth",                "3");
 
 			if (config.ContainsKey("debug") && config["debug"] == "1")
 			{
@@ -230,6 +199,26 @@ THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 			{
 				config ["sums_horizontal_alignment"] = "0";
 			}
+
+
+			config.AddNewItem("Aliases", "Corneria", "CO");
+			config.AddNewItem("Aliases", "Meteo", "ME");
+			config.AddNewItem("Aliases", "Sector Y", "SY");
+			config.AddNewItem("Aliases", "Fichina", "FI");
+			config.AddNewItem("Aliases", "Fortuna", "FO");
+			config.AddNewItem("Aliases", "Katina", "KA");
+			config.AddNewItem("Aliases", "Aquas", "AQ");
+			config.AddNewItem("Aliases", "Sector X", "SX");
+			config.AddNewItem("Aliases", "Solar", "SO");
+			config.AddNewItem("Aliases", "Zoness", "ZO");
+			config.AddNewItem("Aliases", "Titania", "TI");
+			config.AddNewItem("Aliases", "Macbeth", "MA");
+			config.AddNewItem("Aliases", "Sector Z", "SZ");
+			config.AddNewItem("Aliases", "Bolse", "BO");
+			config.AddNewItem("Aliases", "Area 6", "A6");
+			config.AddNewItem("Aliases", "Venom 1", "VE");
+			config.AddNewItem("Aliases", "Venom 2", "VE");
+
 
 			config.Save();
 
@@ -349,16 +338,6 @@ THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 
 
 			FileReader pbEasy = new FileReader("pb_easy.ini", SortingStyle.Validate);
-			if (configVersion <= 20210130)
-			{
-				pbEasy.AddNewItem("Aliases", "Corneria", "CO");
-				pbEasy.AddNewItem("Aliases", "Meteo", "ME");
-				pbEasy.AddNewItem("Aliases", "Katina", "KA");
-				pbEasy.AddNewItem("Aliases", "Sector X", "SX");
-				pbEasy.AddNewItem("Aliases", "Macbeth", "Ma");
-				pbEasy.AddNewItem("Aliases", "Area 6", "A6");
-				pbEasy.AddNewItem("Aliases", "Venom 2", "VE");
-			}
 			if (!File.Exists("pb_easy.ini"))
 			{
 				pbEasy.AddNewItem("Best Run", "Corneria", "0");
@@ -380,16 +359,6 @@ THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 			TrackerData.ValidateFile(pbEasy);
 
 			FileReader pbHard = new FileReader("pb_hard.ini", SortingStyle.Validate);
-			if (configVersion <= 20210130)
-			{
-				pbHard.AddNewItem("Aliases", "Corneria", "CO");
-				pbHard.AddNewItem("Aliases", "Sector Y", "SY");
-				pbHard.AddNewItem("Aliases", "Aquas", "AQ");
-				pbHard.AddNewItem("Aliases", "Zoness", "ZO");
-				pbHard.AddNewItem("Aliases", "Macbeth", "Ma");
-				pbHard.AddNewItem("Aliases", "Area 6", "A6");
-				pbHard.AddNewItem("Aliases", "Venom 2", "VE");
-			}
 			if (!File.Exists("pb_hard.ini"))
 			{
 				pbHard.AddNewItem("Best Run", "Corneria", "0");
@@ -457,67 +426,6 @@ THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 		return "" + i;
 	}
 
-	public static void ConvertFiles()
-	{
-		if (File.Exists("config.txt"))
-		{
-			FileReader convertConfig = new FileReader(':', "config.txt", SortingStyle.Sort);
-			convertConfig.KeySeparator = '=';
-			convertConfig.FileName = "config.ini";
-			convertConfig.Save();
-
-			FileReader convertEasy = new FileReader(':', "pb_easy.txt");
-
-			FileReader convertHard = new FileReader(':', "pb_hard.txt");
-
-			FileReader convertIL = new FileReader(':', "pb_individuals.txt");
-
-			FileReader easy = new FileReader("pb_easy.ini");
-			FileReader hard = new FileReader("pb_hard.ini");
-
-			easy.AddNewItem("name", "Easy Route");
-			foreach (SectionKeyValue<string> pair in convertEasy)
-			{
-				string k = (pair.Key != "Venom") ? pair.Key : "Venom 2";
-				easy.AddNewItem("Best Run", k, convertEasy[pair.Key]);
-				string tmp = "0";
-				if (convertIL.ContainsKey(pair.Key)) tmp = convertIL["General", pair.Key];
-				easy.AddNewItem("Top Scores", k, tmp);
-			}
-			if (easy.GetSection("Best Run").Keys.Count > 0) easy.Save();
-
-			easy.AddNewItem("name", "Hard Route");
-			foreach (SectionKeyValue<string> pair in convertHard)
-			{
-				string k = (pair.Key != "Venom") ? pair.Key : "Venom 2";
-				hard.AddNewItem("Best Run", k, convertHard[pair.Key]);
-				string tmp = "0";
-				if (convertIL.ContainsKey(pair.Key)) tmp = convertIL["General", pair.Key];
-				hard.AddNewItem("Top Scores", k, tmp);
-			}
-			if (hard.GetSection("Best Run").Keys.Count > 0) hard.Save();
-
-			if (convertIL.ContainsKey("Venom"))
-			{
-				convertIL["Venom 2"] = convertIL["Venom"];
-				convertIL.RemoveKey("Venom");
-			}
-			convertIL.Export();
-
-
-			File.Delete("config.txt");
-			File.Delete("pb_easy.txt");
-			File.Delete("pb_hard.txt");
-			
-			MessageBox.Show("Your files have been converted to a new format."+
-			                " Going forward \"pb_individuals.txt\" will no longer be used to track your individual level PBs.\r\n\r\n"+
-					"Instead level pbs are now saved in the same file as your run pb and are unique to that run with no crossover between routes.\r\n\r\n"+
-					"Your \"pb_individuals.txt\" will be left intact and if you wish to continue storing your ILs in this file you can do so by adding \"generate_legacy_il_file = 1\" to \"config.ini\" while the program is closed.\r\n\r\n"+
-					"Do note that enabling this option WILL NOT change where this program reads these scores from."+
-					" These scores will still be output to and read from the file that stores your best run.", 
-					"Your tracker files have been converted!");
-		}
-	}
 
 	public static void Test()
 	{

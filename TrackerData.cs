@@ -7,8 +7,10 @@ public class TrackerData
 	private FileReader file;
 	private ScoreSet scores;
 	private ScoreSet best;
+	private ScoreSet worst;
 	private List<FileReader> syncFiles = new List<FileReader>();
 	private List<ScoreSet> comparisons = new List<ScoreSet>();
+	private List<string> pbHistory = new List<string>();
 
 	private int comparisonIndex = 0;
 
@@ -16,9 +18,9 @@ public class TrackerData
 	{
 		this.file = file;
 		ValidateFile(file);
-		comparisonIndex = Int32.Parse(file["comparison_index"]);
 		scores = new ScoreSet(file, "Best Run");
 		best = new ScoreSet(file, "Top Scores");
+
 		foreach (string section in file.Sections)
 		{
 			if (!IsComparison(file, section))
@@ -27,42 +29,10 @@ public class TrackerData
 			comparisons.Add(new ScoreSet(file, section));
 		}
 
-		/*if (file.ContainsKey("IL Syncing") && file["IL Syncing"] == "on")
-		{
-			bool updateComparisons = false;
-			foreach (string filename in ScoreTracker.files)
-			{
-				FileReader syncFile = new FileReader(filename, SortingStyle.Unsort);
-				if (file["game"] != syncFile["game"] || syncFile["IL Syncing"] != "on") 
-					continue;
-				bool doAdd = false;
-				foreach (ScoreEntry score in best)
-				{
-					if (syncFile.ContainsKey("Top Scores", score.Name))
-					{
-						doAdd = true;
-						if (score.Comparison > Int32.Parse(syncFile["Top Scores", score.Name]))
-							syncFile["Top Scores", score.Name] = "" + score.Comparison;
-						if (score.Comparison < Int32.Parse(syncFile["Top Scores", score.Name]))
-						{
-							score.Comparison = Int32.Parse(syncFile["Top Scores", score.Name]);
-							updateComparisons = true;
-						}
-					}
-				}
-				if (doAdd)
-				{
-					syncFiles.Add(syncFile);
-				}
-				syncFile.Save();
-			}
-			if (updateComparisons)
-			{
-				best.SaveComparisons();
-			}
-		}*/
 
+		GenerateWorst();
 		file.Save();
+		comparisonIndex = Int32.Parse(file["comparison_index"]);
 	}
 
 
@@ -73,11 +43,13 @@ public class TrackerData
 		file.AddNewItem("game", "");
 		//file.AddNewItem("IL Syncing", "off");
 		file.AddNewItem("comparison_index", "0");
-
+		file.AddNewItem("pb_history_count", "0");
+		/*
 		foreach (string key in file.GetSection("Aliases").Keys)
 		{
 			file.AddNewItem("Aliases", key, "0");
 		}
+		*/
 		
 		file.AddNewItem("Best Run", "Scoreset Type", "Record");
 		Validate(file, "Best Run");
@@ -105,11 +77,20 @@ public class TrackerData
 			Validate(file, section);
 			i++;
 		}
+		List<string> history = SortHistory(file);
+		foreach (string section in history)
+		{
+			Validate(file, section);
+		}
+		if (history.Count > 0 && ScoreTracker.config["sum_of_worst_depth"] != "0")
+			i++;
 
 		if (Int32.Parse(file["comparison_index"]) >= i)
 		{
 			file["comparison_index"] = "0";
 		}
+		file["pb_history_count"] = "" + history.Count;
+		
 
 		file.Save();
 	}
@@ -143,12 +124,72 @@ public class TrackerData
 		return false;
 	}
 
+	public static bool IsHistory(FileReader file, string section)
+	{
+		if (file.ContainsKey(section, "Scoreset Type") && file[section, "Scoreset Type"] == "PB History")
+		{
+			if (section.StartsWith("PBH "))
+			{
+				string[] parts = section.Split(' ');
+				int i = 0;
+				if (parts.Length != 2 || !int.TryParse(parts[1], out i))
+					return false;
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+	public static int ParseHistory(string section)
+	{
+			if (section.StartsWith("PBH "))
+			{
+				string[] parts = section.Split(' ');
+				int i = 0;
+				if (parts.Length != 2 || !int.TryParse(parts[1], out i))
+					throw new System.Exception();
+				return Int32.Parse(parts[1]);
+			}
+
+			throw new System.Exception();
+	}
+
+	public static List<string> SortHistory(FileReader file)
+	{
+		List<string> history = new List<string>();
+		foreach (string section in file.Sections)
+		{
+			if (!file.ContainsKey(section, "Scoreset Type") || file[section, "Scoreset Type"] != "PB History")
+				continue;
+			if (IsHistory(file, section))
+			{
+				int pbr = ParseHistory(section);
+				bool inserted = false;
+				for (int j = 0; j < history.Count; j++)
+				{
+					if (pbr < ParseHistory(history[j]))
+						continue;
+					history.Insert(j, section);
+					inserted = true;
+					break;
+				}
+				if (!inserted)
+					history.Add(section);
+			}
+
+		}
+		return history;
+	}
+
 	public int this[int index]
 	{
 		set
 		{
 			SetScore(scores, index, value);
 			SetScore(best, index, value);
+			if (worst != null)
+				SetScore(worst, index, value);
 			foreach (ScoreSet scoreSet in comparisons)
 			{
 				SetScore(scoreSet, index, value);
@@ -185,6 +226,8 @@ public class TrackerData
 	{
 		scores.Refresh();
 		best.Refresh();
+		if (worst != null)
+			worst.Refresh();
 		foreach (ScoreSet scoreSet in comparisons)
 		{
 			scoreSet.Refresh();
@@ -220,6 +263,8 @@ public class TrackerData
 	{
 		scores.SetCurrent(index);
 		best.SetCurrent(index);
+		if (worst != null)
+			worst.SetCurrent(index);
 		foreach (ScoreSet scoreSet in comparisons)
 		{
 			scoreSet.SetCurrent(index);
@@ -228,8 +273,11 @@ public class TrackerData
 
 	public ScoreSet NextComparison()
 	{
+		int max = 2;
+		if (worst != null)
+			max = 3;
 		comparisonIndex++;
-		if (comparisonIndex >= comparisons.Count + 2)
+		if (comparisonIndex >= comparisons.Count + max)
 			comparisonIndex = 0;
 		file["comparison_index"] = "" + comparisonIndex;
 		file.Save();
@@ -238,9 +286,12 @@ public class TrackerData
 
 	public ScoreSet PreviousComparison()
 	{
+		int max = 2;
+		if (worst != null)
+			max = 3;
 		comparisonIndex--;
 		if (comparisonIndex < 0)
-			comparisonIndex = comparisons.Count + 1;
+			comparisonIndex = comparisons.Count + max;
 		file["comparison_index"] = "" + comparisonIndex;
 		file.Save();
 		return GetScoreSet();
@@ -253,7 +304,10 @@ public class TrackerData
 
 	public void SetComparisonIndex(int index)
 	{
-		if (index != comparisonIndex && index < comparisons.Count + 2 && index >= 0)
+		int max = 2;
+		if (worst != null)
+			max = 3;
+		if (index != comparisonIndex && index < comparisons.Count + max && index >= 0)
 		{
 			comparisonIndex = index;
 			file["comparison_index"] = "" + comparisonIndex;
@@ -266,6 +320,8 @@ public class TrackerData
 		List<string> toReturn = new List<string>();
 		toReturn.Add("Best Run");
 		toReturn.Add("Top Scores");
+		if (worst != null)
+			toReturn.Add("Sum of Worst");
 		foreach (ScoreSet set in comparisons)
 		{
 			toReturn.Add(set.Name);
@@ -285,12 +341,16 @@ public class TrackerData
 
 	public ScoreSet GetScoreSet(int index)
 	{
+		int max = 2;
+		if (worst != null)
+			max = 3;
 		ScoreSet toReturn;
 		switch (index)
 		{
 			case 0: toReturn = scores; break;
 			case 1: toReturn = best; break;
-			default: toReturn = comparisons[comparisonIndex - 2]; break;
+			case 2: if (worst != null) toReturn = worst; else toReturn = comparisons[comparisonIndex - max]; break;
+			default: toReturn = comparisons[comparisonIndex - max]; break;
 		}
 		return toReturn;
 	}
@@ -310,6 +370,37 @@ public class TrackerData
 		return GetScoreSet(index).GetCurrentPace();
 	}
 
+	public void GenerateWorst()
+	{
+		worst = null;
+		pbHistory.Clear();
+		pbHistory = SortHistory(file);
+		List<ScoreEntry> histSet = new List<ScoreEntry>();
+		int pos = 0;
+		int pbhCount = pbHistory.Count;
+		if (pbhCount > Int32.Parse(ScoreTracker.config["sum_of_worst_depth"]))
+			pbhCount = Int32.Parse(ScoreTracker.config["sum_of_worst_depth"]);
+		Console.WriteLine(pbhCount);
+		if (pbhCount > 0)
+		{
+			foreach(string key in file.GetSection("Best Run").Keys)
+			{
+				if (key == "Total Score" || key == "Scoreset Type") 
+					continue;
+				int lowest = Int32.Parse(file[pbHistory[0], key]);
+				for (int i = 1; i < pbhCount; i++)
+				{
+					int check = Int32.Parse(file[pbHistory[i], key]);
+					if (check < lowest)
+						lowest = check;
+				}
+				ScoreEntry entry = new ScoreEntry(key, lowest);
+				entry.Position = pos++;
+				histSet.Add(entry);
+			}
+			worst = new ScoreSet(file, "Sum of Worst", histSet);
+		}
+	}
 
 	public void UpdateBestScores()
 	{
@@ -355,7 +446,9 @@ public class TrackerData
 		bool doSave = false;
 
 		if (tot > scores.GetComparisonTotal())
+		{
 			doSave = true;
+		}
 
 		for(int i = 0; i < scores.Count; i++)
 		{
@@ -368,5 +461,7 @@ public class TrackerData
 		if (!doSave)
 			return;
 		scores.SaveScores();
+		ValidateFile(file);
+		GenerateWorst();
 	}
 }

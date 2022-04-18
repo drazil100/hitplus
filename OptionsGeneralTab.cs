@@ -39,8 +39,8 @@ public class OptionsGeneralTab : OptionsTab
 
 		generalOptions.Add(new DropdownField("Font:", "" + ind, fonts.ToArray()));
 		generalOptions.Add(new NumericField("Font Size:", config["font_size"]));
-		generalOptions.Add(new TextField("Foo:", "Bar"));
-		//generalOptions.Add(new DropdownField("Vertical Scaling Mode:", config["vertical_scale_mode"], "Space", "Split"));
+		generalOptions.Add(new NumericField("Sum of Worst Depth:", config["sum_of_worst_depth"]));
+		//generalOptions.Add(new TextField("Foo:", "Bar"));
 
 	}
 
@@ -53,6 +53,7 @@ public class OptionsGeneralTab : OptionsTab
 		config ["sums_horizontal_alignment"] = generalOptions[4].ToString();
 		config ["font"]                      = generalOptions[5].GetOption();
 		config ["font_size"]                 = generalOptions[6].ToString();
+		config ["sum_of_worst_depth"]        = generalOptions[7].ToString();
 		//config ["vertical_scale_mode"]       = generalOptions[7].ToString();
 		//Console.WriteLine (font.Text);
 		config.Save ();
