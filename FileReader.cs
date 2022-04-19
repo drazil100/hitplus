@@ -282,7 +282,13 @@ public abstract class BaseFileReader<T> : IEnumerable<SectionKeyValue<T>>
 					try {
 						value = content[section][key];
 					} catch {
-						value = defaultValues[section][key];
+						try {
+							value = defaultValues[section][key];
+						} catch (Exception e) {
+							WriteDebug(String.Format("ERROR: Key does not exist [{0}, {1}]", section, key));
+							Console.WriteLine("");
+							throw e;
+						}
 					}
 					cachedValues[tuple] = StringToValue(value);
 				}
