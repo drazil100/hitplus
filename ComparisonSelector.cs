@@ -24,6 +24,8 @@ public class ComparisonSelector : Panel
 
 	private bool reloading = false;
 
+	private bool includeSumOfWorst = false;
+
 	private bool getFromTrackerData = false;
 
 	//private Action n;
@@ -133,6 +135,7 @@ public class ComparisonSelector : Panel
 
 	public void SetItems()
 	{
+		bool oldSOW = includeSumOfWorst;
 		List<string> items;
 		switch (SetType)
 		{
@@ -150,7 +153,14 @@ public class ComparisonSelector : Panel
 		int oldIndex = Index;
 		options.Items.Clear();
 		this.options.Items.AddRange(items.ToArray());
-		if (oldIndex >= items.Count || oldIndex == -1) oldIndex = 0;
+		if (!oldSOW && includeSumOfWorst && oldIndex >= 2)
+			oldIndex++;
+		if (oldSOW && !includeSumOfWorst && oldIndex >= 2)
+		{
+			oldIndex--;
+			if (oldIndex == 1) oldIndex = 0;
+		}
+		if (oldIndex >= items.Count || oldIndex < 0) oldIndex = 0;
 		Index = oldIndex;
 	}
 
@@ -209,7 +219,14 @@ public class ComparisonSelector : Panel
 			toReturn.Add(section);
 		}
 		if (File["pb_history_count"] != "0" && ScoreTracker.config["sum_of_worst_depth"] != "0")
+		{
 			toReturn.Insert(2, "Sum of Worst (Past " + ScoreTracker.config["sum_of_worst_depth"] + ")" );
+			includeSumOfWorst = true;
+		}
+		else
+		{
+			includeSumOfWorst = false;
+		}
 		return toReturn;
 	}
 

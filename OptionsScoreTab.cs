@@ -186,7 +186,7 @@ public class OptionsScoreTabContent : Panel
 		int compIndex = Int32.Parse(file["comparison_index"]);
 		if (compIndex >= (selector.Index + 2))
 		{
-			if (compIndex == selector.Index + 2)
+			if (compIndex >= selector.Index + 2)
 			{
 				file["comparison_index"] = "0";
 			}
@@ -196,6 +196,7 @@ public class OptionsScoreTabContent : Panel
 			}
 		}
 		file.RemoveSection(name);
+		pages[name].Dispose();
 		pages.Remove(name);
 		selector.Reload();
 		//ReloadComparisons();

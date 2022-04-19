@@ -362,6 +362,8 @@ public class InputWindow : Form
 	public void OnReset(object sender, EventArgs e)
 	{
 		tracker.SaveAndReset();
+		selector.Reload();
+		tracker.Data.SetComparisonIndex(selector.Index);
 		SwapControls(submit);
 		submit.Enabled = true;
 		SwapControls (submit);
@@ -532,35 +534,38 @@ public class InputWindow : Form
 
 	public void ConfirmClose(object sender, FormClosingEventArgs e) 
 	{
-		SaveBounds();
-		config.Save();
-			
-		if (!reopening)
+		if (!closing)
 		{
-			if (tracker.IsRunning() && !closing)
+			SaveBounds();
+			config.Save();
+			
+			if (!reopening)
 			{
-				var confirmResult = MessageBox.Show ("Your run is incomplete! Are you sure you wish to exit?\n\n(Any unsaved gold scores will be lost)\n(To save gold scores on an incomplete run fill in the rest of the levels with 0)",
-					                    "Continue Closing?",
-					                    MessageBoxButtons.YesNo);
-				if (confirmResult == DialogResult.Yes)
+				if (tracker.IsRunning())
 				{
-					closing = true;
-					Environment.Exit (0);
+					var confirmResult = MessageBox.Show ("Your run is incomplete! Are you sure you wish to exit?\n\n(Any unsaved gold scores will be lost)\n(To save gold scores on an incomplete run fill in the rest of the levels with 0)",
+							"Continue Closing?",
+							MessageBoxButtons.YesNo);
+					if (confirmResult == DialogResult.Yes)
+					{
+						closing = true;
+						Application.Exit ();
+					}
+					else
+					{
+						e.Cancel = true;
+					}
 				}
 				else
 				{
-					e.Cancel = true;
-				}
+					closing = true;
+					Application.Exit ();
+				}	
 			}
 			else
 			{
-				closing = true;
-				Environment.Exit (0);
-			}	
-		}
-		else
-		{
-			
+
+			}
 		}
 	}
 

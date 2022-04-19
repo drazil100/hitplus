@@ -376,7 +376,6 @@ public class TrackerData
 		int pbhCount = pbHistory.Count;
 		if (pbhCount > Int32.Parse(ScoreTracker.config["sum_of_worst_depth"]))
 			pbhCount = Int32.Parse(ScoreTracker.config["sum_of_worst_depth"]);
-		Console.WriteLine(pbhCount);
 		if (pbhCount > 0)
 		{
 			foreach(string key in file.GetSection("Best Run").Keys)
