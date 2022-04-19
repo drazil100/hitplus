@@ -236,6 +236,8 @@ THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 
 
 
+			int configVersion = DateToNumber(config["version"]);
+
 			files = new List<string>();
 			if (config.ContainsSection("Files"))
 			{
@@ -254,6 +256,30 @@ THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 						{
 							config.RemoveKey("Files", key);
 							continue;
+						}
+						else
+						{
+							if (configVersion < 20220418)
+							{
+								int total = 0;
+								foreach(string key2 in tmp.GetSection("Best Run").Keys)
+								{
+									if (key2 == "Total Score" || key2 == "Scoreset Type" || key2 == "Show In Comparisons") 
+										continue;
+									total += Int32.Parse(tmp["Best Run", key2]);
+
+								}
+								if (total == 0) continue;
+								tmp.AddNewItem("PBH " + total, "Scoreset Type", "PB History");
+								foreach(string key2 in tmp.GetSection("Best Run").Keys)
+								{
+									if (key2 == "Total Score" || key2 == "Scoreset Type" || key2 == "Show In Comparisons") 
+										continue;
+
+									tmp.AddNewItem("PBH " + total, key2, tmp["Best Run", key2]);
+								}
+								tmp.Save();
+							}
 						}
 					}
 					catch (Exception)
@@ -334,7 +360,6 @@ THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 
 			config.Save();
 
-			int configVersion = DateToNumber(config["version"]);
 
 
 			FileReader pbEasy = new FileReader("pb_easy.ini", SortingStyle.Validate);
