@@ -280,6 +280,16 @@ THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 								}
 								tmp.Save();
 							}
+							string game = "";
+							if (tmp.ContainsKey("game") && tmp["game"] != "")
+							{
+								game = tmp["game"];
+							}
+							Directory.CreateDirectory(Path.Combine("records", game));
+							Console.WriteLine("blah");
+							string newLocation = Path.Combine("records", game, Path.GetFileName(config["Files", key]));
+							File.Move(config["Files", key], newLocation);
+							continue;
 						}
 					}
 					catch (Exception)
@@ -287,21 +297,8 @@ THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 						config.RemoveKey("Files", key);
 						continue;
 					}
-					files.Add(config["Files", key]);
 					config.RemoveKey("Files", key);
 				}
-				int fileIndex = 0;
-				foreach (string file in files)
-				{
-					config.AddNewItem("Files", "File_" + FormatNumber(fileIndex++), file);
-				}
-			}
-			else
-			{
-				config["Files", "File_0000"] = "pb_easy.ini";
-				config["Files", "File_0001"] = "pb_hard.ini";
-				files.Add("pb_easy.ini");
-				files.Add("pb_hard.ini");
 			}
 
 			config.AddNewItem("System", "horizontal_width",                      "1296");
@@ -360,50 +357,6 @@ THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 
 			config.Save();
 
-
-
-			FileReader pbEasy = new FileReader("pb_easy.ini", SortingStyle.Validate);
-			if (!File.Exists("pb_easy.ini"))
-			{
-				pbEasy.AddNewItem("Best Run", "Corneria", "0");
-				pbEasy.AddNewItem("Best Run", "Meteo",    "0");
-				pbEasy.AddNewItem("Best Run", "Katina",   "0");
-				pbEasy.AddNewItem("Best Run", "Sector X", "0");
-				pbEasy.AddNewItem("Best Run", "Macbeth",  "0");
-				pbEasy.AddNewItem("Best Run", "Area 6",   "0");
-				pbEasy.AddNewItem("Best Run", "Venom 2",  "0");
-				pbEasy.Save();
-			}
-			if (!pbEasy.ContainsKey("game")) 
-			{
-				pbEasy["name"] = "Easy Route";
-				pbEasy["game"] = "Star Fox 64";
-				//pbEasy["IL Syncing"] = "on";
-			}
-
-			TrackerData.ValidateFile(pbEasy);
-
-			FileReader pbHard = new FileReader("pb_hard.ini", SortingStyle.Validate);
-			if (!File.Exists("pb_hard.ini"))
-			{
-				pbHard.AddNewItem("Best Run", "Corneria", "0");
-				pbHard.AddNewItem("Best Run", "Sector Y", "0");
-				pbHard.AddNewItem("Best Run", "Aquas",    "0");
-				pbHard.AddNewItem("Best Run", "Zoness",   "0");
-				pbHard.AddNewItem("Best Run", "Macbeth",  "0");
-				pbHard.AddNewItem("Best Run", "Bolse",    "0");
-				pbHard.AddNewItem("Best Run", "Venom 1",  "0");
-				pbHard.Save();
-			}
-			if (!pbHard.ContainsKey("game")) 
-			{
-				pbHard["name"] = "Hard Route";
-				pbHard["game"] = "Star Fox 64";
-				//pbHard["IL Syncing"] = "on";
-			}
-
-			TrackerData.ValidateFile(pbHard);
-			
 
 			individualLevels = new FileReader(':', "pb_individuals.txt", SortingStyle.Unsort);
 
