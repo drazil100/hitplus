@@ -19,7 +19,7 @@ public class DisplayWindow : Form
 	{
 		//this.peanut_butter = peanut_butter;
 		//this.individual_levels = individual_levels;
-		Text = "Star Fox 64 Score Tracker";
+		Text = "Hit+ Score Tracker";
 
 
 		FormClosing += new FormClosingEventHandler(InputWindow.mainWindow.ConfirmClose);

@@ -12,9 +12,9 @@ using System.Globalization;
 
 public class ScoreTracker : Form
 {
-	public static string version = "4/18/2022";
+	public static string version = "7/4/2024";
 
-	public static string license = @"Copyright (c) 2017-2022 Austin Allman
+	public static string license = @"Copyright (c) 2017-2024 Austin Allman
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ""Software""), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -371,7 +371,7 @@ THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 				pbEasy.AddNewItem("Best Run", "Sector X", "0");
 				pbEasy.AddNewItem("Best Run", "Macbeth",  "0");
 				pbEasy.AddNewItem("Best Run", "Area 6",   "0");
-				pbEasy.AddNewItem("Best Run", "Venom 2",    "0");
+				pbEasy.AddNewItem("Best Run", "Venom 2",  "0");
 				pbEasy.Save();
 			}
 			if (!pbEasy.ContainsKey("game")) 
@@ -391,8 +391,8 @@ THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 				pbHard.AddNewItem("Best Run", "Aquas",    "0");
 				pbHard.AddNewItem("Best Run", "Zoness",   "0");
 				pbHard.AddNewItem("Best Run", "Macbeth",  "0");
-				pbHard.AddNewItem("Best Run", "Area 6",   "0");
-				pbHard.AddNewItem("Best Run", "Venom 2",    "0");
+				pbHard.AddNewItem("Best Run", "Bolse",    "0");
+				pbHard.AddNewItem("Best Run", "Venom 1",  "0");
 				pbHard.Save();
 			}
 			if (!pbHard.ContainsKey("game")) 

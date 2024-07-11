@@ -6,10 +6,10 @@ else
 	REFERENCES = -sdk:4.5 -r:System.Windows.Forms,System.Drawing,System.Core
 endif
 
-all: SF64ScoreTracker.exe
+all: HitPlus.exe
 
-SF64ScoreTracker.exe: $(wildcard *.cs)
-	$(CSC) /out:SF64ScoreTracker.exe /win32icon:medal.ico $(REFERENCES) *.cs
+HitPlus.exe: $(wildcard *.cs)
+	$(CSC) /out:HitPlus.exe /win32icon:medal.ico $(REFERENCES) *.cs
 
 clean:
 	rm -f *.exe *.mdb 
@@ -17,8 +17,8 @@ clean:
 cleanall:
 	rm -f *.exe *.mdb *.zip *.txt *.ini
 
-run: SF64ScoreTracker.exe
-	mono SF64ScoreTracker.exe
+run: HitPlus.exe
+	mono HitPlus.exe
 
 cleanrun: cleanall run
 
