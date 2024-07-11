@@ -37,9 +37,28 @@ public class TrackerData
 
 
 
-	public static void ValidateFile(FileReader file)
+	public static bool ValidateFile(FileReader file)
 	{
-		file.AddNewItem("name", "Run");
+		int nonScores = 0;
+		if (file.ContainsSection("Best Run") && file.ContainsKey("name") && file.ContainsKey("game")) {
+			if (file["name"] == "" || file["game"] == "") 
+			{
+				return false;
+			}
+			if (file.ContainsKey("Best Run", "Scoreset Type")) {
+				nonScores = 1;
+			}
+			if (file.GetSection("Best Run").Keys.Count - nonScores < 1)
+			{
+				return false;
+			}
+		}
+		else
+		{
+			return false;
+		}
+
+		file.AddNewItem("name", "");
 		file.AddNewItem("game", "");
 		//file.AddNewItem("IL Syncing", "off");
 		file.AddNewItem("comparison_index", "0");
@@ -89,6 +108,7 @@ public class TrackerData
 		
 
 		file.Save();
+		return true;
 	}
 
 	private static void Validate(FileReader file, string section, string type)

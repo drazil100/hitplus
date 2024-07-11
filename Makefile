@@ -12,10 +12,10 @@ HitPlus.exe: $(wildcard *.cs)
 	$(CSC) /out:HitPlus.exe /win32icon:medal.ico $(REFERENCES) *.cs
 
 clean:
-	rm -f *.exe *.mdb 
+	rm -rf *.exe *.mdb records/
 
 cleanall:
-	rm -f *.exe *.mdb *.zip *.txt *.ini
+	rm -rf *.exe *.mdb records/ *.zip *.txt *.ini
 
 run: HitPlus.exe
 	mono HitPlus.exe
