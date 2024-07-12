@@ -207,7 +207,9 @@ public class ScorePanel : Panel
 	
 	public string GetAlias(string n)
 	{
-		if (ScoreTracker.config.ContainsKey("Aliases", n))
+		if (ScoreTracker.Data.File.ContainsSection("Aliases") && ScoreTracker.Data.File.ContainsKey("Aliases", n))
+			return ScoreTracker.Data.File["Aliases", n];
+		if (ScoreTracker.config.ContainsSection("Aliases") && ScoreTracker.config.ContainsKey("Aliases", n))
 			return ScoreTracker.config["Aliases", n];
 		return n;
 	}

@@ -8,6 +8,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Globalization;
+using System.Diagnostics;
 
 
 public class ScoreTracker : Form
@@ -200,26 +201,6 @@ THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 				config ["sums_horizontal_alignment"] = "0";
 			}
 
-
-			config.AddNewItem("Aliases", "Corneria", "CO");
-			config.AddNewItem("Aliases", "Meteo", "ME");
-			config.AddNewItem("Aliases", "Sector Y", "SY");
-			config.AddNewItem("Aliases", "Fichina", "FI");
-			config.AddNewItem("Aliases", "Fortuna", "FO");
-			config.AddNewItem("Aliases", "Katina", "KA");
-			config.AddNewItem("Aliases", "Aquas", "AQ");
-			config.AddNewItem("Aliases", "Sector X", "SX");
-			config.AddNewItem("Aliases", "Solar", "SO");
-			config.AddNewItem("Aliases", "Zoness", "ZO");
-			config.AddNewItem("Aliases", "Titania", "TI");
-			config.AddNewItem("Aliases", "Macbeth", "MA");
-			config.AddNewItem("Aliases", "Sector Z", "SZ");
-			config.AddNewItem("Aliases", "Bolse", "BO");
-			config.AddNewItem("Aliases", "Area 6", "A6");
-			config.AddNewItem("Aliases", "Venom 1", "VE");
-			config.AddNewItem("Aliases", "Venom 2", "VE");
-
-
 			config.Save();
 
 			colors = new ColorFileReader("color_theme.ini", SortingStyle.Validate);
@@ -235,8 +216,7 @@ THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 			colors.Save();
 
 
-			string ePath = Path.Combine("records", "Star Fox 64", "pb_easy.ini");
-			string hPath = Path.Combine("records", "Star Fox 64", "pb_hard.ini");
+			string examplePath = Path.Combine("records", "Example Game", "Category Name.ini");
 
 			int configVersion = DateToNumber(config["version"]);
 
@@ -365,51 +345,36 @@ THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 
 			config.Save();
 
-			Directory.CreateDirectory(Path.Combine("records", "Star Fox 64"));
+			Directory.CreateDirectory(Path.Combine("records", "Example Game"));
 
-			FileReader pbEasy = new FileReader(ePath, SortingStyle.Validate);
-			if (!File.Exists(ePath))
+			FileReader pbEasy = new FileReader(examplePath, SortingStyle.Validate);
+			if (!File.Exists(examplePath))
 			{
-				pbEasy.AddNewItem("Best Run", "Corneria", "0");
-				pbEasy.AddNewItem("Best Run", "Meteo",    "0");
-				pbEasy.AddNewItem("Best Run", "Katina",   "0");
-				pbEasy.AddNewItem("Best Run", "Sector X", "0");
-				pbEasy.AddNewItem("Best Run", "Macbeth",  "0");
-				pbEasy.AddNewItem("Best Run", "Area 6",   "0");
-				pbEasy.AddNewItem("Best Run", "Venom 2",  "0");
+				pbEasy.AddNewItem("Best Run", "First",     "0");
+				pbEasy.AddNewItem("Best Run", "Second",    "0");
+				pbEasy.AddNewItem("Best Run", "Third",     "0");
+				pbEasy.AddNewItem("Best Run", "Fourth",    "0");
+				pbEasy.AddNewItem("Best Run", "Fifth",     "0");
+				pbEasy.AddNewItem("Best Run", "Sixth",     "0");
+				pbEasy.AddNewItem("Best Run", "Seventh",   "0");
+				pbEasy.AddNewItem("Aliases", "First",     "1st");
+				pbEasy.AddNewItem("Aliases", "Second",    "2nd");
+				pbEasy.AddNewItem("Aliases", "Third",     "3rd");
+				pbEasy.AddNewItem("Aliases", "Fourth",    "4th");
+				pbEasy.AddNewItem("Aliases", "Fifth",     "5th");
+				pbEasy.AddNewItem("Aliases", "Sixth",     "6th");
+				pbEasy.AddNewItem("Aliases", "Seventh",   "7th");
 				pbEasy.Save();
-				files.Add(ePath);
+				files.Add(examplePath);
 			}
 			if (!pbEasy.ContainsKey("game")) 
 			{
-				pbEasy["name"] = "Easy Route";
-				pbEasy["game"] = "Star Fox 64";
+				pbEasy["name"] = "Category Name";
+				pbEasy["game"] = "Example Game";
 				//pbEasy["IL Syncing"] = "on";
 			}
 
 			TrackerData.ValidateFile(pbEasy);
-
-			FileReader pbHard = new FileReader(hPath, SortingStyle.Validate);
-			if (!File.Exists(hPath))
-			{
-				pbHard.AddNewItem("Best Run", "Corneria", "0");
-				pbHard.AddNewItem("Best Run", "Sector Y", "0");
-				pbHard.AddNewItem("Best Run", "Aquas",    "0");
-				pbHard.AddNewItem("Best Run", "Zoness",   "0");
-				pbHard.AddNewItem("Best Run", "Macbeth",  "0");
-				pbHard.AddNewItem("Best Run", "Bolse",    "0");
-				pbHard.AddNewItem("Best Run", "Venom 1",  "0");
-				pbHard.Save();
-				files.Add(hPath);
-			}
-			if (!pbHard.ContainsKey("game")) 
-			{
-				pbHard["name"] = "Hard Route";
-				pbHard["game"] = "Star Fox 64";
-				//pbHard["IL Syncing"] = "on";
-			}
-
-			TrackerData.ValidateFile(pbHard);
 
 			individualLevels = new FileReader(':', "pb_individuals.txt", SortingStyle.Unsort);
 
@@ -440,8 +405,7 @@ THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 		}
 		catch (Exception e)
 		{
-			Console.WriteLine(e.Message);
-			Console.WriteLine(e.StackTrace);
+			LogError(e);
 		}
 
 
@@ -467,7 +431,7 @@ THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 			foreach(string f in fileList)
 			{
 				FileReader file = new FileReader(f, SortingStyle.Validate);
-				if (TrackerData.ValidateFile(file))
+				if (TrackerData.ValidateFile(file, false))
 				{
 					files.Add(f);
 				}
@@ -482,14 +446,26 @@ THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMP
 		}
 		catch (Exception e)
 		{
-			Console.WriteLine(e.Message);
-			Console.WriteLine(e.StackTrace);
+			LogError(e);
 			return false;
 		}
 
 		return true;
 	}
 
+	public static void LogError(Exception ex)
+	{
+		var st = new StackTrace(ex, true);
+		var frame = st.GetFrame(0);
+		var line = frame.GetFileLineNumber();
+		var method = frame.GetMethod();
+		var fileName = frame.GetFileName();
+
+		Console.WriteLine($"Exception: {ex.Message}");
+		Console.WriteLine($"Method: {method}");
+		Console.WriteLine($"File: {fileName}");
+		Console.WriteLine($"Line: {line}");
+	}
 }
 
 public class NumericTextBox : TextBox

@@ -23,7 +23,7 @@ public class TrackerData
 
 		foreach (string section in file.Sections)
 		{
-			if (!IsComparison(file, section))
+			if (!IsComparison(file, section) || section == "Aliases")
 				continue;
 
 			comparisons.Add(new ScoreSet(file, section));
@@ -37,7 +37,7 @@ public class TrackerData
 
 
 
-	public static bool ValidateFile(FileReader file)
+	public static bool ValidateFile(FileReader file, bool save = true)
 	{
 		int nonScores = 0;
 		if (file.ContainsSection("Best Run") && file.ContainsKey("name") && file.ContainsKey("game")) {
@@ -63,22 +63,23 @@ public class TrackerData
 		//file.AddNewItem("IL Syncing", "off");
 		file.AddNewItem("comparison_index", "0");
 		file.AddNewItem("pb_history_count", "0");
-		/*
-		foreach (string key in file.GetSection("Aliases").Keys)
-		{
-			file.AddNewItem("Aliases", key, "0");
-		}
-		*/
 		
+		if (file.ContainsSection("Aliases"))
+		{
+			foreach (string aliasName in file.GetSection("Aliases").Keys)
+			{
+				file.AddNewItem("Aliases", aliasName, file["Aliases", aliasName]);
+			}
+		}
 		//file.AddNewItem("Best Run", "Scoreset Type", "Record");
-		Validate(file, "Best Run", "Record");
+		ValidateScores(file, "Best Run", "Record");
 
 		//file.AddNewItem("Top Scores", "Scoreset Type", "Top Scores");
-		Validate(file, "Top Scores", "Top Scores");
+		ValidateScores(file, "Top Scores", "Top Scores");
 
 		foreach (string section in file.Sections)
 		{
-			if (section == "General" || file.ContainsKey(section, "Scoreset Type"))
+			if (section == "General" || section == "Aliases" || file.ContainsKey(section, "Scoreset Type"))
 				continue;
 			file.AddNewItem(section, "Scoreset Type", "Comparison");
 		}
@@ -89,13 +90,13 @@ public class TrackerData
 			if (!file.ContainsKey(section, "Scoreset Type") || file[section, "Scoreset Type"] != "Comparison")
 				continue;
 
-			Validate(file, section, "Comparison");
+			ValidateScores(file, section, "Comparison");
 			i++;
 		}
 		List<string> history = SortHistory(file);
 		foreach (string section in history)
 		{
-			Validate(file, section, "PB History");
+			ValidateScores(file, section, "PB History");
 		}
 		if (history.Count > 0 && ScoreTracker.config["sum_of_worst_depth"] != "0")
 			i++;
@@ -107,11 +108,14 @@ public class TrackerData
 		file["pb_history_count"] = "" + history.Count;
 		
 
-		file.Save();
+		if (save)
+		{
+			file.Save();
+		}
 		return true;
 	}
 
-	private static void Validate(FileReader file, string section, string type)
+	private static void ValidateScores(FileReader file, string section, string type)
 	{
 		file.AddNewItem(section, "Scoreset Type", type);
 		//file.AddNewItem(section, "Show In Comparisons", "yes");
