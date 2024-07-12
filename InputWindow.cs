@@ -134,7 +134,7 @@ public class InputWindow : Form
 		{
 			using (WebClient client = new WebClient()) 
 			{
-				string latestVersion = client.DownloadString("http://greenmaw.com/drazil100.php?filename=tracker_version.txt");
+				string latestVersion = client.DownloadString("https://drazil100.bitbucket.io/tracker_version.txt");
 
 				string[] parts = latestVersion.Split(':');
 				if (parts[0] == "CurrentTrackerVersion")
@@ -159,7 +159,7 @@ public class InputWindow : Form
 					}
 					if (ScoreTracker.DateToNumber(checkVersion) < ScoreTracker.DateToNumber(parts[1]))
 					{
-						string whatsNew = client.DownloadString("http://greenmaw.com/drazil100.php?filename=tracker_whats_new.txt");
+						string whatsNew = client.DownloadString("https://drazil100.bitbucket.io/tracker_whats_new.txt");
 						ShowUpdateDialog(parts[1], whatsNew);
 					}
 				}

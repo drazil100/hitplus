@@ -38,11 +38,11 @@ public class WhatsNewDialog : Form
 		openRepo.Click += delegate { 
 			try 
 			{ 
-				Process.Start("https://bitbucket.org/drazil100/sf64scoretracker/");
+				Process.Start("https://github.com/drazil100/hitplus");
 			}
 			catch (Exception)
 			{
-				MessageBox.Show("Program could not open URL. Copy paste this into your browser.\n\nhttps://bitbucket.org/drazil100/sf64scoretracker/", "Error", MessageBoxButtons.OK); 
+				MessageBox.Show("Program could not open URL. Copy paste this into your browser.\n\nhttps://github.com/drazil100/hitplus", "Error", MessageBoxButtons.OK); 
 			}
 		};
 		remind.Click += delegate { this.Close(); };
